@@ -2,7 +2,7 @@ import unittest
 
 import pandas as pd
 
-import pita.core.axes.define as define
+import flatbread.core.axes.define as define
 
 
 class TestAddCategory_CategoricalIndexSimple(unittest.TestCase):

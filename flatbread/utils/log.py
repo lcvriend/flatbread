@@ -4,8 +4,8 @@ import logging
 from functools import wraps
 
 import pandas as pd
-from pita.config import here
-import pita.utils.repper as repper
+from flatbread.config import here
+import flatbread.utils.repper as repper
 
 
 log = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 # ch = logging.StreamHandler(log_capture)
 # ch.setLevel(logging.DEBUG)
 # log.addHandler(ch)
-fh = logging.FileHandler(here / "pita.log", "w")
+fh = logging.FileHandler(here / "flatbread.log", "w")
 fh.setLevel(logging.DEBUG)
 log.addHandler(fh)
 

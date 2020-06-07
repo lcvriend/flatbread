@@ -1,19 +1,19 @@
 import pandas as pd
-import pita.utils.log as log
-from pita.utils.types import AxisAlias, IndexName, LevelAlias
-from pita.utils.axes import get_axis_number
-from pita.utils.levels import (
+import flatbread.utils.log as log
+from flatbread.utils.types import AxisAlias, IndexName, LevelAlias
+from flatbread.utils.axes import get_axis_number
+from flatbread.utils.levels import (
     get_level_number,
     validate_index_for_within_operations,
 )
-from pita.core import copy
-from pita.core.axes.define import (
+from flatbread.core import copy
+from flatbread.core.axes.define import (
     add_category,
     add_item_to_key,
     replace_item_in_key,
     key_to_list,
 )
-from pita.core.aggregation.globals import TOTALS_NAME, SUBTOTALS_NAME
+from flatbread.core.aggregation.globals import TOTALS_NAME, SUBTOTALS_NAME
 
 
 @log.entry

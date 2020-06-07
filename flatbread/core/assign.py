@@ -1,7 +1,7 @@
 import pandas as pd
 # from pandas.core.computation.scope import ensure_scope
-from pita.core import copy
-import pita.utils.log as log
+from flatbread.core import copy
+import flatbread.utils.log as log
 import inspect
 
 

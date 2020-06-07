@@ -1,6 +1,6 @@
 from decimal import Decimal
 import pandas as pd
-from pita.core import copy
+from flatbread.core import copy
 
 
 @copy

@@ -1,5 +1,5 @@
-import pita.utils.log as log
-from pita.core import copy
+import flatbread.utils.log as log
+from flatbread.core import copy
 
 
 @log.entry

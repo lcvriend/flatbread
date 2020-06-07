@@ -1,5 +1,5 @@
 import pandas as pd
-from pita.utils.types import LevelAlias, AxisAlias, IndexName
+from flatbread.utils.types import LevelAlias, AxisAlias, IndexName
 
 
 def get_level_number(

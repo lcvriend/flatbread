@@ -1,3 +1,2 @@
 include README.md
-include pita/config.json
-
+include flatbread/config.json

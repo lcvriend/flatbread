@@ -1,5 +1,5 @@
 import unittest
-import pita.utils.axes as axes
+import flatbread.utils.axes as axes
 
 
 class TestGetAxisNumber_Validation(unittest.TestCase):

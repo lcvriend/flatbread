@@ -1,4 +1,4 @@
-from pita.config import config
+from flatbread.config import config
 
 
 TOTALS_NAME    = config['aggregation']['totals_name']

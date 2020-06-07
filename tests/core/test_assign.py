@@ -2,7 +2,7 @@ import unittest
 
 import pandas as pd
 
-import pita
+import flatbread
 
 
 class TestAssign_DataFrameSimple(unittest.TestCase):
@@ -13,7 +13,7 @@ class TestAssign_DataFrameSimple(unittest.TestCase):
     def test_assign_scalar_criteria(self):
         x = 3
         y = 7
-        s = pita.assign.values(
+        s = flatbread.assign.values(
             self.df,
             values=y,
             column='E',

@@ -3,46 +3,46 @@ from random import randint
 
 import pandas as pd
 
-import pita
+import flatbread
 
 
 class TestTotalsAdd_DataFrameSimple(unittest.TestCase):
     def setUp(self):
-        self.totals_name = pita.agg.globals.TOTALS_NAME
+        self.totals_name = flatbread.agg.globals.TOTALS_NAME
         self.df = pd._testing.makeDataFrame().head(5)
 
     def test_add_rows(self):
-        s = pita.agg.totals.add(self.df, axis=0).loc[self.totals_name]
+        s = flatbread.agg.totals.add(self.df, axis=0).loc[self.totals_name]
         self.assertTrue(s.equals(self.df.sum()))
 
     def test_add_cols(self):
-        s = pita.agg.totals.add(self.df, axis=1).loc[:, self.totals_name]
+        s = flatbread.agg.totals.add(self.df, axis=1).loc[:, self.totals_name]
         self.assertTrue(s.equals(self.df.sum(axis=1)))
 
     def test_add_both(self):
-        v = (pita.agg.totals.add(self.df, axis=2)
+        v = (flatbread.agg.totals.add(self.df, axis=2)
             .loc[self.totals_name, self.totals_name])
         self.assertTrue(v == self.df.sum().sum())
 
 
 class TestTotalsAdd_DataFrameCategorical(unittest.TestCase):
     def setUp(self):
-        self.totals_name = pita.agg.globals.TOTALS_NAME
+        self.totals_name = flatbread.agg.globals.TOTALS_NAME
         df = pd._testing.makeDataFrame().head(5)
         df.columns = pd.Categorical(df.columns)
         df.index = pd.Categorical(df.index)
         self.df = df
 
     def test_add_rows(self):
-        s = pita.agg.totals.add(self.df, axis=0).loc[self.totals_name]
+        s = flatbread.agg.totals.add(self.df, axis=0).loc[self.totals_name]
         self.assertTrue(s.equals(self.df.sum()))
 
     def test_add_cols(self):
-        s = pita.agg.totals.add(self.df, axis=1).loc[:, self.totals_name]
+        s = flatbread.agg.totals.add(self.df, axis=1).loc[:, self.totals_name]
         self.assertTrue(s.equals(self.df.sum(axis=1)))
 
     def test_add_both(self):
-        v = (pita.agg.totals.add(self.df, axis=2)
+        v = (flatbread.agg.totals.add(self.df, axis=2)
             .loc[self.totals_name, self.totals_name])
         self.assertTrue(v == self.df.sum().sum())
 
@@ -59,21 +59,21 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
             r_ndupe_l=[4,2,1])
 
     def test_add_rows(self):
-        s = pita.agg.totals.add(self.df, axis=0).iloc[-1]
+        s = flatbread.agg.totals.add(self.df, axis=0).iloc[-1]
         self.assertTrue(s.equals(self.df.sum()))
 
     def test_add_cols(self):
-        s = pita.agg.totals.add(self.df, axis=1).iloc[:, -1]
+        s = flatbread.agg.totals.add(self.df, axis=1).iloc[:, -1]
         self.assertTrue(s.equals(self.df.sum(axis=1)))
 
     def test_add_both(self):
-        v = (pita.agg.totals.add(self.df, axis=2).iloc[-1, -1])
+        v = (flatbread.agg.totals.add(self.df, axis=2).iloc[-1, -1])
         self.assertTrue(v == self.df.sum().sum())
 
     def test_add_rows_within(self):
         left = (
-            pita.agg.totals.add(self.df, level=-1)
-            .xs(pita.agg.globals.SUBTOTALS_NAME, level=-1)
+            flatbread.agg.totals.add(self.df, level=-1)
+            .xs(flatbread.agg.globals.SUBTOTALS_NAME, level=-1)
             .values)
         right = self.df.groupby(level=-2).sum().values
         comparison = (left == right).all()
@@ -81,8 +81,8 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
 
     def test_add_cols_within(self):
         left = (
-            pita.agg.totals.add(self.df, axis=1, level=1)
-            .xs(pita.agg.globals.SUBTOTALS_NAME, axis=1, level=1)
+            flatbread.agg.totals.add(self.df, axis=1, level=1)
+            .xs(flatbread.agg.globals.SUBTOTALS_NAME, axis=1, level=1)
             .values)
         right = self.df.groupby(level=0, axis=1).sum().values
         comparison = (left == right).all()

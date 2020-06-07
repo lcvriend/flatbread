@@ -1,6 +1,6 @@
 __pycache__
 .vscode
-pita.egg-info
+flatbread.egg-info
 build
 dist
 notebooks

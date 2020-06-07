@@ -1,15 +1,15 @@
 import pandas as pd
-import pita.core.select
-import pita.core.axes.define
-from pita.core.axes.define import add_idx_level
+import flatbread.core.select
+import flatbread.core.axes.define
+from flatbread.core.axes.define import add_idx_level
 
 
 def select(df, criteria, **kwargs):
-    return pita.core.select.rows(df, criteria, **kwargs)
+    return flatbread.core.select.rows(df, criteria, **kwargs)
 
 
 def rename(df, mapper, level=0):
-    return pita.core.axes.define.rename(df, mapper, level=level)
+    return flatbread.core.axes.define.rename(df, mapper, level=level)
 
 
 def set_index(df, index):
@@ -22,7 +22,7 @@ def add_level(df, level_name, level):
 
 
 def totals(df, level=0):
-    return pita.core.aggregation.totals.add(df, level=level, **kwargs)
+    return flatbread.core.aggregation.totals.add(df, level=level, **kwargs)
 
 
 def timeseries_offset(df, datefield, yearfield, year):

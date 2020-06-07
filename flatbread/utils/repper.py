@@ -1,5 +1,5 @@
 from itertools import accumulate, takewhile
-from pita.config import config
+from flatbread.config import config
 
 
 def func(func):

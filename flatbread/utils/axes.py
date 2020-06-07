@@ -1,4 +1,4 @@
-from pita.utils.types import AxisAlias
+from flatbread.utils.types import AxisAlias
 
 AXES_ALIAS = {
     0: 0,

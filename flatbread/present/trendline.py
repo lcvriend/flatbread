@@ -1,8 +1,8 @@
 from datetime import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
-from pita.core.axes.index import timeseries_offset
-from pita.config import PATHS
+from flatbread.core.axes.index import timeseries_offset
+from flatbread.config import PATHS
 
 today_as_string = str(datetime.now().date())
 

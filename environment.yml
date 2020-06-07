@@ -1,4 +1,4 @@
-name: pita
+name: flatbread
 dependencies:
   - python >= 3.7
   # build
