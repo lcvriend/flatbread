@@ -1,0 +1,15 @@
+name: pita
+dependencies:
+  - python >= 3.7
+  # build
+  - mypy
+  - flake8
+  # jupyter
+  - jupyter
+  - jupyterlab
+  - ipykernel
+  # data
+  - pandas
+  - openpyxl
+  # visualization
+  - matplotlib

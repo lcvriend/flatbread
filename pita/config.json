@@ -1,0 +1,22 @@
+{
+    "settings": {
+        "store_output_in_cwd": true
+    },
+    "paths": {
+        "output": "output",
+        "data":   "output/data",
+        "tables": "output/tables",
+        "graphs": "output/graphs"
+    },
+    "repper": {
+        "max_length_col1": 32,
+        "max_length_col2": 72
+    },
+    "aggregation": {
+        "totals_name": "Totaal",
+        "subtotals_name": "Subtotaal",
+        "ndigits": 1,
+        "label_abs": "abs",
+        "label_rel": "%"
+    }
+}
