@@ -1,5 +1,5 @@
 import pandas as pd
-import flatbread.utils.log as log
+from flatbread.utils import log
 from flatbread.utils.types import AxisAlias, IndexName, LevelAlias
 from flatbread.utils.axes import get_axis_number
 from flatbread.utils.levels import (

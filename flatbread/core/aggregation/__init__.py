@@ -1,2 +1,2 @@
-import flatbread.core.aggregation.totals as totals
-import flatbread.core.aggregation.percentages as percentages
+from flatbread.core.aggregation import totals
+from flatbread.core.aggregation import percentages

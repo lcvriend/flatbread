@@ -1,4 +1,4 @@
-import flatbread.utils.log as log
+from flatbread.utils import log
 from flatbread.core import copy
 
 
