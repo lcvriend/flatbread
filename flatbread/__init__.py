@@ -15,6 +15,13 @@ from flatbread import present
 from flatbread.present.format import formatter
 from flatbread.present.trendline import TrendLine
 
+__version__ = '0.0.6'
+__license__ = 'GPLv3+'
+__author__  = 'L.C. Vriend'
+__email__   = 'vanboefer@gmail.com'
+__credits__ = ['L.C. Vriend']
+
+
 @log.entry
 def init(df, **kwargs):
     return df

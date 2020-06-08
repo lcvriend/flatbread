@@ -18,7 +18,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='flatbread',
-    version=get_version('flatbread/version.py', 'version'),
+    version=get_version('flatbread/__init__.py', 'version'),
     description='Pivot tables and graphs for pandas',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -32,9 +32,9 @@ setup(
     ],
     keywords='data pivot tables pandas',
     url='http://github.com/lcvriend/flatbread',
-    author=get_version('flatbread/version.py', 'author'),
-    author_email=get_version('flatbread/version.py', 'email'),
-    license=get_version('flatbread/version.py', 'license'),
+    author=get_version('flatbread/__init__.py', 'author'),
+    author_email=get_version('flatbread/__init__.py', 'email'),
+    license=get_version('flatbread/__init__.py', 'license'),
     packages=find_packages(),
     install_requires=[
         'pandas>=1.0.0',
