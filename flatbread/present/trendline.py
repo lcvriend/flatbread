@@ -498,19 +498,37 @@ class TrendLine(object):
                 ax.set_ylabel(row, rotation=0, size='large', labelpad=36)
 
         if legend:
-            legend_entries = {
-                label: handle
-                for ax in fig.axes
-                for handle, label in zip(*ax.get_legend_handles_labels())
-            }
+            handles = []
+            labels = []
+            for ax in fig.axes:
+                for handle, label in zip(*ax.get_legend_handles_labels()):
+                    if label not in labels:
+                        handles.append(handle)
+                        labels.append(label)
             fig.legend(
-                reversed(legend_entries.values()),
-                reversed(legend_entries.keys()),
+                reversed(handles),
+                reversed(labels),
                 title          = self.grouper,
                 loc            = 'upper left',
                 bbox_to_anchor = (1.0, 1.0),
                 bbox_transform = plt.gcf().transFigure,
             )
+
+            # PYTHON >= 3.7
+            # legend_entries = {
+            #     label: handle
+            #     for ax in fig.axes
+            #     for handle, label in zip(*ax.get_legend_handles_labels())
+            # }
+            # fig.legend(
+            #     reversed(legend_entries.values()),
+            #     reversed(legend_entries.keys()),
+            #     title          = self.grouper,
+            #     loc            = 'upper left',
+            #     bbox_to_anchor = (1.0, 1.0),
+            #     bbox_transform = plt.gcf().transFigure,
+            # )
+
         fig = self._resize_subplots(fig)
         return fig
 
