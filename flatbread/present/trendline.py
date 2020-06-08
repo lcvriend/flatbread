@@ -1,8 +1,10 @@
+import re
 from datetime import datetime
+
 import matplotlib.pyplot as plt
 import pandas as pd
-from flatbread.core.axes.index import timeseries_offset
 from flatbread.config import PATHS
+from flatbread.core.axes.index import timeseries_offset
 
 today_as_string = str(datetime.now().date())
 
@@ -19,62 +21,6 @@ LAYOUT = dict(
         width = 6,
         height = 4,
     ),
-)
-
-
-class TrendLine(object):
-    """
-    TrendLine
-    =========
-    Object for plotting data with a DatetimeIndex.
-    Parameters can be set when initializing but also when plotting.
-    Plot can display several trendlines by group.
-    Plot can be split up into subplots (rows and/or columns).
-    Use ordered categorical variables to control display order.
-
-    Parameters
-    ==========
-    ts : DataFrame
-        Timeseries consisting of a DataFrame with DateTimeIndex.
-    start : str, optional
-        Start date used for slicing the DateTimeIndex.
-    end : str, optional
-        End date used for slicing the DateTimeIndex.
-    period : DateOffset, Timedelta or str, default 'd'
-        The offset string or object representing target conversion.
-        {'d', 'w', 'm', 'y'}
-    kind : str, default 'line'
-        The kind of plot to produce:
-            'line' : line plot (default)
-            'bar' : vertical bar plot
-            'barh' : horizontal bar plot
-            'area' : area plot
-    stacked : bool, default True
-        Stack plots on top of each other.
-    cum : bool, default False
-        Create a cumulative plot.
-    grouper : str, optional
-        Name of the column to group by.
-    focus : optional
-        Value within the group to focus on.
-        'comparison'-styling will be applied to the other groups.
-    rows : str, optional
-        Name of the column for splitting the plots into rows.
-    cols : str, optional
-        Name of the column for splitting the plots into columns.
-    filter : str, optional
-        The query string to evaluate.
-    xticklabels : list[str], optional
-        List of string labels.
-    width : int, optional
-        Width in inches of the plot or subplot.
-    height : int, optional
-        Height in inches of the plot or subplot.
-    """
-
-    general = {}
-    comparison = {}
-    size = {}
     colors = [
         'tab:blue',
         'tab:orange',
@@ -86,7 +32,87 @@ class TrendLine(object):
         'tab:gray',
         'tab:olive',
         'tab:cyan',
-    ]
+    ],
+)
+
+
+class TrendLine(object):
+    """TrendLine
+    =========
+    Object for plotting time series data.
+    For convenience the x-axis can also be assigned to categorical variables.
+
+    Attributes may be set when initializing the object but also when plotting.
+    Plots can show a singilar trendline or split it up into groups.
+    Figure can be split up into subplots (rows and/or columns).
+    Use ordered categorical variables to control display order.
+
+    The filename is auto-generated when saving a figure,
+    unless a filename is explicitly provided to the `savefig` method.
+
+    ## Note on styling
+    Plot styling can be set on three levels:
+
+    1. In the global LAYOUT dictionary
+    2. In the class attributes (general, comparison, size, colors)
+    3. In the object (namely, width and height)
+
+    The object will always prefer layouts defined on a more specific level.
+    Thus class attributes will overwrite global layout settings,
+    object attributes will overwrite class attributes.
+
+    Attributes
+    ==========
+    ts : DataFrame
+        Timeseries after optional date range and filters have been applied.
+    data : DataFrame, Series
+        Grouped, resampled or pivoted data, ready for plotting.
+    groups : list, None
+        Group values according to `grouper` or None.
+    row_values : list, None
+        Row values according to `rows` or None.
+    col_values : list, None
+        Column values according to `cols` or None.
+    nrows: int
+        Number of rows.
+    ncols: int
+        Number of columns.
+    figure : Figure
+        Last plotted figure. Returns None if nothing has been plotted yet.
+    filename : str
+        Auto-generated filename for saving the graph.
+    styling : dict, None
+        Dictionary mapping groups to colors or None.
+
+    Other attributes
+    ================
+    general : dict
+        Dictionary containing general styling instructions.
+    comparison : dict
+        Dictionary containing styling instructions for elements not in focus.
+    size : dict
+        Dictionary containing height and width for (sub)plots.
+    colors : list
+        List containing colors to use for plot groups.
+
+    Methods
+    =======
+    plot :
+        Plot the data.
+    savefig :
+        Save the current figure.
+    reset :
+        Reset all plot attributes to their default.
+    update :
+        Update any plot attributes, return non-attribute kwargs.
+    from_df :
+        Create a timeseries from a df using `flatbread.axes.timeseries_offset`
+    """
+
+    general = {}
+    comparison = {}
+    size = {}
+    colors = []
 
 
     def __init__(
@@ -104,11 +130,59 @@ class TrendLine(object):
         rows        = None,
         cols        = None,
         filter      = None,
+        all_label   = 'all',
         xticklabels = None,
         width       = None,
         height      = None,
+        colors      = None,
         extension   = 'png',
     ):
+        """Initialize the TrendLine object.
+
+        Parameters
+        ==========
+        ts : DataFrame
+            Timeseries consisting of a DataFrame with DateTimeIndex.
+        start : str, optional
+            Start date used for slicing the DateTimeIndex.
+        end : str, optional
+            End date used for slicing the DateTimeIndex.
+        period : DateOffset, Timedelta or str, default 'd'
+            The offset string or object representing target conversion.
+            {'d', 'w', 'm', 'y'}
+        kind : str, default 'line'
+            The kind of plot to produce:
+                'line' : line plot (default)
+                'bar' : vertical bar plot
+                'barh' : horizontal bar plot
+                'area' : area plot
+        stacked : bool, default True
+            Stack plots on top of each other.
+        cum : bool, default False
+            Create a cumulative plot.
+        grouper : str, optional
+            Name of the column to group the data by.
+        focus : optional
+            Value within the group to focus on.
+            'comparison'-styling will be applied to the other groups.
+        rows : str, optional
+            Name of the column for splitting the plots into rows.
+        cols : str, optional
+            Name of the column for splitting the plots into columns.
+        filter : str, optional
+            The query string to evaluate.
+        all_lable : str, default 'all'
+            Name to use when data is not grouped by `grouper`.
+        xticklabels : list[str], optional
+            List of string labels.
+        width : int, optional
+            Width in inches of the plot or subplot.
+        height : int, optional
+            Height in inches of the plot or subplot.
+        extension : str, default 'png'
+            Extension designating the save format.
+        """
+
         self.ts          = ts
         self.start       = start
         self.end         = end
@@ -122,6 +196,7 @@ class TrendLine(object):
         self.rows        = rows
         self.cols        = cols
         self.filter      = filter
+        self.all_label   = all_label
         self.xticklabels = xticklabels
         self.width       = width or {**LAYOUT['size'], **self.size}['width']
         self.height      = height or {**LAYOUT['size'], **self.size}['height']
@@ -147,7 +222,7 @@ class TrendLine(object):
 
     @property
     def figure(self):
-        "Last plotted figure. Returns if None if nothing has been plotted yet."
+        "Last plotted figure. Returns None if nothing has been plotted yet."
 
         if hasattr(self, '_figure'):
             return self._figure
@@ -156,7 +231,9 @@ class TrendLine(object):
 
     @property
     def filename(self):
-        def repr(attr, len=5):
+        "Auto-generated filename for saving the graph."
+
+        def repattr(attr, len=5):
             value = getattr(self, attr)
             if value is None:
                 return None
@@ -167,27 +244,55 @@ class TrendLine(object):
                 # value = ''.join([char for char in value if char not in vowels])
                 # return f"{attr[0]}[{value[:len]:_<{len}}]"
 
+        def repfilter(expr):
+            if expr is None:
+                return None
+
+            translate = {
+                ' == ':  '==',
+                ' != ':  '!=',
+                ' and ': '&',
+                ' or ':  '^',
+                ' & ':   '&',
+                '|':     '^',
+                '<=':    ' lte ',
+                '>=':    ' gte ',
+                '<':     ' lt ',
+                '>':     ' gt ',
+                "'":     '',
+            }
+            for k, v in translate.items():
+                expr = expr.replace(k, v)
+            return f"f[{expr}]"
+
+        data = self.data
+        if isinstance(data.index, pd.MultiIndex):
+            index_name = data.index.levels[-1].name
+        else:
+            index_name = data.index.name
+
         args = [
             today_as_string,
-            'trend',
-            self.xaxis or self.data.index.name,
+            self.xaxis or index_name,
             self.kind,
             'cum' if self.cum else 'abs',
             'stacked' if self.stacked else None,
-            None if self.xaxis is not None else repr('period', len=1),
-            repr('grouper'),
-            repr('rows'),
-            repr('cols'),
-            repr('start', len=10),
-            repr('end', len=10),
-            f"[{self.filter.replace(' ', '_')}]" if self.filter is not None else None,
+            None if self.xaxis is not None else repattr('period', len=1),
+            repattr('grouper'),
+            repattr('rows'),
+            repattr('cols'),
+            repattr('start', len=10),
+            repattr('end', len=10),
+            repfilter(self.filter),
             self.extension,
         ]
-        return '.'.join([arg for arg in args if arg is not None])
+        filename = '.'.join([arg for arg in args if arg is not None])
+        filename = '_'.join(filename.split())
+        return re.sub(r'[\\/?%*:|"<>]', '', filename)
 
 
     def savefig(self, filename=None):
-        "Save the figure as `extension`."
+        "Save the figure as `extension` at `filename`."
 
         if filename is None:
             PATHS.graphs.mkdir(parents=True, exist_ok=True)
@@ -202,12 +307,12 @@ class TrendLine(object):
         data = self.ts
         data['_unit'] = 1
         if self.xaxis is not None:
-            return self.pivot(data)
+            return self._pivot(data)
         else:
-            return self.resample(data)
+            return self._resample(data)
 
 
-    def pivot(self, data):
+    def _pivot(self, data):
         groupers = [self.rows, self.cols, self.xaxis]
         index = [grouper for grouper in groupers if grouper is not None]
         if self.grouper is not None:
@@ -228,26 +333,37 @@ class TrendLine(object):
         return data
 
 
-    def resample(self, data):
-        groupers = [self.grouper, self.rows, self.cols]
+    def _resample(self, data):
+        if self.grouper is None:
+            data['_group'] = self.all_label
+            grouper = '_group'
+        else:
+            grouper = self.grouper
+        groupers = [grouper, self.rows, self.cols]
         groupby = [grouper for grouper in groupers if grouper is not None]
         if groupby:
-            data = data.groupby(groupby, observed=True)
+            data = (
+                data
+                .groupby(groupby, observed=True)
+                .resample(self.period)
+                ._unit
+                .count()
+                .unstack(0)
+            )
+        else:
+            data = (
+                data
+                .resample(self.period)
+                ._unit
+                .count()
+            )
 
-        data = (
-            data
-            .resample(self.period)
-            ._unit
-            .count()
-            .unstack(0)
-        )
-
-        groupers = [self.rows, self.cols]
-        groupby = [grouper for grouper in groupers if grouper is not None]
-        if groupby:
-            data = data.groupby(groupby).fillna(method='bfill')
+        matrix = [self.rows, self.cols]
+        axes = [axis for axis in matrix if axis is not None]
+        if axes:
+            data = data.groupby(axes).fillna(method='bfill')
             if self.cum:
-                return data.groupby(groupby).cumsum()
+                return data.groupby(axes).cumsum()
             return data
 
         data = data.fillna(method='bfill')
@@ -285,7 +401,7 @@ class TrendLine(object):
 
     @property
     def nrows(self):
-        "Number of rows within the plot."
+        "Number of rows within the figure."
 
         if self.rows is None:
             return 1
@@ -294,7 +410,7 @@ class TrendLine(object):
 
     @property
     def ncols(self):
-        "Number of columns within the plot."
+        "Number of columns within the figure."
 
         if self.cols is None:
             return 1
@@ -305,8 +421,9 @@ class TrendLine(object):
     def styling(self):
         "Color assignment per group."
 
+        colors = self.colors or LAYOUT['colors']
         if self.groups is not None:
-            colors = zip(self.groups, self.colors)
+            colors = zip(self.groups, colors)
             return {group:color for group, color in colors}
         else:
             None
@@ -314,11 +431,16 @@ class TrendLine(object):
 
     @property
     def layout_general(self):
+        "General styling for plots. Combines class and module settings."
+
         return {**LAYOUT['general'], **self.general}
 
 
     @property
     def layout_comparison(self):
+        """Styling for the groups without `focus`. Combines class and module settings.
+        """
+
         return {**LAYOUT['comparison'], **self.comparison}
 
 
@@ -337,19 +459,13 @@ class TrendLine(object):
         self.rows        = None
         self.cols        = None
         self.xaxis       = None
+        self.all_label   = 'all'
         self.xticklabels = None
 
 
-    def plot(self, legend=True, **kwargs):
-        """
-        Plot trendlines from the data.
-        Pass in parameters to change plot settings.
-        Any changes will be stored within the object.
-
-        Fields that contain categorical variables may be used to split the
-        graph into subplots by assigning them to either `rows` or `cols`.
-        Assign a categorical variable to `grouper` to plot multiple groups
-        within a single graph. Focus can be used to highlight one of the groups.
+    def update(self, **kwargs):
+        """Update attribute settings.
+        Kwargs are consumed, any non-attribute kwargs are returned.
         """
 
         for kw, value in kwargs.copy().items():
@@ -366,11 +482,34 @@ class TrendLine(object):
                 'rows',
                 'cols',
                 'xaxis',
+                'all_label',
                 'xticklabels',
             ]:
                 setattr(self, kw, value)
                 del kwargs[kw]
+        return kwargs
 
+
+    def plot(self, legend=True, **kwargs):
+        """Plot trendlines from the data.
+        Pass in kwargs to update attribute settings before plotting.
+
+        Plot attributes
+        ===============
+        grouper :
+            Groups from `grouper` will be plotted within a single graph.
+            Use `focus` to highlight a specific group.
+            The `comparison` styling will be applied to all other groups.
+        rows/columns :
+            Groups from `rows` or `cols` will split up the graph into subplots.
+
+        Parameters
+        ==========
+        legend : bool, default True
+            Add legend to figure.
+        """
+
+        kwargs = self.update(**kwargs)
         layout = {**self.layout_general, **kwargs}
         if self.nrows > 1 or self.ncols > 1:
             fig = self._subplot(**kwargs, **layout)
@@ -585,6 +724,7 @@ class TrendLine(object):
             layout = dict(
                 width       = self.width,
                 height      = self.height,
+                all_label   = self.all_label,
                 xticklabels = self.xticklabels,
                 general     = self.layout_general,
                 comparison  = self.layout_comparison,
@@ -605,6 +745,8 @@ class TrendLine(object):
 
     @classmethod
     def from_df(cls, df, datefield, yearfield, year, **kwargs):
+        "Convert df to timeseries and initialize TrendLine object from it."
+
         ts = timeseries_offset(df, datefield, yearfield, year)
         return cls(ts, **kwargs)
 
