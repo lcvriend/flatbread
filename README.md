@@ -5,3 +5,8 @@ Initially I planned for this library to be called pita -- short for pivot tables
 
 ## About
 Flatbread is a library built upon pandas and matplotlib for displaying and presenting data. Under construction.
+
+## Install
+To install:
+
+```pip install flatbread```
