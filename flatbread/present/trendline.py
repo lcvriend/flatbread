@@ -1,3 +1,9 @@
+"""Trendline Module
+================
+
+This module contains the TrendLine class for generating trendline graphs.
+"""
+
 import re
 from datetime import datetime
 

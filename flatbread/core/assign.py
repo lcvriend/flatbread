@@ -14,8 +14,7 @@ def values(
     criteria=None,
     **kwargs,
 ):
-    """
-    Assign `values` to `column` in `df` if row meets `criteria`.
+    """Assign `values` to `column` in `df` if row meets `criteria`.
 
     Parameters
     ==========
