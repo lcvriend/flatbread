@@ -88,7 +88,7 @@ def length(operator):
 
             compare = getattr(len_in, operators[operator])
             assert compare(len_out), (
-                f"Length of original {len_in} {operator} output {len_out}"
+                f"False: input {len_in} {operator} output {len_out}"
             )
 
             return result
