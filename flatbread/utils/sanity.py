@@ -1,10 +1,24 @@
+"""Sanity Module
+=============
+
+The sanity module provides decorators for checking the pipeline. The decorator
+tests if the output DataFrame meets a specified requirement. If the check fails
+an assertion error is raised. The following decorators are provided:
+
+unittest :
+    Perform a unittest from the TestCase class on a column of the data.
+    First an aggregation is performed on the column, then the resulting value is
+    tested against the the comparison scalar.
+length :
+    Check if the length of the input DataFrame is equal to/smaller than/greater than the output DataFrame.
+"""
+
 from unittest import TestCase
 from functools import wraps
 
 
 def unittest(column, operation, test, comparison):
-    """
-    Add unittest as sanity check to function.
+    """Add unittest as sanity check to function.
     If check fails AssertionException is raised.
     Aggregation `operation` will be performed on `column`.
     Result will be compared to `comparison` using `test`.
@@ -39,6 +53,22 @@ def unittest(column, operation, test, comparison):
 
 
 def length(operator):
+    """Add a length test as sanity check to function.
+    If check fails AssertionException is raised.
+    The input will be tested against output using `operator`.
+
+    Parameters
+    ==========
+    operator : str
+        Operator to use for comparing in and output
+        <  : lesser than
+        <= : lesser than or equal to
+        == : equal to
+        != : not equal to
+        >  : smaller than
+        >= : smaller than or equal to
+    """
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -47,26 +77,20 @@ def length(operator):
             result = func(*args, **kwargs)
             len_out = len(result)
 
-            if operator == '==':
-                assert len_in == len_out, (
-                    f"Length of original ({len_in}) is not equal to "
-                    f"length of output ({len_out})"
-                )
-            if operator == '!=':
-                assert len_in != len_out, (
-                    f"Length of original ({len_in}) is equal to "
-                    f"length of output ({len_out})"
-                )
-            elif operator == '>':
-                assert len_in > len_out, (
-                    f"Length of original ({len_in}) is not greater than "
-                    f"length of output ({len_out})"
-                )
-            elif operator == '<':
-                assert len_in > len_out, (
-                    f"Length of original ({len_in}) is not lesser than "
-                    f"length of output ({len_out})"
-                )
+            operators = {
+                '<'  : '__lt__',
+                '<=' : '__le__',
+                '==' : '__eq__',
+                '!=' : '__ne__',
+                '>'  : '__gt__',
+                '>=' : '__ge__',
+            }
+
+            compare = getattr(len_in, operators[operator])
+            assert compare(len_out), (
+                f"Length of original {len_in} {operator} output {len_out}"
+            )
+
             return result
         return wrapper
     return decorator
