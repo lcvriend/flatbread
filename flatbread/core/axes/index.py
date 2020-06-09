@@ -1,7 +1,7 @@
 import pandas as pd
 import flatbread.core.select
-import flatbread.core.axes.define
-from flatbread.core.axes.define import add_idx_level
+from flatbread.core.aggregation import totals
+from flatbread.core.axes import define
 
 
 def select(df, criteria, **kwargs):
@@ -9,7 +9,7 @@ def select(df, criteria, **kwargs):
 
 
 def rename(df, mapper, level=0):
-    return flatbread.core.axes.define.rename(df, mapper, level=level)
+    return define.rename(df, mapper, level=level)
 
 
 def set_index(df, index):
@@ -18,11 +18,11 @@ def set_index(df, index):
 
 
 def add_level(df, level_name, level):
-    return add_idx_level(df, level_name, level=level)
+    return define.add_idx_level(df, level_name, level=level)
 
 
 def totals(df, level=0):
-    return flatbread.core.aggregation.totals.add(df, level=level, **kwargs)
+    return totals.add(df, level=level, **kwargs)
 
 
 def timeseries_offset(df, datefield, yearfield, year):
