@@ -6,7 +6,7 @@ statements) to functions. They can be used to give direct visual feedback to the
 user during the build process. The following decorators are provided:
 
 printout :
-    Add a simple message to be printed.
+    Add a simple message to be printed before/after processing.
 column :
     Calculate an aggregate from a specified column in the resuting DatFrame and
     print it.
@@ -17,12 +17,15 @@ shape :
 from functools import wraps
 
 
-def printout(msg):
+def printout(msg, when='before'):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
+            if when == 'before':
+                print(msg)
             result = func(*args, **kwargs)
-            print(msg)
+            if when == 'after':
+                print(msg)
             return result
         return wrapper
     return decorator
