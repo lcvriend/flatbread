@@ -1,11 +1,11 @@
 import pandas as pd
-import flatbread.core.select
+from flatbread.core.select import rows as select_rows
 from flatbread.core.aggregation import totals
 from flatbread.core.axes import define
 
 
 def select(df, criteria, **kwargs):
-    return flatbread.core.select.rows(df, criteria, **kwargs)
+    return select_rows(df, criteria, **kwargs)
 
 
 def rename(df, mapper, level=0):

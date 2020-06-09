@@ -1,10 +1,10 @@
-import flatbread.core.select
+from flatbread.core.select import columns as select_columns
 from flatbread.core.axes import define
 from flatbread.core.aggregation import totals
 
 
 def select(df, columns):
-    return flatbread.core.select.columns(df, columns)
+    return select_columns(df, columns)
 
 
 def normalize(df, func=None):
