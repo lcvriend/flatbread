@@ -1,16 +1,16 @@
 import pandas as pd
-from flatbread.utils import log
-from flatbread.utils.types import AxisAlias, IndexName, LevelAlias
-from flatbread.utils.axes import get_axis_number
 from flatbread.core import copy
-from flatbread.core.axes.define import add_idx_level
 from flatbread.core.aggregation.globals import (
-    TOTALS_NAME,
-    SUBTOTALS_NAME,
-    NDIGITS,
     LABELS_ABS,
-    LABELS_REL
+    LABELS_REL,
+    NDIGITS,
+    SUBTOTALS_NAME,
+    TOTALS_NAME
 )
+from flatbread.core.axes.define import add_idx_level
+from flatbread.helpers.axes import get_axis_number
+from flatbread.helpers.types import AxisAlias, IndexName, LevelAlias
+from flatbread.utils import log
 
 
 @log.entry

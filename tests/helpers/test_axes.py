@@ -1,5 +1,5 @@
 import unittest
-import flatbread.utils.axes as axes
+import flatbread.helpers.axes as axes
 
 
 class TestGetAxisNumber_Validation(unittest.TestCase):

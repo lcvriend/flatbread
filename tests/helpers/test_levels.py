@@ -1,6 +1,6 @@
 import unittest
 import pandas as pd
-import flatbread.utils.levels as levels
+import flatbread.helpers.levels as levels
 
 
 class TestGetLevels_MultiIndex(unittest.TestCase):

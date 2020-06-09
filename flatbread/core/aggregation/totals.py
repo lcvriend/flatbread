@@ -1,8 +1,8 @@
 import pandas as pd
 from flatbread.utils import log
-from flatbread.utils.types import AxisAlias, IndexName, LevelAlias
-from flatbread.utils.axes import get_axis_number
-from flatbread.utils.levels import (
+from flatbread.helpers.types import AxisAlias, IndexName, LevelAlias
+from flatbread.helpers.axes import get_axis_number
+from flatbread.helpers.levels import (
     get_level_number,
     validate_index_for_within_operations,
 )
