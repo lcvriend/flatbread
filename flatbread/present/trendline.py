@@ -297,9 +297,8 @@ class TrendLine(object):
         return re.sub(r'[\\/?%*:|"<>]', '', filename)
 
 
-    def savefig(self, filename=None):
+    def savefig(self, filename=None, **kwargs):
         "Save the figure as `extension` at `filename`."
-
         if filename is None:
             PATHS.graphs.mkdir(parents=True, exist_ok=True)
             filename = PATHS.graphs / self.filename
@@ -642,6 +641,7 @@ class TrendLine(object):
             for ax, row in zip(axes[:,0], self.row_values):
                 ax.set_ylabel(row, rotation=0, size='large', labelpad=36)
 
+
         if legend:
             handles = []
             labels = []
@@ -650,13 +650,21 @@ class TrendLine(object):
                     if label not in labels:
                         handles.append(handle)
                         labels.append(label)
-            fig.legend(
+            # LEGEND WILL SHOW ON SCREEN BUT NOT GET SAVED TO FILE
+            # fig.legend(
+            #     reversed(handles),
+            #     reversed(labels),
+            #     title          = self.grouper,
+            #     loc            = 'upper left',
+            #     bbox_to_anchor = (1.0, 1.0),
+            #     bbox_transform = plt.gcf().transFigure,
+            # )
+
+            ax = fig.axes[0]
+            ax.legend(
                 reversed(handles),
                 reversed(labels),
                 title          = self.grouper,
-                loc            = 'upper left',
-                bbox_to_anchor = (1.0, 1.0),
-                bbox_transform = plt.gcf().transFigure,
             )
 
             # PYTHON >= 3.7
