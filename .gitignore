@@ -4,5 +4,6 @@ flatbread.egg-info
 build
 dist
 notebooks
+output
 *.bat
 *.sh

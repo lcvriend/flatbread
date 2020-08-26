@@ -4,6 +4,9 @@ dependencies:
   # build
   - mypy
   - flake8
+  - setuptools
+  - wheel
+  - twine
   # jupyter
   - jupyter
   - jupyterlab
