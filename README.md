@@ -146,14 +146,14 @@ tl.savefig()
       <th rowspan="5" valign="top">R_l0_g0</th>
       <th rowspan="2" valign="top">R_l1_g0</th>
       <th>R_l2_g0</th>
-      <td halign="right">45</td>
-      <td halign="right">68</td>
-      <td halign="right">78</td>
-      <td halign="right">52</td>
-      <td halign="right">6</td>
-      <td halign="right">25</td>
-      <td halign="right">99</td>
-      <td halign="right">42</td>
+      <td align="right">45</td>
+      <td align="right">68</td>
+      <td align="right">78</td>
+      <td align="right">52</td>
+      <td align="right">6</td>
+      <td align="right">25</td>
+      <td align="right">99</td>
+      <td align="right">42</td>
     </tr>
     <tr>
       <th>R_l2_g1</th>
