@@ -96,7 +96,7 @@ tl.savefig()
 
 ### HTML TEST
 
-<table border="1" class="dataframe">
+<table border="1" cellpadding="4" class="dataframe">
   <thead>
     <tr>
       <th></th>
@@ -157,121 +157,121 @@ tl.savefig()
     </tr>
     <tr>
       <th>R_l2_g1</th>
-      <td>63</td>
-      <td>86</td>
-      <td>97</td>
-      <td>88</td>
-      <td>60</td>
-      <td>20</td>
-      <td>24</td>
-      <td>10</td>
+      <td align="right">63</td>
+      <td align="right">86</td>
+      <td align="right">97</td>
+      <td align="right">88</td>
+      <td align="right">60</td>
+      <td align="right">20</td>
+      <td align="right">24</td>
+      <td align="right">10</td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">R_l1_g1</th>
       <th>R_l2_g2</th>
-      <td>92</td>
-      <td>33</td>
-      <td>44</td>
-      <td>41</td>
-      <td>95</td>
-      <td>48</td>
-      <td>36</td>
-      <td>25</td>
+      <td align="right">92</td>
+      <td align="right">33</td>
+      <td align="right">44</td>
+      <td align="right">41</td>
+      <td align="right">95</td>
+      <td align="right">48</td>
+      <td align="right">36</td>
+      <td align="right">25</td>
     </tr>
     <tr>
       <th>R_l2_g3</th>
-      <td>88</td>
-      <td>80</td>
-      <td>67</td>
-      <td>20</td>
-      <td>28</td>
-      <td>83</td>
-      <td>96</td>
-      <td>38</td>
+      <td align="right">88</td>
+      <td align="right">80</td>
+      <td align="right">67</td>
+      <td align="right">20</td>
+      <td align="right">28</td>
+      <td align="right">83</td>
+      <td align="right">96</td>
+      <td align="right">38</td>
     </tr>
     <tr>
       <th>Subtotal</th>
       <th></th>
-      <td>288</td>
-      <td>267</td>
-      <td>286</td>
-      <td>201</td>
-      <td>189</td>
-      <td>176</td>
-      <td>255</td>
-      <td>115</td>
+      <td align="right">288</td>
+      <td align="right">267</td>
+      <td align="right">286</td>
+      <td align="right">201</td>
+      <td align="right">189</td>
+      <td align="right">176</td>
+      <td align="right">255</td>
+      <td align="right">115</td>
     </tr>
     <tr>
       <th rowspan="5" valign="top">R_l0_g1</th>
       <th rowspan="2" valign="top">R_l1_g2</th>
       <th>R_l2_g4</th>
-      <td>90</td>
-      <td>28</td>
-      <td>39</td>
-      <td>76</td>
-      <td>2</td>
-      <td>88</td>
-      <td>18</td>
-      <td>47</td>
+      <td align="right">90</td>
+      <td align="right">28</td>
+      <td align="right">39</td>
+      <td align="right">76</td>
+      <td align="right">2</td>
+      <td align="right">88</td>
+      <td align="right">18</td>
+      <td align="right">47</td>
     </tr>
     <tr>
       <th>R_l2_g5</th>
-      <td>19</td>
-      <td>76</td>
-      <td>37</td>
-      <td>5</td>
-      <td>38</td>
-      <td>59</td>
-      <td>88</td>
-      <td>7</td>
+      <td align="right">19</td>
+      <td align="right">76</td>
+      <td align="right">37</td>
+      <td align="right">5</td>
+      <td align="right">38</td>
+      <td align="right">59</td>
+      <td align="right">88</td>
+      <td align="right">7</td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">R_l1_g3</th>
       <th>R_l2_g6</th>
-      <td>20</td>
-      <td>19</td>
-      <td>20</td>
-      <td>4</td>
-      <td>8</td>
-      <td>59</td>
-      <td>64</td>
-      <td>11</td>
+      <td align="right">20</td>
+      <td align="right">19</td>
+      <td align="right">20</td>
+      <td align="right">4</td>
+      <td align="right">8</td>
+      <td align="right">59</td>
+      <td align="right">64</td>
+      <td align="right">11</td>
     </tr>
     <tr>
       <th>R_l2_g7</th>
-      <td>90</td>
-      <td>35</td>
-      <td>25</td>
-      <td>29</td>
-      <td>13</td>
-      <td>22</td>
-      <td>2</td>
-      <td>55</td>
+      <td align="right">90</td>
+      <td align="right">35</td>
+      <td align="right">25</td>
+      <td align="right">29</td>
+      <td align="right">13</td>
+      <td align="right">22</td>
+      <td align="right">2</td>
+      <td align="right">55</td>
     </tr>
     <tr>
       <th>Subtotal</th>
       <th></th>
-      <td>219</td>
-      <td>158</td>
-      <td>121</td>
-      <td>114</td>
-      <td>61</td>
-      <td>228</td>
-      <td>172</td>
-      <td>120</td>
+      <td align="right">219</td>
+      <td align="right">158</td>
+      <td align="right">121</td>
+      <td align="right">114</td>
+      <td align="right">61</td>
+      <td align="right">228</td>
+      <td align="right">172</td>
+      <td align="right">120</td>
     </tr>
     <tr>
       <th>Total</th>
       <th></th>
       <th></th>
-      <td>507</td>
-      <td>425</td>
-      <td>407</td>
-      <td>315</td>
-      <td>250</td>
-      <td>404</td>
-      <td>427</td>
-      <td>235</td>
+      <td align="right">507</td>
+      <td align="right">425</td>
+      <td align="right">407</td>
+      <td align="right">315</td>
+      <td align="right">250</td>
+      <td align="right">404</td>
+      <td align="right">427</td>
+      <td align="right">235</td>
     </tr>
   </tbody>
 </table>
