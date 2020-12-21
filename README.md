@@ -9,7 +9,9 @@ Flatbread is a library built upon pandas and matplotlib for displaying and prese
 ## Install
 To install:
 
-```pip install flatbread```
+```
+pip install flatbread
+```
 
 ## Pivot tables
 Easily add subtotals to your pivot tables:
