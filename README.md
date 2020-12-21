@@ -96,7 +96,7 @@ tl.savefig()
 
 ### HTML TEST
 
-<table border="1" cellpadding="4" class="dataframe">
+<table border="1" cellpadding="4" cellspacing="4" class="dataframe">
   <thead>
     <tr>
       <th></th>
