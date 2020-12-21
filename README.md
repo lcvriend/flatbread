@@ -386,7 +386,7 @@ fig = tl.plot()
 tl.savefig()
 ```
 
-![example graph](static/2020-08-26.date_request.line.abs.p[w].g[academic_year].e[2019-09-01].png)
+![example graph](output/graphs/2020-12-21.date_request.line.abs.p[w].g[academic_year].e[2019-09-01].svg)
 
 Split your graphs in rows and columns:
 
@@ -411,4 +411,4 @@ fig = tl.plot(
 tl.savefig()
 ```
 
-![example graph](static/2020-08-26.date_enrolled.line.cum.p[w].g[faculty].r[origin].c[exam_type].e[2019-10-01].f[academic_year==2019].png)
+![example graph](output/graphs/2020-12-21.date_enrolled.line.cum.p[w].g[faculty].r[origin].c[exam_type].e[2019-10-01].f[academic_year==2019].svg)
