@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def formatter(df, nan=''):
     def format_int(x):
         if x != x:

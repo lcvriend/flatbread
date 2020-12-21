@@ -9,8 +9,8 @@ from datetime import datetime
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from flatbread.config import PATHS
-from flatbread.core.axes.index import timeseries_offset
+from flatbread.config import CONFIG
+from flatbread.build.rows import timeseries_offset
 
 today_as_string = str(datetime.now().date())
 
@@ -56,7 +56,7 @@ class TrendLine(object):
     The filename is auto-generated when saving a figure,
     unless a filename is explicitly provided to the `savefig` method.
 
-    ## Note on styling
+    **Note on styling**
     Plot styling can be set on three levels:
 
     1. In the global LAYOUT dictionary
@@ -68,7 +68,7 @@ class TrendLine(object):
     object attributes will overwrite class attributes.
 
     Attributes
-    ==========
+    ----------
     ts : DataFrame
         Timeseries after optional date range and filters have been applied.
     data : DataFrame, Series
@@ -91,7 +91,7 @@ class TrendLine(object):
         Dictionary mapping groups to colors or None.
 
     Other attributes
-    ================
+    ----------------
     general : dict
         Dictionary containing general styling instructions.
     comparison : dict
@@ -102,7 +102,7 @@ class TrendLine(object):
         List containing colors to use for plot groups.
 
     Methods
-    =======
+    -------
     plot :
         Plot the data.
     savefig :
@@ -300,8 +300,8 @@ class TrendLine(object):
     def savefig(self, filename=None, **kwargs):
         "Save the figure as `extension` at `filename`."
         if filename is None:
-            PATHS.graphs.mkdir(parents=True, exist_ok=True)
-            filename = PATHS.graphs / self.filename
+            CONFIG.get_path('graphs').mkdir(parents=True, exist_ok=True)
+            filename = CONFIG.get_path('graphs') / self.filename
         self.figure.savefig(filename)
 
 

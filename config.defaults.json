@@ -1,10 +1,10 @@
 {
-    "settings": {
+    "general": {
         "store_output_in_cwd": true
     },
     "paths": {
         "output": "output",
-        "data":   "output/data",
+        "data": "output/data",
         "tables": "output/tables",
         "graphs": "output/graphs"
     },
@@ -13,8 +13,8 @@
         "max_length_col2": 72
     },
     "aggregation": {
-        "totals_name": "Totaal",
-        "subtotals_name": "Subtotaal",
+        "totals_name": "Total",
+        "subtotals_name": "Subtotal",
         "ndigits": 1,
         "label_abs": "abs",
         "label_rel": "%"

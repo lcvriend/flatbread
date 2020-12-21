@@ -1,11 +1,14 @@
-from itertools import accumulate, takewhile
-from flatbread.config import config
+from itertools import accumulate
+from flatbread.config import CONFIG
+
+
+BRACKETS = {list: '[]', set: '{}', tuple: '()'}
 
 
 def func(func):
     module = '.'.join(func.__module__.split('.')[2:])
     func_name = f"[{module}.{func.__name__}]"
-    return f"{func_name:<{MAX_LENGTH_COL1}}"
+    return f"{func_name:<{CONFIG.repper['max_length_col1']}}"
 
 
 def args(*args):
@@ -38,16 +41,8 @@ def represent_arg(arg):
         return repr(arg)
 
 
-################
-
-
-MAX_LENGTH_COL1 = config['repper']['max_length_col1']
-MAX_LENGTH_COL2 = config['repper']['max_length_col2']
-BRACKETS = {list: '[]', set: '{}', tuple: '()'}
-
-
 def log_args(*args, **kwargs):
-    limit     = MAX_LENGTH_COL2
+    limit     = CONFIG.repper['max_length_col2']
     mortar    = ', '
     n_args    = len(args) + len(kwargs)
     spaces    = (n_args - 1) * len(mortar)
@@ -75,7 +70,7 @@ def log_args(*args, **kwargs):
     if len(repr_args) < len(args[2:]):
         repr_args.append('...')
 
-    return f"{mortar.join(repr_args):<{MAX_LENGTH_COL2}}"
+    return f"{mortar.join(repr_args):<{CONFIG.repper['max_length_col2']}}"
 
 
 def rep_list(collection, limit):
