@@ -1,10 +1,10 @@
 # Flatbread
 
+## About
+Flatbread is a small library built to extend the pivot table functionality in pandas. The library contains functions which will allow you to easily add **totals/subtotals** to one or more levels of your pivot table. Furthermore, flatbread can calculate **percentages** from each axis and level of your pivot table. You can transform the existing values in your table into percentages, but you can also add the percentages neatly next to your data. The library also contains some functionality built on matplotlib for plotting your data.
+
 ## Name
 Initially I planned for this library to be called pita -- short for pivot tables. But as that name was already taken on pypi.org the choice fell on flatbread.
-
-## About
-Flatbread is a library built upon pandas and matplotlib for displaying and presenting data. It is currently a work in progress. The goal is to implement the same functionalities as [pandas crosstabs](https://github.com/lcvriend/pandas_crosstabs).
 
 ## Install
 To install:
@@ -14,7 +14,7 @@ pip install flatbread
 ```
 
 ## Pivot tables
-Easily add subtotals to your pivot tables:
+Let's create a df for testing:
 
 ```Python
 from random import randint
@@ -30,7 +30,11 @@ df = pd._testing.makeCustomDataframe(
     c_ndupe_l=[2,1],
     r_ndupe_l=[4,2,1],
 )
+```
 
+Flatbread let's you easily add subtotals to your pivot tables. Here we add totals and subtotals to both axes at once:
+
+```
 df.pipe(fb.totals.add, axis=2, level=[0,1])
 ```
 
@@ -193,7 +197,7 @@ df.pipe(fb.totals.add, axis=2, level=[0,1])
   </tbody>
 </table>
 
-Add percentages to your pivot tables:
+Flatbread let's you calculate the percentages from within a specified level of your data. You can transform the data or add the percentages into your pivot table:
 
 ```Python
 df.pipe(fb.percs.add, level=1)
@@ -371,44 +375,42 @@ df.pipe(fb.percs.add, level=1)
 Use the Trendline object to create trendlines. Compare multiple years:
 
 ```Python
-tl = flatbread.TrendLine.from_df(
-    df,
-    year      = 2019,
-    yearfield = 'academic_year',
-    datefield = 'date_request',
-    end       = '2019-09-01',
-    period    = 'w',
-    grouper   = 'academic_year',
-    focus     = 2019,
+tl = fb.TrendLine.from_df(
+    sample,
+    offset_year = 2019,
+    datefield   = 'Date of Application',
+    yearfield   = 'Academic Year',
+    period      = 'w',
+    end         = '2019-09-01',
+    grouper     = 'Academic Year',
+    focus       = 2019,
 )
 
 fig = tl.plot()
-tl.savefig()
 ```
 
-![example graph](static/2020-12-21.date_request.line.abs.p[w].g[academic_year].e[2019-09-01].svg)
+![example graph](static\2020-12-22.Date_of_Application.line.abs.svg)
 
 Split your graphs in rows and columns:
 
 ```Python
-tl = flatbread.TrendLine.from_df(
-    sample.query(query),
-    year      = 2019,
-    datefield = 'date_enrolled',
-    yearfield = 'academic_year',
-    period    = 'w',
-    end       = '2019-10-01',
-    grouper   = 'faculty',
-    focus     = 'Humanities',
+tl = fb.TrendLine.from_df(
+    sample,
+    offset_year = 2019,
+    datefield   = 'Date Processed',
+    yearfield   = 'Academic Year',
+    period      = 'w',
+    end         = '2019-10-01',
+    grouper     = 'Faculty',
+    focus       = 'Humanities',
 )
 
 fig = tl.plot(
-    rows   = 'origin',
-    cols   = 'exam_type',
+    rows   = 'Origin Country',
+    cols   = 'Examination Type',
     cum    = True,
-    filter = "academic_year == 2019"
+    filter = "`Academic Year` == 2019"
 )
-tl.savefig()
 ```
 
-![example graph](static/2020-12-21.date_enrolled.line.cum.p[w].g[faculty].r[origin].c[exam_type].e[2019-10-01].f[academic_year==2019].svg)
+![example graph](static\2020-12-22.Date_Processed.line.cum.svg)
