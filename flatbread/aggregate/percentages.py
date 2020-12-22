@@ -283,6 +283,7 @@ def _axis_wise(
         return result.round(ndigits)
     return result
 
+
 @add_totals(axis=2)
 @drop_totals(axis=2)
 def _table_wise(
