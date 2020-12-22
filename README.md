@@ -79,121 +79,121 @@ df.pipe(fb.totals.add, axis=2, level=[0,1])
       <th rowspan="5" valign="top">R_l0_g0</th>
       <th rowspan="2" valign="top">R_l1_g0</th>
       <th>R_l2_g0</th>
-      <td align="right">77</td>
-      <td align="right">1</td>
-      <td align="right">78</td>
-      <td align="right">59</td>
-      <td align="right">40</td>
-      <td align="right">99</td>
-      <td align="right">177</td>
+      <td align="right">8</td>
+      <td align="right">76</td>
+      <td align="right">84</td>
+      <td align="right">32</td>
+      <td align="right">55</td>
+      <td align="right">87</td>
+      <td align="right">171</td>
     </tr>
     <tr>
       <th>R_l2_g1</th>
-      <td align="right">69</td>
-      <td align="right">83</td>
-      <td align="right">152</td>
-      <td align="right">27</td>
-      <td align="right">85</td>
-      <td align="right">112</td>
-      <td align="right">264</td>
+      <td align="right">21</td>
+      <td align="right">75</td>
+      <td align="right">96</td>
+      <td align="right">15</td>
+      <td align="right">67</td>
+      <td align="right">82</td>
+      <td align="right">178</td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">R_l1_g1</th>
       <th>R_l2_g2</th>
-      <td align="right">18</td>
-      <td align="right">9</td>
-      <td align="right">27</td>
-      <td align="right">72</td>
-      <td align="right">52</td>
-      <td align="right">124</td>
-      <td align="right">151</td>
+      <td align="right">66</td>
+      <td align="right">84</td>
+      <td align="right">150</td>
+      <td align="right">38</td>
+      <td align="right">40</td>
+      <td align="right">78</td>
+      <td align="right">228</td>
     </tr>
     <tr>
       <th>R_l2_g3</th>
-      <td align="right">24</td>
-      <td align="right">85</td>
-      <td align="right">109</td>
-      <td align="right">10</td>
-      <td align="right">44</td>
-      <td align="right">54</td>
-      <td align="right">163</td>
+      <td align="right">83</td>
+      <td align="right">94</td>
+      <td align="right">177</td>
+      <td align="right">57</td>
+      <td align="right">31</td>
+      <td align="right">88</td>
+      <td align="right">265</td>
     </tr>
     <tr>
       <th>Subtotal</th>
       <th></th>
-      <td align="right">188</td>
       <td align="right">178</td>
-      <td align="right">366</td>
-      <td align="right">168</td>
-      <td align="right">221</td>
-      <td align="right">389</td>
-      <td align="right">755</td>
+      <td align="right">329</td>
+      <td align="right">507</td>
+      <td align="right">142</td>
+      <td align="right">193</td>
+      <td align="right">335</td>
+      <td align="right">842</td>
     </tr>
     <tr>
       <th rowspan="5" valign="top">R_l0_g1</th>
       <th rowspan="2" valign="top">R_l1_g2</th>
       <th>R_l2_g4</th>
-      <td align="right">27</td>
-      <td align="right">47</td>
-      <td align="right">74</td>
-      <td align="right">39</td>
-      <td align="right">70</td>
-      <td align="right">109</td>
-      <td align="right">183</td>
+      <td align="right">32</td>
+      <td align="right">82</td>
+      <td align="right">114</td>
+      <td align="right">55</td>
+      <td align="right">87</td>
+      <td align="right">142</td>
+      <td align="right">256</td>
     </tr>
     <tr>
       <th>R_l2_g5</th>
-      <td align="right">24</td>
-      <td align="right">27</td>
-      <td align="right">51</td>
-      <td align="right">12</td>
-      <td align="right">88</td>
+      <td align="right">68</td>
+      <td align="right">22</td>
+      <td align="right">90</td>
       <td align="right">100</td>
-      <td align="right">151</td>
+      <td align="right">70</td>
+      <td align="right">170</td>
+      <td align="right">260</td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">R_l1_g3</th>
       <th>R_l2_g6</th>
-      <td align="right">64</td>
-      <td align="right">30</td>
-      <td align="right">94</td>
-      <td align="right">27</td>
+      <td align="right">55</td>
+      <td align="right">25</td>
+      <td align="right">80</td>
       <td align="right">40</td>
-      <td align="right">67</td>
-      <td align="right">161</td>
+      <td align="right">24</td>
+      <td align="right">64</td>
+      <td align="right">144</td>
     </tr>
     <tr>
       <th>R_l2_g7</th>
-      <td align="right">96</td>
-      <td align="right">9</td>
-      <td align="right">105</td>
-      <td align="right">82</td>
-      <td align="right">59</td>
-      <td align="right">141</td>
-      <td align="right">246</td>
+      <td align="right">12</td>
+      <td align="right">80</td>
+      <td align="right">92</td>
+      <td align="right">31</td>
+      <td align="right">79</td>
+      <td align="right">110</td>
+      <td align="right">202</td>
     </tr>
     <tr>
       <th>Subtotal</th>
       <th></th>
-      <td align="right">211</td>
-      <td align="right">113</td>
-      <td align="right">324</td>
-      <td align="right">160</td>
-      <td align="right">257</td>
-      <td align="right">417</td>
-      <td align="right">741</td>
+      <td align="right">167</td>
+      <td align="right">209</td>
+      <td align="right">376</td>
+      <td align="right">226</td>
+      <td align="right">260</td>
+      <td align="right">486</td>
+      <td align="right">862</td>
     </tr>
     <tr>
       <th>Total</th>
       <th></th>
       <th></th>
-      <td align="right">399</td>
-      <td align="right">291</td>
-      <td align="right">690</td>
-      <td align="right">328</td>
-      <td align="right">478</td>
-      <td align="right">806</td>
-      <td align="right">1496</td>
+      <td align="right">345</td>
+      <td align="right">538</td>
+      <td align="right">883</td>
+      <td align="right">368</td>
+      <td align="right">453</td>
+      <td align="right">821</td>
+      <td align="right">1704</td>
     </tr>
   </tbody>
 </table>
@@ -255,118 +255,118 @@ df.pipe(fb.percs.add, level=1)
       <th rowspan="5" valign="top">R_l0_g0</th>
       <th rowspan="2" valign="top">R_l1_g0</th>
       <th>R_l2_g0</th>
-      <td align="right">77</td>
-      <td align="right">41.0</td>
-      <td align="right">1</td>
-      <td align="right">0.6</td>
-      <td align="right">59</td>
-      <td align="right">35.1</td>
-      <td align="right">40</td>
-      <td align="right">18.1</td>
+      <td align="right">8</td>
+      <td align="right">4.5</td>
+      <td align="right">76</td>
+      <td align="right">23.1</td>
+      <td align="right">32</td>
+      <td align="right">22.5</td>
+      <td align="right">55</td>
+      <td align="right">28.5</td>
     </tr>
     <tr>
       <th>R_l2_g1</th>
-      <td align="right">69</td>
-      <td align="right">36.7</td>
-      <td align="right">83</td>
-      <td align="right">46.6</td>
-      <td align="right">27</td>
-      <td align="right">16.1</td>
-      <td align="right">85</td>
-      <td align="right">38.5</td>
+      <td align="right">21</td>
+      <td align="right">11.8</td>
+      <td align="right">75</td>
+      <td align="right">22.8</td>
+      <td align="right">15</td>
+      <td align="right">10.6</td>
+      <td align="right">67</td>
+      <td align="right">34.7</td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">R_l1_g1</th>
       <th>R_l2_g2</th>
-      <td align="right">18</td>
-      <td align="right">9.6</td>
-      <td align="right">9</td>
-      <td align="right">5.1</td>
-      <td align="right">72</td>
-      <td align="right">42.9</td>
-      <td align="right">52</td>
-      <td align="right">23.5</td>
+      <td align="right">66</td>
+      <td align="right">37.1</td>
+      <td align="right">84</td>
+      <td align="right">25.5</td>
+      <td align="right">38</td>
+      <td align="right">26.8</td>
+      <td align="right">40</td>
+      <td align="right">20.7</td>
     </tr>
     <tr>
       <th>R_l2_g3</th>
-      <td align="right">24</td>
-      <td align="right">12.8</td>
-      <td align="right">85</td>
-      <td align="right">47.8</td>
-      <td align="right">10</td>
-      <td align="right">6.0</td>
-      <td align="right">44</td>
-      <td align="right">19.9</td>
+      <td align="right">83</td>
+      <td align="right">46.6</td>
+      <td align="right">94</td>
+      <td align="right">28.6</td>
+      <td align="right">57</td>
+      <td align="right">40.1</td>
+      <td align="right">31</td>
+      <td align="right">16.1</td>
     </tr>
     <tr>
       <th>Subtotal</th>
       <th></th>
-      <td align="right">188</td>
-      <td align="right">100.0</td>
       <td align="right">178</td>
       <td align="right">100.0</td>
-      <td align="right">168</td>
+      <td align="right">329</td>
       <td align="right">100.0</td>
-      <td align="right">221</td>
+      <td align="right">142</td>
+      <td align="right">100.0</td>
+      <td align="right">193</td>
       <td align="right">100.0</td>
     </tr>
     <tr>
       <th rowspan="5" valign="top">R_l0_g1</th>
       <th rowspan="2" valign="top">R_l1_g2</th>
       <th>R_l2_g4</th>
-      <td align="right">27</td>
-      <td align="right">12.8</td>
-      <td align="right">47</td>
-      <td align="right">41.6</td>
-      <td align="right">39</td>
-      <td align="right">24.4</td>
-      <td align="right">70</td>
-      <td align="right">27.2</td>
+      <td align="right">32</td>
+      <td align="right">19.2</td>
+      <td align="right">82</td>
+      <td align="right">39.2</td>
+      <td align="right">55</td>
+      <td align="right">24.3</td>
+      <td align="right">87</td>
+      <td align="right">33.5</td>
     </tr>
     <tr>
       <th>R_l2_g5</th>
-      <td align="right">24</td>
-      <td align="right">11.4</td>
-      <td align="right">27</td>
-      <td align="right">23.9</td>
-      <td align="right">12</td>
-      <td align="right">7.5</td>
-      <td align="right">88</td>
-      <td align="right">34.2</td>
+      <td align="right">68</td>
+      <td align="right">40.7</td>
+      <td align="right">22</td>
+      <td align="right">10.6</td>
+      <td align="right">100</td>
+      <td align="right">44.3</td>
+      <td align="right">70</td>
+      <td align="right">26.9</td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">R_l1_g3</th>
       <th>R_l2_g6</th>
-      <td align="right">64</td>
-      <td align="right">30.3</td>
-      <td align="right">30</td>
-      <td align="right">26.5</td>
-      <td align="right">27</td>
-      <td align="right">16.9</td>
+      <td align="right">55</td>
+      <td align="right">32.9</td>
+      <td align="right">25</td>
+      <td align="right">11.9</td>
       <td align="right">40</td>
-      <td align="right">15.6</td>
+      <td align="right">17.7</td>
+      <td align="right">24</td>
+      <td align="right">9.2</td>
     </tr>
     <tr>
       <th>R_l2_g7</th>
-      <td align="right">96</td>
-      <td align="right">45.5</td>
-      <td align="right">9</td>
-      <td align="right">8.0</td>
-      <td align="right">82</td>
-      <td align="right">51.2</td>
-      <td align="right">59</td>
-      <td align="right">23.0</td>
+      <td align="right">12</td>
+      <td align="right">7.2</td>
+      <td align="right">80</td>
+      <td align="right">38.3</td>
+      <td align="right">31</td>
+      <td align="right">13.7</td>
+      <td align="right">79</td>
+      <td align="right">30.4</td>
     </tr>
     <tr>
       <th>Subtotal</th>
       <th></th>
-      <td align="right">211</td>
+      <td align="right">167</td>
       <td align="right">100.0</td>
-      <td align="right">113</td>
+      <td align="right">209</td>
       <td align="right">100.0</td>
-      <td align="right">160</td>
+      <td align="right">226</td>
       <td align="right">100.0</td>
-      <td align="right">257</td>
+      <td align="right">260</td>
       <td align="right">100.0</td>
     </tr>
   </tbody>
@@ -385,7 +385,7 @@ df = pd._testing.makeCustomDataframe(
 df.pipe(fb.percs.add).pipe(fb.format)
 ```
 
-<table border="1" class="dataframe"><table border="1" class="dataframe">
+<table border="1" class="dataframe">
   <thead>
     <tr>
       <th>C0</th>
@@ -420,68 +420,68 @@ df.pipe(fb.percs.add).pipe(fb.format)
   <tbody>
     <tr>
       <th>R_l0_g0</th>
-      <td align="right">591</td>
-      <td align="right">48,2</td>
-      <td align="right">633</td>
-      <td align="right">16,5</td>
-      <td align="right">287</td>
-      <td align="right">13,5</td>
-      <td align="right">552</td>
-      <td align="right">22,7</td>
+      <td align="right">702</td>
+      <td align="right">23,8</td>
+      <td align="right">57</td>
+      <td align="right">1,7</td>
+      <td align="right">579</td>
+      <td align="right">23,2</td>
+      <td align="right">908</td>
+      <td align="right">39,6</td>
     </tr>
     <tr>
       <th>R_l0_g1</th>
-      <td align="right">266</td>
-      <td align="right">21,7</td>
-      <td align="right">837</td>
-      <td align="right">21,8</td>
-      <td align="right">274</td>
-      <td align="right">12,9</td>
-      <td align="right">430</td>
-      <td align="right">17,7</td>
+      <td align="right">791</td>
+      <td align="right">26,8</td>
+      <td align="right">839</td>
+      <td align="right">25,6</td>
+      <td align="right">687</td>
+      <td align="right">27,6</td>
+      <td align="right">333</td>
+      <td align="right">14,5</td>
     </tr>
     <tr>
       <th>R_l0_g2</th>
-      <td align="right">272</td>
-      <td align="right">22,2</td>
-      <td align="right">923</td>
-      <td align="right">24,0</td>
-      <td align="right">209</td>
-      <td align="right">9,9</td>
-      <td align="right">781</td>
-      <td align="right">32,1</td>
+      <td align="right">579</td>
+      <td align="right">19,6</td>
+      <td align="right">777</td>
+      <td align="right">23,7</td>
+      <td align="right">633</td>
+      <td align="right">25,4</td>
+      <td align="right">553</td>
+      <td align="right">24,2</td>
     </tr>
     <tr>
       <th>R_l0_g3</th>
-      <td align="right">86</td>
-      <td align="right">7,0</td>
-      <td align="right">950</td>
-      <td align="right">24,7</td>
-      <td align="right">975</td>
-      <td align="right">46,0</td>
-      <td align="right">259</td>
-      <td align="right">10,7</td>
+      <td align="right">571</td>
+      <td align="right">19,3</td>
+      <td align="right">699</td>
+      <td align="right">21,3</td>
+      <td align="right">108</td>
+      <td align="right">4,4</td>
+      <td align="right">439</td>
+      <td align="right">19,1</td>
     </tr>
     <tr>
       <th>R_l0_g4</th>
-      <td align="right">10</td>
-      <td align="right">0,8</td>
-      <td align="right">502</td>
-      <td align="right">13,1</td>
-      <td align="right">376</td>
-      <td align="right">17,7</td>
-      <td align="right">408</td>
-      <td align="right">16,8</td>
+      <td align="right">310</td>
+      <td align="right">10,5</td>
+      <td align="right">908</td>
+      <td align="right">27,7</td>
+      <td align="right">484</td>
+      <td align="right">19,4</td>
+      <td align="right">59</td>
+      <td align="right">2,6</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td align="right">1.225</td>
+      <td align="right">2.953</td>
       <td align="right">100,0</td>
-      <td align="right">3.845</td>
+      <td align="right">3.280</td>
       <td align="right">100,0</td>
-      <td align="right">2.121</td>
+      <td align="right">2.491</td>
       <td align="right">100,0</td>
-      <td align="right">2.430</td>
+      <td align="right">2.292</td>
       <td align="right">100,0</td>
     </tr>
   </tbody>
