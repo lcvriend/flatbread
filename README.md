@@ -391,7 +391,7 @@ tl = fb.TrendLine.from_df(
 fig = tl.plot()
 ```
 
-![example graph](static/2020-12-22.Date_of_Application.line.abs.svg)
+<img src="static/2020-12-22.Date_of_Application.line.abs.svg" width="630">
 
 Split your graphs in rows and columns:
 
@@ -415,4 +415,4 @@ fig = tl.plot(
 )
 ```
 
-![example graph](static/2020-12-22.Date_Processed.line.cum.svg)
+<img src="static/2020-12-22.Date_Processed.line.cum.svg">
