@@ -493,12 +493,13 @@ Flatbread let's you control most of its behavior through key-word arguments, but
 ```Python
 from flatbread import CONFIG
 
-# pick your preferred locale and set it
+# pick your preferred locale and set it (used with `format`)
 CONFIG.format['locale'] = 'nl_NL'
 CONFIG.set_locale()
 
 # set your own labels
 CONFIG.aggregation['totals_name'] = 'Totes'
+CONFIG.aggregation['label_rel'] = 'pct'
 
 # define the number of digits to round to (-1 is no rounding)
 CONFIG.aggregation['ndigits] = 2
