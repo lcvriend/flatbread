@@ -758,10 +758,10 @@ class TrendLine(object):
 
 
     @classmethod
-    def from_df(cls, df, datefield, yearfield, year, **kwargs):
+    def from_df(cls, df, datefield, yearfield, offset_year, **kwargs):
         "Convert df to timeseries and initialize TrendLine object from it."
 
-        ts = timeseries_offset(df, datefield, yearfield, year)
+        ts = timeseries_offset(df, datefield, yearfield, offset_year)
         return cls(ts, **kwargs)
 
 
