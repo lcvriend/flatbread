@@ -199,7 +199,7 @@ df.pipe(fb.totals.add, axis=2, level=[0,1])
 </table>
 
 ### Percentages from totals and subtotals
-Flatbread let's you calculate the percentages from within a specified level of your data. You can transform the data or add the percentages into your pivot table:
+Flatbread let's you calculate the percentages of the totals or subtotals. You can either transform the data itself or add the percentages into your pivot table as separate columns. When rounding the percentages they will always add up to 100%:
 
 ```Python
 df.pipe(fb.percs.add, level=1)
@@ -373,7 +373,7 @@ df.pipe(fb.percs.add, level=1)
 </table>
 
 ### Localize your table formats
-Use the `format` function in order to display your pivot table according to your preferred locale. Here we use `nl-NL`:
+Flatbread provides the `format` function for rendering your pivot table according to your preferred locale. Here we use `nl-NL` as an example:
 
 ```Python
 df = pd._testing.makeCustomDataframe(
@@ -500,10 +500,13 @@ CONFIG.set_locale()
 # set your own labels
 CONFIG.aggregation['totals_name'] = 'Totes'
 
-# store your configuration permanently
+# define the number of digits to round to (-1 is no rounding)
+CONFIG.aggregation['ndigits] = 2
+
+# store your configuration permanently (across sessions)
 CONFIG.save()
 
-# restore to factory settings
+# restore your settings to 'factory' defaults
 CONFIG.factory_reset()
 ```
 
