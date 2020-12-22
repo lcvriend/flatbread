@@ -373,15 +373,13 @@ df.pipe(fb.percs.add, level=1)
 </table>
 
 ### Localize your table formats
-Using the `format` function your pivot table will nicely be displayed according to your preferred locale:
+Use the `format` function in order to display your pivot table according to your preferred locale. Here we use `nl-NL`:
 
-```
+```Python
 df = pd._testing.makeCustomDataframe(
     nrows=5,
     ncols=4,
     data_gen_f=lambda r,c:randint(10,1000),
-    c_idx_nlevels=1,
-    r_idx_nlevels=1,
 )
 
 df.pipe(fb.percs.add).pipe(fb.format)
@@ -481,7 +479,7 @@ df.pipe(fb.percs.add).pipe(fb.format)
 ### Easy configuration
 Flatbread let's you control most of its behavior through key-word arguments, but it is also easy to store your settings and use them globally throughout a project:
 
-```
+```Python
 from flatbread import CONFIG
 
 # pick your preferred locale and set it
