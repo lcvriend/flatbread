@@ -107,10 +107,10 @@ def add_category(
 ) -> pd.Index:
     "Add `category` to categorical `index` at specified `level`."
 
-    def add_cat(index, category):
+    def add_cat(index, cats):
         if isinstance(index, pd.CategoricalIndex):
-            category = [item for item in category if item not in list(index.categories)]
-            index = index.add_categories(category)
+            cats = [item for item in cats if item not in list(index.categories)]
+            index = index.add_categories(cats)
         return index
 
     if isinstance(category, str):
