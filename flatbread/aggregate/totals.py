@@ -137,6 +137,7 @@ def _add_axis(
         for level, item in enumerate(key):
             df.index = add_category(df.index, item, level=level)
     else:
+        totals.index.name = df.index.name
         df.index = add_category(df.index, totals_name)
     return pd.concat([df, totals])
 
