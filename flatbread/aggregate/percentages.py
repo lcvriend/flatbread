@@ -215,6 +215,7 @@ def transform(
         Name identifying the row/column subtotals.
     ndigits : int, default=CONFIG.aggregation['ndigits']
         Number of digits used for rounding the percentages.
+        Set to -1 to not round.
     drop_totals : bool, default=False
         Drop row/column totals from output.
 
@@ -276,8 +277,11 @@ def _axis_wise(
         )
     else:
         totals = df.loc[totals_name]
-    return (df.div(totals).multiply(100).round(ndigits))
 
+    result = df.div(totals).multiply(100)
+    if ndigits >= 0:
+        return result.round(ndigits)
+    return result
 
 @add_totals(axis=2)
 @drop_totals(axis=2)
@@ -305,4 +309,8 @@ def _table_wise(
         )
     else:
         totals = df.loc[totals_name, totals_name]
-    return (df.div(totals).multiply(100).round(ndigits))
+
+    result = df.div(totals).multiply(100)
+    if ndigits >= 0:
+        return result.round(ndigits)
+    return result
