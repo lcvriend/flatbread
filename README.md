@@ -385,7 +385,7 @@ df = pd._testing.makeCustomDataframe(
 df.pipe(fb.percs.add).pipe(fb.format)
 ```
 
-<table border="1" class="dataframe">
+<table border="1" class="dataframe"><table border="1" class="dataframe">
   <thead>
     <tr>
       <th>C0</th>
@@ -405,72 +405,83 @@ df.pipe(fb.percs.add).pipe(fb.format)
       <th>abs</th>
       <th>%</th>
     </tr>
+    <tr>
+      <th>R0</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
   </thead>
   <tbody>
     <tr>
       <th>R_l0_g0</th>
-      <td align="right">773</td>
-      <td align="right">22,9</td>
-      <td align="right">892</td>
-      <td align="right">23,4</td>
-      <td align="right">968</td>
-      <td align="right">29,1</td>
-      <td align="right">294</td>
-      <td align="right">19,9</td>
+      <td align="right">591</td>
+      <td align="right">48,2</td>
+      <td align="right">633</td>
+      <td align="right">16,5</td>
+      <td align="right">287</td>
+      <td align="right">13,5</td>
+      <td align="right">552</td>
+      <td align="right">22,7</td>
     </tr>
     <tr>
       <th>R_l0_g1</th>
-      <td align="right">979</td>
-      <td align="right">28,9</td>
-      <td align="right">457</td>
-      <td align="right">12,0</td>
-      <td align="right">662</td>
-      <td align="right">19,9</td>
-      <td align="right">221</td>
-      <td align="right">15,0</td>
+      <td align="right">266</td>
+      <td align="right">21,7</td>
+      <td align="right">837</td>
+      <td align="right">21,8</td>
+      <td align="right">274</td>
+      <td align="right">12,9</td>
+      <td align="right">430</td>
+      <td align="right">17,7</td>
     </tr>
     <tr>
       <th>R_l0_g2</th>
-      <td align="right">495</td>
-      <td align="right">14,6</td>
-      <td align="right">917</td>
+      <td align="right">272</td>
+      <td align="right">22,2</td>
+      <td align="right">923</td>
       <td align="right">24,0</td>
-      <td align="right">890</td>
-      <td align="right">26,8</td>
-      <td align="right">63</td>
-      <td align="right">4,3</td>
+      <td align="right">209</td>
+      <td align="right">9,9</td>
+      <td align="right">781</td>
+      <td align="right">32,1</td>
     </tr>
     <tr>
       <th>R_l0_g3</th>
-      <td align="right">282</td>
-      <td align="right">8,3</td>
-      <td align="right">826</td>
-      <td align="right">21,7</td>
-      <td align="right">681</td>
-      <td align="right">20,5</td>
-      <td align="right">804</td>
-      <td align="right">54,5</td>
+      <td align="right">86</td>
+      <td align="right">7,0</td>
+      <td align="right">950</td>
+      <td align="right">24,7</td>
+      <td align="right">975</td>
+      <td align="right">46,0</td>
+      <td align="right">259</td>
+      <td align="right">10,7</td>
     </tr>
     <tr>
       <th>R_l0_g4</th>
-      <td align="right">853</td>
-      <td align="right">25,2</td>
-      <td align="right">722</td>
-      <td align="right">18,9</td>
-      <td align="right">120</td>
-      <td align="right">3,6</td>
-      <td align="right">94</td>
-      <td align="right">6,4</td>
+      <td align="right">10</td>
+      <td align="right">0,8</td>
+      <td align="right">502</td>
+      <td align="right">13,1</td>
+      <td align="right">376</td>
+      <td align="right">17,7</td>
+      <td align="right">408</td>
+      <td align="right">16,8</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td align="right">3.382</td>
+      <td align="right">1.225</td>
       <td align="right">100,0</td>
-      <td align="right">3.814</td>
+      <td align="right">3.845</td>
       <td align="right">100,0</td>
-      <td align="right">3.321</td>
+      <td align="right">2.121</td>
       <td align="right">100,0</td>
-      <td align="right">1.476</td>
+      <td align="right">2.430</td>
       <td align="right">100,0</td>
     </tr>
   </tbody>
