@@ -2,6 +2,7 @@ __pycache__
 .vscode
 flatbread.egg-info
 build
+!flatbread/build
 dist
 notebooks
 output
