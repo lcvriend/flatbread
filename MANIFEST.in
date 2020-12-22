@@ -1,2 +1,1 @@
-include README.md
-include flatbread/config.json
+include flatbread/config.defaults.json

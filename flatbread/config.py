@@ -3,7 +3,7 @@ import locale
 from pathlib import Path
 
 
-HERE = Path(__file__).resolve().parent.parent
+HERE = Path(__file__).resolve().parent
 
 
 class Config:
