@@ -75,6 +75,15 @@ def drop_totals(axis):
     return decorator
 
 
+def round_percentages(s, ndigits=-1):
+    "Round percentages in a way that they always add up to 100%."
+    if ndigits < 0:
+        return s
+    cumsum = s.cumsum().round(ndigits)
+    prev_baseline = cumsum.shift(1).fillna(0)
+    return cumsum - prev_baseline
+
+
 @log.entry
 def add(
     df:            pd.DataFrame,
@@ -279,9 +288,8 @@ def _axis_wise(
         totals = df.loc[totals_name]
 
     result = df.div(totals).multiply(100)
-    if ndigits >= 0:
-        return result.round(ndigits)
-    return result
+    return result.pipe(round_percentages, ndigits=ndigits)
+
 
 
 @add_totals(axis=2)
@@ -312,6 +320,4 @@ def _table_wise(
         totals = df.loc[totals_name, totals_name]
 
     result = df.div(totals).multiply(100)
-    if ndigits >= 0:
-        return result.round(ndigits)
-    return result
+    return result.pipe(round_percentages, ndigits=ndigits)
