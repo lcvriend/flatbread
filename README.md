@@ -1,4 +1,4 @@
-# <img src="static/noun_pita_3216932.svg" width="24"> Flatbread
+# <img src="static/noun_pita_3216932.svg" width="24"> Flatbread <img src="static/noun_pita_3216932.svg" width="24">
 
 ## About
 Flatbread is a small library built to extend the pivot table functionality in pandas. The library contains functions which will allow you to easily add **totals/subtotals** to one or more axes/levels of your pivot table. Furthermore, flatbread can calculate **percentages** from the totals/subtotals of each axis/level of your pivot table. You can transform the existing values in your table into percentages, but you can also add the percentages neatly next to your data. If the required (sub)totals are not present, then flatbread will add them automatically in order to perform the calculations. By default the (sub)totals are kept but you can drop them too. The library also contains some functionality built on top of matplotlib for plotting your data.
@@ -371,6 +371,132 @@ df.pipe(fb.percs.add, level=1)
     </tr>
   </tbody>
 </table>
+
+### Localize your table formats
+Using the `format` function your pivot table will nicely be displayed according to your preferred locale:
+
+```
+df = pd._testing.makeCustomDataframe(
+    nrows=5,
+    ncols=4,
+    data_gen_f=lambda r,c:randint(10,1000),
+    c_idx_nlevels=1,
+    r_idx_nlevels=1,
+)
+
+df.pipe(fb.percs.add).pipe(fb.format)
+```
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th>C0</th>
+      <th colspan="2" halign="left">C_l0_g0</th>
+      <th colspan="2" halign="left">C_l0_g1</th>
+      <th colspan="2" halign="left">C_l0_g2</th>
+      <th colspan="2" halign="left">C_l0_g3</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>abs</th>
+      <th>%</th>
+      <th>abs</th>
+      <th>%</th>
+      <th>abs</th>
+      <th>%</th>
+      <th>abs</th>
+      <th>%</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>R_l0_g0</th>
+      <td align="right">773</td>
+      <td align="right">22,9</td>
+      <td align="right">892</td>
+      <td align="right">23,4</td>
+      <td align="right">968</td>
+      <td align="right">29,1</td>
+      <td align="right">294</td>
+      <td align="right">19,9</td>
+    </tr>
+    <tr>
+      <th>R_l0_g1</th>
+      <td align="right">979</td>
+      <td align="right">28,9</td>
+      <td align="right">457</td>
+      <td align="right">12,0</td>
+      <td align="right">662</td>
+      <td align="right">19,9</td>
+      <td align="right">221</td>
+      <td align="right">15,0</td>
+    </tr>
+    <tr>
+      <th>R_l0_g2</th>
+      <td align="right">495</td>
+      <td align="right">14,6</td>
+      <td align="right">917</td>
+      <td align="right">24,0</td>
+      <td align="right">890</td>
+      <td align="right">26,8</td>
+      <td align="right">63</td>
+      <td align="right">4,3</td>
+    </tr>
+    <tr>
+      <th>R_l0_g3</th>
+      <td align="right">282</td>
+      <td align="right">8,3</td>
+      <td align="right">826</td>
+      <td align="right">21,7</td>
+      <td align="right">681</td>
+      <td align="right">20,5</td>
+      <td align="right">804</td>
+      <td align="right">54,5</td>
+    </tr>
+    <tr>
+      <th>R_l0_g4</th>
+      <td align="right">853</td>
+      <td align="right">25,2</td>
+      <td align="right">722</td>
+      <td align="right">18,9</td>
+      <td align="right">120</td>
+      <td align="right">3,6</td>
+      <td align="right">94</td>
+      <td align="right">6,4</td>
+    </tr>
+    <tr>
+      <th>Total</th>
+      <td align="right">3.382</td>
+      <td align="right">100,0</td>
+      <td align="right">3.814</td>
+      <td align="right">100,0</td>
+      <td align="right">3.321</td>
+      <td align="right">100,0</td>
+      <td align="right">1.476</td>
+      <td align="right">100,0</td>
+    </tr>
+  </tbody>
+</table>
+
+### Easy configuration
+Flatbread let's you control most of its behavior through key-word arguments, but it is also easy to store your settings and use them globally throughout a project:
+
+```
+from flatbread import CONFIG
+
+# pick your preferred locale and set it
+CONFIG.format['locale'] = 'nl_NL'
+CONFIG.set_locale()
+
+# set your own labels
+CONFIG.aggregation['totals_name'] = 'Totes'
+
+# store your configuration permanently
+CONFIG.save()
+
+# restore to factory settings
+CONFIG.factory_reset()
+```
 
 ## Pivot charts
 

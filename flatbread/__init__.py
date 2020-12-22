@@ -15,6 +15,7 @@ import flatbread.build.columns as cols
 import flatbread.build.rows as rows
 import flatbread.build.rows as index
 import flatbread.build.rows as idx
+from flatbread.format import format
 from flatbread.config import CONFIG
 from flatbread.plot.trendline import TrendLine
 from flatbread.utils import sanity, readout, log

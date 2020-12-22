@@ -1,7 +1,10 @@
 {
     "general": {
-        "locale": "en-us",
         "store_output_in_cwd": true
+    },
+    "format": {
+        "locale": null,
+        "na_rep": ""
     },
     "paths": {
         "output": "output",

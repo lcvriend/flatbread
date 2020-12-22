@@ -1,4 +1,5 @@
 import json
+import locale
 from pathlib import Path
 
 
@@ -23,6 +24,8 @@ class Config:
         Restore default settings (overwrite any stored saved settings).
     get_path : str
         Return item in `paths` as Path object.
+    set_locale : str
+        Set locale if one was provided in 'format' section under ['locale'].
 
     Constructors
     ------------
@@ -34,6 +37,7 @@ class Config:
 
     def __init__(self, settings):
         self.__dict__ = settings
+        self.set_locale()
 
     def save(self):
         "Save settings permanently."
@@ -60,6 +64,11 @@ class Config:
     def get_path(self, key):
         "Get path from `paths` relative to `basepath` as Path object."
         return self.basepath / self.paths[key]
+
+    def set_locale(self):
+        "Set locale if one was provided."
+        if self.format['locale']:
+            locale.setlocale(locale.LC_ALL, self.format['locale'])
 
     @staticmethod
     def load(configfile):
