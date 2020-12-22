@@ -9,13 +9,17 @@ import flatbread
 class TestTotalsAdd_DataFrameSimple(unittest.TestCase):
     def setUp(self):
         self.totals_name = flatbread.agg.set_value('totals_name')
-        self.df = pd._testing.makeDataFrame().head(5)
+        self.df = pd._testing.makeCustomDataframe(
+            nrows=5,
+            ncols=4,
+            data_gen_f=lambda r,c:randint(1,100),
+        )
 
-    def test_add_rows(self):
+    def test_add_column_total_to_rows(self):
         s = flatbread.totals.add(self.df, axis=0).loc[self.totals_name]
         self.assertTrue(s.equals(self.df.sum()))
 
-    def test_add_cols(self):
+    def test_add_row_total_to_cols(self):
         s = flatbread.totals.add(self.df, axis=1).loc[:, self.totals_name]
         self.assertTrue(s.equals(self.df.sum(axis=1)))
 
@@ -24,6 +28,12 @@ class TestTotalsAdd_DataFrameSimple(unittest.TestCase):
             self.totals_name, self.totals_name
         ]
         self.assertTrue(v == self.df.sum().sum())
+
+    def test_preserve_axis_names(self):
+        r1 = flatbread.totals.add(self.df)
+        r2 = flatbread.totals.add(self.df, axis=1)
+        self.assertEqual(self.df.index.names, r1.index.names)
+        self.assertEqual(self.df.index.names, r2.index.names)
 
 
 class TestTotalsAdd_DataFrameCategorical(unittest.TestCase):
@@ -34,11 +44,11 @@ class TestTotalsAdd_DataFrameCategorical(unittest.TestCase):
         df.index = pd.Categorical(df.index)
         self.df = df
 
-    def test_add_rows(self):
+    def test_add_column_total_to_rows(self):
         s = flatbread.totals.add(self.df, axis=0).loc[self.totals_name]
         self.assertTrue(s.equals(self.df.sum()))
 
-    def test_add_cols(self):
+    def test_add_row_total_to_cols(self):
         s = flatbread.totals.add(self.df, axis=1).loc[:, self.totals_name]
         self.assertTrue(s.equals(self.df.sum(axis=1)))
 
@@ -61,11 +71,11 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
             r_ndupe_l=[4, 2, 1],
         )
 
-    def test_add_rows(self):
+    def test_add_column_total_to_rows(self):
         s = flatbread.totals.add(self.df, axis=0).iloc[-1]
         self.assertTrue(s.equals(self.df.sum()))
 
-    def test_add_cols(self):
+    def test_add_row_total_to_cols(self):
         s = flatbread.totals.add(self.df, axis=1).iloc[:, -1]
         self.assertTrue(s.equals(self.df.sum(axis=1)))
 
@@ -105,6 +115,16 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
             .pipe(flatbread.totals.add)
         )
         self.assertTrue(left.equals(right))
+
+    def test_preserve_axis_names(self):
+        r1 = flatbread.totals.add(self.df)
+        r2 = flatbread.totals.add(self.df, axis=1)
+        r3 = flatbread.totals.add(self.df, level=1)
+        r4 = flatbread.totals.add(self.df, axis=1, level=1)
+        self.assertEqual(self.df.index.names, r1.index.names)
+        self.assertEqual(self.df.index.names, r2.index.names)
+        self.assertEqual(self.df.index.names, r3.index.names)
+        self.assertEqual(self.df.index.names, r4.index.names)
 
 
 if __name__ == "__main__":
