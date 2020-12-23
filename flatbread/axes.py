@@ -24,10 +24,10 @@ AXES_ALIAS = {
 
 def transpose(func):
     @wraps(func)
-    def wrapper(df, **kwargs):
+    def wrapper(df, *args, **kwargs):
         axis = kwargs.pop('axis', 0)
         df = df.T if axis == 1 else df
-        result = func(df, **kwargs)
+        result = func(df, *args, **kwargs)
         return result.T if axis == 1 else result
     if func.__doc__ is not None:
         wrapper.__doc__ = f"Operate on `axis`. {func.__doc__}"
