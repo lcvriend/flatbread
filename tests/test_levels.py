@@ -46,26 +46,30 @@ class TestGetLevels_MultiIndex(unittest.TestCase):
 
 class TestValidateForOperationWithin_Simple(unittest.TestCase):
     def setUp(self):
-        self.index = pd._testing.makeStringIndex()
+        index = pd._testing.makeStringIndex()
+        self.df = pd.DataFrame(index=index)
 
     def test_validation_level_0(self):
         self.assertRaises(
             ValueError,
-            levels.validate_index_for_within_operations,
-            self.index,
-            level=0)
+            levels._validate_index_for_within_operations,
+            self.df,
+            level=0
+        )
 
 
 class TestValidateForOperationWithin_MultiIndex(unittest.TestCase):
     def setUp(self):
-        self.index = pd._testing.makeMultiIndex(names=['A', 'B'])
+        index = pd._testing.makeMultiIndex(names=['A', 'B'])
+        self.df = pd.DataFrame(index=index)
 
     def test_validation_level_0(self):
         self.assertRaises(
             ValueError,
-            levels.validate_index_for_within_operations,
-            self.index,
-            level=0)
+            levels._validate_index_for_within_operations,
+            self.df,
+            level=0
+        )
 
 
 if __name__ == '__main__':
