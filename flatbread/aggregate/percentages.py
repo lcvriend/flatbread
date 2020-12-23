@@ -4,7 +4,7 @@ from typing import Optional
 import pandas as pd
 
 from flatbread import totals
-from flatbread.aggregate import set_value
+from flatbread.aggregate import set_labels, TOTALS_LABELS, PERCS_LABELS
 from flatbread.axes import get_axis_number, transpose, add_axis_level
 from flatbread.types import AxisAlias, IndexName, LevelAlias
 from flatbread.utils import log, copy
@@ -20,6 +20,7 @@ def round_percentages(s, ndigits=-1):
 
 
 @log.entry
+@set_labels(TOTALS_LABELS + PERCS_LABELS)
 def add(
     df:            pd.DataFrame,
     *,
@@ -31,6 +32,7 @@ def add(
     label_abs:      Optional[str] = None,
     label_rel:      Optional[str] = None,
     drop_totals:    bool          = False,
+    **kwargs
 ) -> pd.DataFrame:
 
     """Add percentages to `df` on `level` of `axis` rounded to `ndigits`.
@@ -74,12 +76,6 @@ def add(
     pd.DataFrame
     """
 
-    ndigits        = set_value('ndigits', ndigits)
-    totals_name    = set_value('totals_name', totals_name)
-    subtotals_name = set_value('subtotals_name', subtotals_name)
-    label_abs      = set_value('label_abs', label_abs)
-    label_rel      = set_value('label_rel', label_rel)
-
     percs = df.pipe(
         transform,
         axis           = axis,
@@ -96,7 +92,7 @@ def add(
     )
 
     df = df.pipe(
-        _add_totals,
+        totals._add_totals,
         axis  = axis,
         level = level,
     ).pipe(
@@ -108,7 +104,7 @@ def add(
 
     if drop_totals:
         df = df.pipe(
-            _drop_totals,
+            totals._drop_totals,
             axis           = axis,
             level          = level,
             totals_name    = totals_name,
@@ -122,6 +118,7 @@ def add(
 
 @log.entry
 @copy
+@set_labels(TOTALS_LABELS + PERCS_LABELS)
 def transform(
     df: pd.DataFrame,
     *,
@@ -131,6 +128,7 @@ def transform(
     subtotals_name: IndexName  = None,
     ndigits:        int        = None,
     drop_totals:    bool       = False,
+    **kwargs
 ) -> pd.DataFrame:
 
     """Transform values of `df` to percentages on `level` of `axis` rounded to
@@ -168,10 +166,6 @@ def transform(
     pd.DataFrame
     """
 
-    ndigits        = set_value('ndigits', ndigits)
-    totals_name    = set_value('totals_name', totals_name)
-    subtotals_name = set_value('subtotals_name', subtotals_name)
-
     axis = get_axis_number(axis)
     if axis < 2:
         return _axis_wise(
@@ -194,9 +188,10 @@ def transform(
         )
 
 
+@set_labels(TOTALS_LABELS + PERCS_LABELS)
 @transpose
-@add_totals(axis=0)
-@drop_totals(axis=0)
+@totals.add_totals(axis=0)
+@totals.drop_totals(axis=0)
 def _axis_wise(
     df:             pd.DataFrame,
     *,
@@ -206,10 +201,6 @@ def _axis_wise(
     ndigits:        int        = None,
     **kwargs
 ) -> pd.DataFrame:
-
-    ndigits        = set_value('ndigits', ndigits)
-    totals_name    = set_value('totals_name', totals_name)
-    subtotals_name = set_value('subtotals_name', subtotals_name)
 
     if level > 0:
         totals_name = subtotals_name
@@ -226,22 +217,18 @@ def _axis_wise(
     return result.pipe(round_percentages, ndigits=ndigits)
 
 
-
-@add_totals(axis=2)
-@drop_totals(axis=2)
+@set_labels(TOTALS_LABELS + PERCS_LABELS)
+@totals.add_totals(axis=2)
+@totals.drop_totals(axis=2)
 def _table_wise(
     df,
     *,
-    level          = 0,
-    totals_name    = None,
-    subtotals_name = None,
-    ndigits        = None,
+    level:          LevelAlias = 0,
+    totals_name:    IndexName  = None,
+    subtotals_name: IndexName  = None,
+    ndigits:        int        = None,
     **kwargs
 ) -> pd.DataFrame:
-
-    ndigits        = set_value('ndigits', ndigits)
-    totals_name    = set_value('totals_name', totals_name)
-    subtotals_name = set_value('subtotals_name', subtotals_name)
 
     if level > 0:
         totals_name = subtotals_name

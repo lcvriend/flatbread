@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from functools import wraps
 
 import pandas as pd
 from flatbread.utils import log, copy
@@ -15,11 +16,12 @@ from flatbread.levels import (
     get_level_number,
     validate_index_for_within_operations,
 )
-from flatbread.aggregate import set_value
+from flatbread.aggregate import set_labels, TOTALS_LABELS
 
 
 @log.entry
 @copy
+@set_labels(TOTALS_LABELS)
 def add(
     df:             pd.DataFrame,
     *,
@@ -53,9 +55,6 @@ def add(
     pd.DataFrame
     """
 
-    totals_name = set_value('totals_name', totals_name)
-    subtotals_name = set_value('subtotals_name', subtotals_name)
-
     if isinstance(level, (int, str)):
         level = [level]
     for level_ in level:
@@ -69,6 +68,7 @@ def add(
     return df
 
 
+@set_labels(TOTALS_LABELS)
 def _add(
     df:             pd.DataFrame,
     *,
@@ -77,9 +77,6 @@ def _add(
     totals_name:    IndexName  = None,
     subtotals_name: IndexName  = None,
 ) -> pd.DataFrame:
-
-    totals_name = set_value('totals_name', totals_name)
-    subtotals_name = set_value('subtotals_name', subtotals_name)
 
     axis = get_axis_number(axis)
     level = get_level_number(df, axis, level)
@@ -114,6 +111,7 @@ def _add(
         )
 
 
+@set_labels(TOTALS_LABELS)
 @transpose
 def _add_axis(
     df:             pd.DataFrame,
@@ -121,9 +119,6 @@ def _add_axis(
     totals_name:    IndexName = None,
     subtotals_name: IndexName = None,
 ) -> pd.DataFrame:
-
-    totals_name = set_value('totals_name', totals_name)
-    subtotals_name = set_value('subtotals_name', subtotals_name)
 
     is_totals_row = lambda x: totals_name in x or subtotals_name in x
     totals = pd.Series(
@@ -142,6 +137,7 @@ def _add_axis(
     return pd.concat([df, totals])
 
 
+@set_labels(TOTALS_LABELS)
 def _add_within(
     df:             pd.DataFrame,
     *,
@@ -150,9 +146,6 @@ def _add_within(
     totals_name:    IndexName = None,
     subtotals_name: IndexName = None,
 ) -> pd.DataFrame:
-
-    totals_name = set_value('totals_name', totals_name)
-    subtotals_name = set_value('subtotals_name', subtotals_name)
 
     if axis < 2:
         return _add_axis_within(
@@ -178,6 +171,7 @@ def _add_within(
         )
 
 
+@set_labels(TOTALS_LABELS)
 @validate_index_for_within_operations
 @transpose
 def _add_axis_within(
@@ -187,10 +181,6 @@ def _add_axis_within(
     totals_name:    IndexName = None,
     subtotals_name: IndexName = None,
 ) -> pd.DataFrame:
-
-    validate_index_for_within_operations(df.index, level)
-    totals_name = set_value('totals_name', totals_name)
-    subtotals_name = set_value('subtotals_name', subtotals_name)
 
     is_totals_row = lambda x: totals_name in x or subtotals_name in x
     totals = df.loc[
@@ -219,6 +209,17 @@ def _add_axis_within(
         index = df.index.levels[idx]
         output = output.reindex(index, level=idx)
     return output
+
+
+# @copy
+# @log.entry
+# def add_totals_group(df, group_name):
+#     levels = list(range(df.index.nlevels))
+#     group = df.groupby(level=levels[1:]).sum()
+#     group.index = pd.MultiIndex.from_tuples(
+#         [add_item_to_key(key, group_name) for key in group.index]
+#     )
+#     return df.append(group)
 
 
 ################################################################################### DECORATORS

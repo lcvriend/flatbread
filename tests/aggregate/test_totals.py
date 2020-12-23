@@ -8,7 +8,7 @@ import flatbread
 
 class TestTotalsAdd_DataFrameSimple(unittest.TestCase):
     def setUp(self):
-        self.totals_name = flatbread.agg.set_value('totals_name')
+        self.totals_name = flatbread.agg.get_value('totals_name')
         self.df = pd._testing.makeCustomDataframe(
             nrows=5,
             ncols=4,
@@ -38,7 +38,7 @@ class TestTotalsAdd_DataFrameSimple(unittest.TestCase):
 
 class TestTotalsAdd_DataFrameCategorical(unittest.TestCase):
     def setUp(self):
-        self.totals_name = flatbread.agg.set_value('totals_name')
+        self.totals_name = flatbread.agg.get_value('totals_name')
         df = pd._testing.makeDataFrame().head(5)
         df.columns = pd.Categorical(df.columns)
         df.index = pd.Categorical(df.index)
@@ -86,7 +86,7 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
     def test_add_rows_within(self):
         left = (
             flatbread.totals.add(self.df, level=-1)
-            .xs(flatbread.agg.set_value('subtotals_name'), level=-1)
+            .xs(flatbread.agg.get_value('subtotals_name'), level=-1)
             .values
         )
         right = self.df.groupby(level=-2).sum().values
@@ -96,7 +96,7 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
     def test_add_cols_within(self):
         left = (
             flatbread.totals.add(self.df, axis=1, level=1)
-            .xs(flatbread.agg.set_value('subtotals_name'), axis=1, level=1)
+            .xs(flatbread.agg.get_value('subtotals_name'), axis=1, level=1)
             .values
         )
         right = self.df.groupby(level=0, axis=1).sum().values

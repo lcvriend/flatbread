@@ -8,9 +8,9 @@ import flatbread
 
 class TestPercsTransform_DataFrameSimple(unittest.TestCase):
     def setUp(self):
-        self.totals_name = flatbread.agg.set_value('totals_name')
-        self.label_abs = flatbread.agg.set_value('label_abs')
-        self.ndigits = flatbread.agg.set_value('ndigits')
+        self.totals_name = flatbread.agg.get_value('totals_name')
+        self.label_abs = flatbread.agg.get_value('label_abs')
+        self.ndigits = flatbread.agg.get_value('ndigits')
         self.df = pd._testing.makeCustomDataframe(
             nrows=5,
             ncols=4,
