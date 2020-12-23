@@ -221,12 +221,66 @@ def _add_axis_within(
     return output
 
 
-@copy
-@log.entry
-def add_totals_group(df, group_name):
-    levels = list(range(df.index.nlevels))
-    group = df.groupby(level=levels[1:]).sum()
-    group.index = pd.MultiIndex.from_tuples(
-        [add_item_to_key(key, group_name) for key in group.index]
-    )
-    return df.append(group)
+################################################################################### DECORATORS
+################################################################################
+
+
+@set_labels(TOTALS_LABELS)
+def _add_totals(df, axis=0, totals_name=None, subtotals_name=None, **kwargs):
+    level = kwargs.get('level') or 0
+    totals_name = totals_name if level == 0 else subtotals_name
+
+    index = df.columns if axis == 1 else df.index
+    is_total = lambda x: totals_name in x
+    has_totals = any([is_total(item) for item in index])
+
+    if not has_totals:
+        df = df.pipe(add, axis=axis, level=level)
+    return df
+
+
+@set_labels(TOTALS_LABELS)
+def _drop_totals(df, axis=0, totals_name=None, subtotals_name=None, **kwargs):
+    level = kwargs.get('level') or 0
+    totals_name = totals_name if level == 0 else subtotals_name
+
+    def exclude_totals(df, axis):
+        index = df.columns if axis == 1 else df.index
+        is_total = lambda x: totals_name in x
+        if isinstance(index, pd.MultiIndex):
+            return [not is_total(item[level]) for item in index]
+        return [not is_total(item) for item in index]
+
+    rows = exclude_totals(df, axis=0)
+    columns = exclude_totals(df, axis=1)
+
+    if axis == 0:
+        return df.loc[rows]
+    if axis == 1:
+        return df.loc[:, columns]
+
+    return df.loc[rows, columns]
+
+
+def add_totals(axis):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(df, **kwargs):
+            df = _add_totals(df, axis, **kwargs)
+            result = func(df, **kwargs)
+            return result
+        return wrapper
+    return decorator
+
+
+def drop_totals(axis):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(df, **kwargs):
+            drop_totals = kwargs.get('drop_totals', False)
+            result = func(df, **kwargs)
+            if drop_totals:
+                result = _drop_totals(result, axis, **kwargs)
+            return result
+        return wrapper
+    return decorator
