@@ -1,4 +1,7 @@
+from functools import wraps
+
 import pandas as pd
+
 from flatbread.types import LevelAlias, AxisAlias, IndexName
 
 
@@ -69,8 +72,8 @@ def validate_level(
     return None
 
 
-def validate_index_for_within_operations(
-    index: pd.MultiIndex,
+def _validate_index_for_within_operations(
+    df: pd.DataFrame,
     level: int
 ) -> None:
 
@@ -81,6 +84,7 @@ def validate_index_for_within_operations(
     - `level` is not > 0.
     """
 
+    index = df.index
     if index.nlevels == 1:
         raise ValueError(
             "Operation can only be performed on index with multiple levels."
@@ -94,3 +98,12 @@ def validate_index_for_within_operations(
             f"Level {level} is out of range for index."
         )
     return None
+
+
+def validate_index_for_within_operations(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        df, *_ = args
+        _validate_index_for_within_operations(df, kwargs['level'])
+        return func(*args, **kwargs)
+    return wrapper

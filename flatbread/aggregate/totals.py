@@ -178,6 +178,7 @@ def _add_within(
         )
 
 
+@validate_index_for_within_operations
 @transpose
 def _add_axis_within(
     df:             pd.DataFrame,
