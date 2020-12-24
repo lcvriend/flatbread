@@ -84,8 +84,8 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
         self.assertTrue(s.equals(self.df.sum(axis=1)))
 
     def test_add_both(self):
-        v = totals.add(self.df, axis=2).iloc[-1, -1]
-        self.assertTrue(v == self.df.sum().sum())
+        value = totals.add(self.df, axis=2).iloc[-1, -1]
+        self.assertTrue(value == self.df.sum().sum())
 
     def test_add_rows_within(self):
         left = (
@@ -118,6 +118,18 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
         right = self.df.groupby(level=0, axis=1).sum().values
         comparison = (left == right).all()
         self.assertTrue(comparison)
+
+    def test_add_multiple_levels(self):
+        subtotals_name = config.get_value('aggregation', 'subtotals_name')
+        result = totals.add(self.df, axis=1, level=[0, 'C1'])
+
+        subtotals_result = result.xs(subtotals_name, axis=1, level=1)
+        calc_subtotals = self.df.groupby(level=0, axis=1).sum()
+        self.assertTrue(subtotals_result.eq(calc_subtotals).all().all())
+
+        totals_result = result.iloc[:,-1]
+        calc_totals = self.df.sum(axis=1)
+        self.assertTrue(totals_result.equals(calc_totals))
 
     def test_commutative_property(self):
         left = (
