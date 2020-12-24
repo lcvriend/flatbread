@@ -1,16 +1,21 @@
 from functools import wraps
-from typing import Optional
+from typing import Any
 
-import pandas as pd
+import pandas as pd # type: ignore
 
-from flatbread import totals
-from flatbread.aggregate import set_labels, TOTALS_LABELS, PERCS_LABELS
-from flatbread.axes import get_axis_number, transpose, add_axis_level
-from flatbread.types import AxisAlias, IndexName, LevelAlias
-from flatbread.utils import log, copy
+import flatbread.config as config
+import flatbread.utils as utils
+import flatbread.utils.log as log
+import flatbread.axes as axes
+import flatbread.levels as levels
+import flatbread.aggregate.totals as totals
+from flatbread.aggregate import AGG_SETTINGS
 
 
-def round_percentages(s, ndigits=-1):
+def round_percentages(
+    s: pd.Series,
+    ndigits: int = -1
+) -> pd.Series:
     "Round percentages in a way that they always add up to 100%."
     if ndigits < 0:
         return s
@@ -20,18 +25,20 @@ def round_percentages(s, ndigits=-1):
 
 
 @log.entry
-@set_labels(TOTALS_LABELS + PERCS_LABELS)
+@config.load_settings(AGG_SETTINGS)
+@axes.get_axis_number
+@levels.get_level_number
 def add(
     df:            pd.DataFrame,
     *,
-    axis:           AxisAlias     = 0,
-    level:          LevelAlias    = 0,
-    totals_name:    IndexName     = None,
-    subtotals_name: IndexName     = None,
-    ndigits:        Optional[int] = None,
-    label_abs:      Optional[str] = None,
-    label_rel:      Optional[str] = None,
-    drop_totals:    bool          = False,
+    axis:           Any  = 0,
+    level:          Any  = 0,
+    totals_name:    str  = None,
+    subtotals_name: str  = None,
+    ndigits:        int  = None,
+    label_abs:      str  = None,
+    label_rel:      str  = None,
+    drop_totals:    bool = False,
     **kwargs
 ) -> pd.DataFrame:
 
@@ -50,25 +57,26 @@ def add(
     Arguments
     ---------
     df : pd.DataFrame
-    axis : AxisAlias
+    axis : {0 or 'index', 1 or 'columns', 2 or 'all'}, default 0
         Axis to use for calculating the percentages:
         0 : percentages of each row by the column totals
         1 : percentages of each column by the row totals
         2 : percentages of each field by the table total
-    level : LevelAlias
-        Level to use for calculating the percentages. Level 0 takes row/column
-        totals, otherwise use subtotals within the specified level.
-    totals_name : IndexName, default=CONFIG.aggregation['totals_name']
+    level : int, level name, default 0
+        Level number or name for the level on which to calculate the
+        percentages. Level 0 uses row/column totals, otherwise subtotals within
+        the specified level are used.
+    totals_name : str, default CONFIG.aggregation['totals_name']
         Name identifying the row/column totals.
-    subtotals_name : IndexName, default=CONFIG.aggregation['subtotals_name']
+    subtotals_name : str, default CONFIG.aggregation['subtotals_name']
         Name identifying the row/column subtotals.
-    ndigits : int, default=CONFIG.aggregation['ndigits']
+    ndigits : int, default CONFIG.aggregation['ndigits']
         Number of digits used for rounding the percentages.
-    label_abs : str, default=CONFIG.aggregation['label_abs']
+    label_abs : str, default CONFIG.aggregation['label_abs']
         Value used for labelling the absolute columns.
-    label_abs : str, default=CONFIG.aggregation['label_rel']
+    label_abs : str, default CONFIG.aggregation['label_rel']
         Value used for labelling the relative columns.
-    drop_totals : bool, default=False
+    drop_totals : bool, default False
         Drop row/column totals from output.
 
     Returns
@@ -85,7 +93,7 @@ def add(
         ndigits        = ndigits,
         drop_totals    = drop_totals,
     ).pipe(
-        add_axis_level,
+        axes.add_axis_level,
         item  = label_rel,
         axis  = 1,
         level = -1,
@@ -96,7 +104,7 @@ def add(
         axis  = axis,
         level = level,
     ).pipe(
-        add_axis_level,
+        axes.add_axis_level,
         item  = label_abs,
         axis  = 1,
         level = -1,
@@ -117,17 +125,19 @@ def add(
 
 
 @log.entry
-@copy
-@set_labels(TOTALS_LABELS + PERCS_LABELS)
+@utils.copy
+@config.load_settings(AGG_SETTINGS)
+@axes.get_axis_number
+@levels.get_level_number
 def transform(
     df: pd.DataFrame,
     *,
-    axis:           AxisAlias  = 0,
-    level:          LevelAlias = 0,
-    totals_name:    IndexName  = None,
-    subtotals_name: IndexName  = None,
-    ndigits:        int        = None,
-    drop_totals:    bool       = False,
+    axis:           Any  = 0,
+    level:          Any  = 0,
+    totals_name:    str  = None,
+    subtotals_name: str  = None,
+    ndigits:        int  = None,
+    drop_totals:    bool = False,
     **kwargs
 ) -> pd.DataFrame:
 
@@ -143,22 +153,23 @@ def transform(
     Arguments
     ---------
     df : pd.DataFrame
-    axis : AxisAlias
+    axis : {0 or 'index', 1 or 'columns', 2 or 'all'}, default 0
         Axis to use for calculating the percentages:
         0 : percentages of each row by the column totals
         1 : percentages of each column by the row totals
         2 : percentages of each field by the table total
-    level : LevelAlias
-        Level to use for calculating the percentages. Level 0 takes row/column
-        totals, otherwise use subtotals within the specified level.
-    totals_name : IndexName, default=CONFIG.aggregation['totals_name']
+    level : int, level name, default 0
+        Level number or name for the level on which to calculate the
+        percentages. Level 0 uses row/column totals, otherwise subtotals within
+        the specified level are used.
+    totals_name : str, default ONFIG.aggregation['totals_name']
         Name identifying the row/column totals.
-    subtotals_name : IndexName, default=CONFIG.aggregation['subtotals_name']
+    subtotals_name : str, default CONFIG.aggregation['subtotals_name']
         Name identifying the row/column subtotals.
-    ndigits : int, default=CONFIG.aggregation['ndigits']
+    ndigits : int, default CONFIG.aggregation['ndigits']
         Number of digits used for rounding the percentages.
         Set to -1 to not round.
-    drop_totals : bool, default=False
+    drop_totals : bool, default False
         Drop row/column totals from output.
 
     Returns
@@ -166,39 +177,32 @@ def transform(
     pd.DataFrame
     """
 
-    axis = get_axis_number(axis)
+    kwargs.update(
+        dict(
+            level=level,
+            totals_name=totals_name,
+            subtotals_name=subtotals_name,
+            ndigits=ndigits,
+            drop_totals=drop_totals,
+        )
+    )
     if axis < 2:
-        return _axis_wise(
-            df,
-            axis=axis,
-            level=level,
-            totals_name=totals_name,
-            subtotals_name=subtotals_name,
-            ndigits=ndigits,
-            drop_totals=drop_totals,
-        )
+        return _axis_wise(df, axis=axis, **kwargs)
     else:
-        return _table_wise(
-            df,
-            level=level,
-            totals_name=totals_name,
-            subtotals_name=subtotals_name,
-            ndigits=ndigits,
-            drop_totals=drop_totals,
-        )
+        return _table_wise(df, **kwargs)
 
 
-@set_labels(TOTALS_LABELS + PERCS_LABELS)
-@transpose
+@config.load_settings(AGG_SETTINGS)
+@axes.transpose
 @totals.add_totals(axis=0)
 @totals.drop_totals(axis=0)
 def _axis_wise(
     df:             pd.DataFrame,
     *,
-    level:          LevelAlias = 0,
-    totals_name:    IndexName  = None,
-    subtotals_name: IndexName  = None,
-    ndigits:        int        = None,
+    level:          int = 0,
+    totals_name:    str = None,
+    subtotals_name: str = None,
+    ndigits:        int = None,
     **kwargs
 ) -> pd.DataFrame:
 
@@ -217,16 +221,16 @@ def _axis_wise(
     return result.pipe(round_percentages, ndigits=ndigits)
 
 
-@set_labels(TOTALS_LABELS + PERCS_LABELS)
+@config.load_settings(AGG_SETTINGS)
 @totals.add_totals(axis=2)
 @totals.drop_totals(axis=2)
 def _table_wise(
     df,
     *,
-    level:          LevelAlias = 0,
-    totals_name:    IndexName  = None,
-    subtotals_name: IndexName  = None,
-    ndigits:        int        = None,
+    level:          int = 0,
+    totals_name:    str = None,
+    subtotals_name: str = None,
+    ndigits:        int = None,
     **kwargs
 ) -> pd.DataFrame:
 

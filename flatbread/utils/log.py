@@ -12,7 +12,7 @@ to_file :
 import logging
 from functools import wraps
 
-import pandas as pd
+import pandas as pd # type: ignore
 from flatbread.config import HERE
 import flatbread.utils.repper as repper
 

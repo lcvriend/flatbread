@@ -1,9 +1,8 @@
 from typing import Any
 
-import pandas as pd
+import pandas as pd # type: ignore
 
 import flatbread.axes as axes
-from flatbread.types import LevelAlias, IndexName
 from flatbread.utils import copy
 from flatbread.aggregate import totals
 
@@ -11,7 +10,7 @@ from flatbread.aggregate import totals
 @copy
 def order(
     df:         pd.DataFrame,
-    column:     IndexName,
+    column:     Any,
     categories: Any,
 ) -> pd.DataFrame:
     df[column] = axes.order_categories(df[column], categories)
@@ -21,8 +20,8 @@ def order(
 def add_level(
     df:         pd.DataFrame,
     item:       Any,
-    level_name: IndexName,
-    level:      LevelAlias,
+    level_name: Any,
+    level:      int,
 ) -> pd.DataFrame:
     "Add `level` with value `item` named `level_name` to columns."
 
@@ -38,7 +37,7 @@ def add_level(
 
 def totals(
     df:    pd.DataFrame,
-    level: LevelAlias = 0,
+    level: Any = 0,
     **kwargs
 ) -> pd.DataFrame:
     return totals.add(df, axis=1, level=level, **kwargs)

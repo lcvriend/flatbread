@@ -1,14 +1,26 @@
 from functools import wraps
+from typing import Any, Callable, TypeVar, Union, cast
 
-import pandas as pd
-
-from flatbread.types import LevelAlias, AxisAlias, IndexName
+import pandas as pd # type: ignore
 
 
-def get_level_number(
+F = TypeVar('F', bound=Callable[..., Any])
+
+
+def get_level_number(func: F) -> F:
+    @wraps(func)
+    def wrapper(df, *args, **kwargs):
+        level = kwargs.get('level') or 0
+        axis = kwargs.get('axis') or 0
+        kwargs['level'] = _get_level_number(df, axis, level)
+        return func(df, *args, **kwargs)
+    return cast(F, wrapper)
+
+
+def _get_level_number(
     df: pd.DataFrame,
     axis: int,
-    level: LevelAlias,
+    level: Union[str, int],
 ) -> int:
 
     "Return level as int from `axis` of `df` by `level`."
@@ -18,58 +30,20 @@ def get_level_number(
     else:
         index = df.index
 
-    level = get_level_from_alias(index, level)
-    validate_level(index, level)
-    level = get_absolute_level(index, level)
-    return level
-
-
-def get_level_from_alias(
-    index: pd.Index,
-    level: LevelAlias
-) -> int:
-
-    "Find level corresponding to `level` in `index`."
-
-    if level in index.names:
-        level = index.names.index(level)
-
-    # validation
     if not isinstance(level, int):
-        raise KeyError(
-            f"Level '{level}' was not found in index."
-        )
+        level = _get_level_from_name(index, level)
+    _validate_level(index, level)
+    level = _get_absolute_level(index, level)
     return level
 
 
-def get_absolute_level(
-    index: pd.MultiIndex,
-    level: int
-) -> int:
-
-    "Return `level` as absolute."
-
-    if level < 0:
-        level = index.nlevels + level
-    return level
-
-
-def validate_level(
-    index: pd.Index,
-    level: int
-) -> None:
-
-    """Validate `level`.
-
-    Raises exception if:
-    - `level` <= nlevels
-    """
-
-    if abs(level) > index.nlevels:
-        raise IndexError(
-            f"Level {level} is out of range for index."
-        )
-    return None
+def validate_index_for_within_operations(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        df, *_ = args
+        _validate_index_for_within_operations(df, kwargs['level'])
+        return func(*args, **kwargs)
+    return wrapper
 
 
 def _validate_index_for_within_operations(
@@ -100,10 +74,45 @@ def _validate_index_for_within_operations(
     return None
 
 
-def validate_index_for_within_operations(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        df, *_ = args
-        _validate_index_for_within_operations(df, kwargs['level'])
-        return func(*args, **kwargs)
-    return wrapper
+def _get_level_from_name(
+    index: pd.Index,
+    level_name: Any
+) -> int:
+
+    "Find level corresponding to `level_name` in `index`."
+
+    if not level_name in index.names:
+        raise KeyError(
+            f"Level '{level_name}' was not found in index."
+        )
+    return index.names.index(level_name)
+
+
+def _get_absolute_level(
+    index: pd.MultiIndex,
+    level: int
+) -> int:
+
+    "Return `level` as absolute."
+
+    if level < 0:
+        level = index.nlevels + level
+    return level
+
+
+def _validate_level(
+    index: pd.Index,
+    level: int
+) -> None:
+
+    """Validate `level`.
+
+    Raise exception if:
+    - `level` <= nlevels
+    """
+
+    if abs(level) > index.nlevels:
+        raise IndexError(
+            f"Level {level} is out of range for index."
+        )
+    return None

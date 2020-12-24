@@ -1,34 +1,30 @@
 from collections.abc import Iterable
 from functools import wraps
+from typing import Any
 
-import pandas as pd
-from flatbread.utils import log, copy
-from flatbread.types import AxisAlias, IndexName, LevelAlias, LevelsAlias
-from flatbread.axes import (
-    get_axis_number,
-    transpose,
-    add_category,
-    add_item_to_key,
-    replace_item_in_key,
-    key_to_list,
-)
-from flatbread.levels import (
-    get_level_number,
-    validate_index_for_within_operations,
-)
-from flatbread.aggregate import set_labels, TOTALS_LABELS
+import pandas as pd # type: ignore
+
+import flatbread.utils as utils
+import flatbread.utils.log as log
+import flatbread.config as config
+import flatbread.axes as axes
+import flatbread.levels as levels
+from flatbread.aggregate import TOTALS_SETTINGS
 
 
 @log.entry
-@copy
-@set_labels(TOTALS_LABELS)
+@utils.copy
+@config.load_settings(TOTALS_SETTINGS)
+@axes.get_axis_number
+@levels.get_level_number
 def add(
     df:             pd.DataFrame,
     *,
-    axis:           AxisAlias   = 0,
-    level:          LevelsAlias = 0,
-    totals_name:    IndexName   = None,
-    subtotals_name: IndexName   = None,
+    axis:           Any = 0,
+    level:          Any = 0,
+    totals_name:    str = None,
+    subtotals_name: str = None,
+    **kwargs
 ) -> pd.DataFrame:
 
     """Add totals to `df` on `level` of `axis`.
@@ -36,18 +32,18 @@ def add(
     Arguments
     ---------
     df : pd.DataFrame
-    axis : AxisAlias
+    axis : {0 or 'index', 1 or 'columns', 2 or 'all'}, default 0
         Axis to add totals:
         0 : add row with column totals
         1 : add column with row totals
         2 : add row and column totals
-    level : LevelsAlias
-        Level to use for calculating the totals. Level 0 adds row/column
-        totals, otherwise subtotals are added within the specified level.
-        Multiple levels may be supplied in a list.
-    totals_name : IndexName, default=CONFIG.aggregation['totals_name']
+    level : int, level name, or sequence of such, default 0
+        Level number or name for the level to use for calculating the totals.
+        Level 0 adds row/column totals, otherwise subtotals are added within
+        the specified level. Multiple levels may be supplied in a list.
+    totals_name : str, default CONFIG.aggregation['totals_name']
         Name for the row/column totals.
-    subtotals_name : IndexName, default=CONFIG.aggregation['subtotals_name']
+    subtotals_name : str, default CONFIG.aggregation['subtotals_name']
         Name for the row/column subtotals.
 
     Returns
@@ -68,21 +64,20 @@ def add(
     return df
 
 
-@set_labels(TOTALS_LABELS)
+@config.load_settings(TOTALS_SETTINGS)
 def _add(
     df:             pd.DataFrame,
     *,
-    axis:           AxisAlias  = 0,
-    level:          LevelAlias = 0,
-    totals_name:    IndexName  = None,
-    subtotals_name: IndexName  = None,
+    axis:           int = 0,
+    level:          int = 0,
+    totals_name:    str = None,
+    subtotals_name: str = None,
+    **kwargs
 ) -> pd.DataFrame:
 
-    axis = get_axis_number(axis)
-    level = get_level_number(df, axis, level)
     if level == 0:
         if axis < 2:
-            return _add_axis(
+            return _add_to_axis(
                 df,
                 axis=axis,
                 totals_name=totals_name,
@@ -102,7 +97,7 @@ def _add(
             )
     # Add within if level is not 0
     else:
-        return _add_within(
+        return _add_within_axis(
             df,
             axis=axis,
             level=level,
@@ -111,13 +106,14 @@ def _add(
         )
 
 
-@set_labels(TOTALS_LABELS)
-@transpose
-def _add_axis(
+@config.load_settings(TOTALS_SETTINGS)
+@axes.transpose
+def _add_to_axis(
     df:             pd.DataFrame,
     *,
-    totals_name:    IndexName = None,
-    subtotals_name: IndexName = None,
+    totals_name:    str = None,
+    subtotals_name: str = None,
+    **kwargs
 ) -> pd.DataFrame:
 
     is_totals_row = lambda x: totals_name in x or subtotals_name in x
@@ -127,59 +123,52 @@ def _add_axis(
     ).to_frame().T
 
     if isinstance(df.index, pd.MultiIndex):
-        key = replace_item_in_key([''] * df.index.nlevels, totals_name, level=0)
+        nlevels = df.index.nlevels
+        key = axes.replace_item_in_key([''] * nlevels, totals_name, level=0)
         totals.index = pd.MultiIndex.from_tuples([key])
         for level, item in enumerate(key):
-            df.index = add_category(df.index, item, level=level)
+            df.index = axes.add_category(df.index, item, level=level)
     else:
         totals.index.name = df.index.name
-        df.index = add_category(df.index, totals_name)
+        df.index = axes.add_category(df.index, totals_name)
     return pd.concat([df, totals])
 
 
-@set_labels(TOTALS_LABELS)
-def _add_within(
+@config.load_settings(TOTALS_SETTINGS)
+def _add_within_axis(
     df:             pd.DataFrame,
     *,
-    axis:           int       = 0,
-    level:          int       = -1,
-    totals_name:    IndexName = None,
-    subtotals_name: IndexName = None,
+    axis:           int = 0,
+    level:          int = -1,
+    totals_name:    str = None,
+    subtotals_name: str = None,
+    **kwargs
 ) -> pd.DataFrame:
 
+    kwargs.update(
+        dict(
+            level=level,
+            totals_name=totals_name,
+            subtotals_name=subtotals_name,
+        )
+    )
     if axis < 2:
-        return _add_axis_within(
-            df,
-            axis=axis,
-            level=level,
-            totals_name=totals_name,
-            subtotals_name=subtotals_name,
-        )
+        return _add_to_axis_level(df, axis=axis, **kwargs)
     else:
-        return df.pipe(
-            _add_within,
-            axis=0,
-            level=level,
-            totals_name=totals_name,
-            subtotals_name=subtotals_name,
-        ).pipe(
-            _add_within,
-            axis=1,
-            level=level,
-            totals_name=totals_name,
-            subtotals_name=subtotals_name,
-        )
+        return df.pipe(_add_within_axis, axis=0, **kwargs
+        ).pipe(_add_within_axis, axis=1, **kwargs)
 
 
-@set_labels(TOTALS_LABELS)
-@validate_index_for_within_operations
-@transpose
-def _add_axis_within(
+@config.load_settings(TOTALS_SETTINGS)
+@levels.validate_index_for_within_operations
+@axes.transpose
+def _add_to_axis_level(
     df:             pd.DataFrame,
     *,
-    level:          int       = -1,
-    totals_name:    IndexName = None,
-    subtotals_name: IndexName = None,
+    level:          int = -1,
+    totals_name:    str = None,
+    subtotals_name: str = None,
+    **kwargs
 ) -> pd.DataFrame:
 
     is_totals_row = lambda x: totals_name in x or subtotals_name in x
@@ -188,7 +177,7 @@ def _add_axis_within(
     ].groupby(level=list(range(level)), sort=False).sum()
 
     def make_key(key, item, nlevels):
-        key = key_to_list(key)
+        key = axes.key_to_list(key)
         key.append(item)
         if len(key) < nlevels:
             key = key + [''] * (nlevels - len(key))
@@ -200,9 +189,9 @@ def _add_axis_within(
 
     if isinstance(df.index, pd.MultiIndex):
         for idx_level, item in enumerate(totals.index.levels):
-            df.index = add_category(df.index, item, level=idx_level)
+            df.index = axes.add_category(df.index, item, level=idx_level)
     else:
-        df.index = add_category(df.index, subtotals_name)
+        df.index = axes.add_category(df.index, subtotals_name)
 
     output = df.append(totals)
     for idx in range(level):
@@ -224,43 +213,6 @@ def _add_axis_within(
 
 ################################################################################### DECORATORS
 ################################################################################
-
-
-@set_labels(TOTALS_LABELS)
-def _add_totals(df, axis=0, totals_name=None, subtotals_name=None, **kwargs):
-    level = kwargs.get('level') or 0
-    totals_name = totals_name if level == 0 else subtotals_name
-
-    index = df.columns if axis == 1 else df.index
-    is_total = lambda x: totals_name in x
-    has_totals = any([is_total(item) for item in index])
-
-    if not has_totals:
-        df = df.pipe(add, axis=axis, level=level)
-    return df
-
-
-@set_labels(TOTALS_LABELS)
-def _drop_totals(df, axis=0, totals_name=None, subtotals_name=None, **kwargs):
-    level = kwargs.get('level') or 0
-    totals_name = totals_name if level == 0 else subtotals_name
-
-    def exclude_totals(df, axis):
-        index = df.columns if axis == 1 else df.index
-        is_total = lambda x: totals_name in x
-        if isinstance(index, pd.MultiIndex):
-            return [not is_total(item[level]) for item in index]
-        return [not is_total(item) for item in index]
-
-    rows = exclude_totals(df, axis=0)
-    columns = exclude_totals(df, axis=1)
-
-    if axis == 0:
-        return df.loc[rows]
-    if axis == 1:
-        return df.loc[:, columns]
-
-    return df.loc[rows, columns]
 
 
 def add_totals(axis):
@@ -285,3 +237,40 @@ def drop_totals(axis):
             return result
         return wrapper
     return decorator
+
+
+@config.load_settings(TOTALS_SETTINGS)
+def _add_totals(df, axis=0, totals_name=None, subtotals_name=None, **kwargs):
+    level = kwargs.get('level') or 0
+    totals_name = totals_name if level == 0 else subtotals_name
+
+    index = df.columns if axis == 1 else df.index
+    is_total = lambda x: totals_name in x
+    has_totals = any([is_total(item) for item in index])
+
+    if not has_totals:
+        df = df.pipe(add, axis=axis, level=level)
+    return df
+
+
+@config.load_settings(TOTALS_SETTINGS)
+def _drop_totals(df, axis=0, totals_name=None, subtotals_name=None, **kwargs):
+    level = kwargs.get('level') or 0
+    totals_name = totals_name if level == 0 else subtotals_name
+
+    def exclude_totals(df, axis):
+        index = df.columns if axis == 1 else df.index
+        is_total = lambda x: totals_name in x
+        if isinstance(index, pd.MultiIndex):
+            return [not is_total(item[level]) for item in index]
+        return [not is_total(item) for item in index]
+
+    rows = exclude_totals(df, axis=0)
+    columns = exclude_totals(df, axis=1)
+
+    if axis == 0:
+        return df.loc[rows]
+    if axis == 1:
+        return df.loc[:, columns]
+
+    return df.loc[rows, columns]

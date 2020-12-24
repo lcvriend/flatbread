@@ -6,9 +6,10 @@ This module contains the TrendLine class for generating trendline graphs.
 
 import re
 from datetime import datetime
+from typing import Any, Dict, List, Tuple
 
-import matplotlib.pyplot as plt
-import pandas as pd
+import matplotlib.pyplot as plt # type: ignore
+import pandas as pd # type: ignore
 from flatbread.config import CONFIG
 from flatbread.build.rows import timeseries_offset
 
@@ -115,10 +116,10 @@ class TrendLine(object):
         Create a timeseries from a df using `flatbread.axes.timeseries_offset`
     """
 
-    general = {}
-    comparison = {}
-    size = {}
-    colors = []
+    general: Dict[str, Any] = {}
+    comparison: Dict[str, Any] = {}
+    size: Dict[str, Tuple[int, int]] = {}
+    colors: List[str] = []
 
 
     def __init__(

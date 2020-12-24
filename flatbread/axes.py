@@ -1,11 +1,13 @@
 from decimal import Decimal
 from functools import wraps
-from typing import Any, List, Tuple, Sequence
+from typing import Any, List, Callable, TypeVar, Tuple, Sequence, cast
 
-import pandas as pd
+import pandas as pd # type: ignore
 
-from flatbread.types import AxisAlias, LevelAlias
-from flatbread.utils import copy
+import flatbread.utils as utils
+
+
+F = TypeVar('F', bound=Callable[..., Any])
 
 
 AXES_ALIAS = {
@@ -22,7 +24,23 @@ AXES_ALIAS = {
 }
 
 
+def get_axis_number(func: F) -> F:
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        axis = kwargs.get('axis') or 0
+        kwargs['axis'] = _get_axis_number(axis)
+        return func(*args, **kwargs)
+    return cast(F, wrapper)
+
+
+def _get_axis_number(axis: Any) -> int:
+    assert (axis in AXES_ALIAS), f"Axis should be one of {AXES_ALIAS.keys()}"
+    return AXES_ALIAS[axis]
+
+
 def transpose(func):
+    """Transposes df if `axis` == 1, then operate on it and transpose it back.
+    Consumes the `axis` kwarg."""
     @wraps(func)
     def wrapper(df, *args, **kwargs):
         axis = kwargs.pop('axis', 0)
@@ -34,18 +52,13 @@ def transpose(func):
     return wrapper
 
 
-def get_axis_number(axis: AxisAlias) -> int:
-    assert (axis in AXES_ALIAS), f"Axis should be one of {AXES_ALIAS.keys()}"
-    return AXES_ALIAS[axis]
-
-
-@copy
+@utils.copy
 @transpose
 def add_axis_level(
     df:         pd.DataFrame,
     item:       Any,
-    level:      LevelAlias = -1,
-    level_name: Any        = None,
+    level:      int = -1,
+    level_name: Any = None,
 ) -> pd.DataFrame:
     "Add `level` with `level_name` to axis in `df`."
 
@@ -58,8 +71,8 @@ def add_axis_level(
 def add_item_to_key(
     key:   Any,
     item:  Any,
-    level: LevelAlias = 0,
-) -> Tuple[Any]:
+    level: int = 0,
+) -> Tuple[Any, ...]:
     "Insert `item` into `key` at a specified `level`."
 
     key = key_to_list(key)
@@ -73,8 +86,8 @@ def add_item_to_key(
 def replace_item_in_key(
     key:   Any,
     item:  Any,
-    level: LevelAlias = 0,
-) -> Tuple[Any]:
+    level: int = 0,
+) -> Tuple[Any, ...]:
     "Replace item in `key` at `level` with `item`."
 
     key = key_to_list(key)
@@ -102,8 +115,8 @@ def order_categories(
 
 def add_category(
     index:    pd.Index,
-    category: str,
-    level:    LevelAlias = 0
+    category: Any,
+    level:    int = 0
 ) -> pd.Index:
     "Add `category` to categorical `index` at specified `level`."
 

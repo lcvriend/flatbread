@@ -1,6 +1,11 @@
 import json
 import locale
+from functools import wraps
+from typing import Any, Dict, List, Callable, TypeVar
 from pathlib import Path
+
+
+F = TypeVar('F', bound=Callable[..., Any])
 
 
 HERE = Path(__file__).resolve().parent
@@ -38,6 +43,9 @@ class Config:
     def __init__(self, settings):
         self.__dict__ = settings
         self.set_locale()
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
 
     def save(self):
         "Save settings permanently."
@@ -87,3 +95,35 @@ class Config:
 
 
 CONFIG = Config.from_json()
+
+
+def get_value(
+    section: str,
+    key: str,
+    value: Any = None,
+) -> Any:
+    "If `value` is None, load value from CONFIG."
+    if value is None:
+        return CONFIG[section][key]
+    return value
+
+
+def load_settings(
+    settings_to_load: Dict[str, List[str]]
+) -> Callable[[F], F]:
+    """Decorate function with a settings loader.
+    If argument in is None, then value
+    will be loaded from CONFIG.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            settings = {
+                key:get_value(section, key, kwargs.get(key))
+                for section, keys in settings_to_load.items()
+                for key in keys
+            }
+            kwargs.update(settings)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
