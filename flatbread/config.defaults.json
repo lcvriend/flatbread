@@ -12,10 +12,6 @@
         "tables": "output/tables",
         "graphs": "output/graphs"
     },
-    "repper": {
-        "max_length_col1": 32,
-        "max_length_col2": 72
-    },
     "aggregation": {
         "totals_name": "Total",
         "subtotals_name": "Subtotal",
