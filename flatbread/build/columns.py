@@ -2,12 +2,13 @@ from typing import Any
 
 import pandas as pd # type: ignore
 
+import flatbread.utils as utils
 import flatbread.axes as axes
-from flatbread.utils import copy
-from flatbread.aggregate import totals
+import flatbread.aggregate.totals as totals
+import flatbread.aggregate.percentages as percs
 
 
-@copy
+@utils.copy
 def order(
     df:         pd.DataFrame,
     column:     Any,
@@ -41,3 +42,14 @@ def totals(
     **kwargs
 ) -> pd.DataFrame:
     return totals.add(df, axis=1, level=level, **kwargs)
+
+
+def percs(
+    df:    pd.DataFrame,
+    level: Any = 0,
+    add = False,
+    **kwargs
+) -> pd.DataFrame:
+    if add:
+        return percs.add(df, axis=1, level=level, **kwargs)
+    return percs.transform(df, axis=1, level=level, **kwargs)
