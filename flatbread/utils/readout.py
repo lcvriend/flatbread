@@ -77,6 +77,7 @@ def _read_out(item, func=None, table_name=None):
     func_name = add_brackets(func.__name__) if func is not None else ''
     module_name = add_brackets(func.__module__) if func is not None else ''
     table_name = add_brackets(table_name) if table_name is not None else ''
-    readout = ''.join([module_name, func_name, table_name, item])
+    meta_data = ''.join([module_name, func_name, table_name])
+    readout = ' '.join([meta_data, item])
     print(readout)
     return None
