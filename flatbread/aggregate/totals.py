@@ -15,8 +15,6 @@ from flatbread.aggregate import TOTALS_SETTINGS
 @log.entry
 @utils.copy
 @config.load_settings(TOTALS_SETTINGS)
-@axes.get_axis_number
-@levels.get_level_number
 def add(
     df:             pd.DataFrame,
     *,
@@ -64,7 +62,8 @@ def add(
     return df
 
 
-@config.load_settings(TOTALS_SETTINGS)
+@axes.get_axis_number
+@levels.get_level_number
 def _add(
     df:             pd.DataFrame,
     *,
@@ -106,7 +105,6 @@ def _add(
         )
 
 
-@config.load_settings(TOTALS_SETTINGS)
 @axes.transpose
 def _add_to_axis(
     df:             pd.DataFrame,
@@ -134,7 +132,7 @@ def _add_to_axis(
     return pd.concat([df, totals])
 
 
-@config.load_settings(TOTALS_SETTINGS)
+@levels.validate_index_for_within_operations
 def _add_within_axis(
     df:             pd.DataFrame,
     *,
@@ -159,8 +157,6 @@ def _add_within_axis(
         ).pipe(_add_within_axis, axis=1, **kwargs)
 
 
-@config.load_settings(TOTALS_SETTINGS)
-@levels.validate_index_for_within_operations
 @axes.transpose
 def _add_to_axis_level(
     df:             pd.DataFrame,
