@@ -1,9 +1,10 @@
 """Sanity Module
 =============
 
-The sanity module provides decorators for checking the pipeline. The decorator
-tests if the output DataFrame meets a specified requirement. If the check fails
-an assertion error is raised. The following decorators are provided:
+The sanity module provides decorators for checking if all goes well within the
+pipeline. The decorator tests if the output DataFrame meets a specified
+requirement. If the check fails an assertion error is raised. The following
+decorators are provided:
 
 unittest :
     Perform a unittest from the TestCase class on a column of the data.
@@ -17,17 +18,17 @@ from unittest import TestCase
 from functools import wraps
 
 
-def unittest(column, operation, test, comparison):
-    """Add unittest as sanity check to function.
-    If check fails AssertionException is raised.
-    Aggregation `operation` will be performed on `column`.
-    Result will be compared to `comparison` using `test`.
+def unittest(column, aggregation, test, comparison):
+    """Decorator adds unittest as a sanity check to a function. The check
+    consists of an operation (`aggregation`) which aggregates the values in
+    `column` into a scalar. This result will be compared to the `comparison`
+    scalar using `test`. If the check fails an AssertionException is raised.
 
     Parameters
     ==========
     column : str
         Column name.
-    operation : str, func
+    aggregation : str, func
         Aggregation operation to perform on column.
         Should return scalar for comparison.
     test : str
@@ -45,17 +46,18 @@ def unittest(column, operation, test, comparison):
             result = func(*args, **kwargs)
             value = result[column].agg(operation)
             method = test.title().replace(' ', '').replace('_', '')
+            message = f"[{func.__module__}][{func.__name__}]"
             tester = getattr(TestCase(), f"assert{method}")
-            tester(value, comparison)
+            tester(value, comparison, msg=message)
             return result
         return wrapper
     return decorator
 
 
 def length(operator):
-    """Add a length test as sanity check to function.
-    If check fails AssertionException is raised.
-    The input will be tested against output using `operator`.
+    """Decorator adds a length test as sanity check to a function. If the check
+    fails an AssertionException is raised. The input length will be tested
+    against the output length using `operator`.
 
     Parameters
     ==========
@@ -88,7 +90,8 @@ def length(operator):
 
             compare = getattr(len_in, operators[operator])
             assert compare(len_out), (
-                f"False: input {len_in} {operator} output {len_out}"
+                f"input {len_in} {operator} output {len_out} is False : "
+                f"[{func.__module__}][{func.__name__}]"
             )
 
             return result
