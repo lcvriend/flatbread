@@ -1,26 +1,17 @@
 """Log module
 ==========
 
-The log module provides decorators for logging:
+The log module provides a decorator for logging the build process:
 
 entry :
-    Create a build log to be stored in the DataFrame attrs.
-to_file :
-    Create a file log of the build process.
+    Create a log to be stored in the DataFrame attrs under 'flatbread_log'.
 """
 
-import logging
 from functools import wraps
 
 import pandas as pd # type: ignore
 from flatbread.config import HERE
 import flatbread.utils.repper as repper
-
-
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler(HERE / "flatbread.log", "w")
-fh.setLevel(logging.DEBUG)
-logger.addHandler(fh)
 
 
 def create_log_entry(func, result, *args, **kwargs):
@@ -38,11 +29,15 @@ def create_log_entry(func, result, *args, **kwargs):
 
 
 def entry(func):
+    """Decorator for logging the build process and storing it in the attrs of
+    the df under 'flatbread_log'. The first item in the log contains the
+    original df."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
         df, *args = args
-        log = df.attrs.get("log")
+        log = df.attrs.get("flatbread_log")
         log_entry = create_log_entry(func, result, *args, **kwargs)
         if log is None:
             log = [
@@ -54,21 +49,6 @@ def entry(func):
                 )
             ]
         log.append(log_entry)
-        result.attrs["log"] = log
-        return result
-    return wrapper
-
-
-def to_file(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        shape = result.shape
-        repr_func = repper.func(func)
-        repr_args = repper.log_args(func, *args, **kwargs)
-        repr_rows = str(shape[0]) + " rows"
-        repr_cols = str(shape[1]) + " cols"
-        info = f"{repr_func}{repr_args}{repr_rows:>12}, {repr_cols}"
-        logger.debug(info)
+        result.attrs["flatbread_log"] = log
         return result
     return wrapper
