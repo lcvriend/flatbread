@@ -9,7 +9,6 @@ import flatbread.utils as utils
 
 F = TypeVar('F', bound=Callable[..., Any])
 
-
 AXES_ALIAS = {
     0: 0,
     1: 1,
@@ -24,6 +23,20 @@ AXES_ALIAS = {
 }
 
 
+def transpose(func):
+    """Decorator that transposes df if `axis` == 1, then operates on it and transposes it back. Consumes the `axis` kwarg."""
+
+    @wraps(func)
+    def wrapper(df, *args, **kwargs):
+        axis = kwargs.pop('axis', 0)
+        df = df.T if axis == 1 else df
+        result = func(df, *args, **kwargs)
+        return result.T if axis == 1 else result
+    if func.__doc__ is not None:
+        wrapper.__doc__ = f"Operate on `axis`. {func.__doc__}"
+    return wrapper
+
+
 def get_axis_number(func: F) -> F:
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -36,20 +49,6 @@ def get_axis_number(func: F) -> F:
 def _get_axis_number(axis: Any) -> int:
     assert (axis in AXES_ALIAS), f"Axis should be one of {AXES_ALIAS.keys()}"
     return AXES_ALIAS[axis]
-
-
-def transpose(func):
-    """Transposes df if `axis` == 1, then operate on it and transpose it back.
-    Consumes the `axis` kwarg."""
-    @wraps(func)
-    def wrapper(df, *args, **kwargs):
-        axis = kwargs.pop('axis', 0)
-        df = df.T if axis == 1 else df
-        result = func(df, *args, **kwargs)
-        return result.T if axis == 1 else result
-    if func.__doc__ is not None:
-        wrapper.__doc__ = f"Operate on `axis`. {func.__doc__}"
-    return wrapper
 
 
 @utils.copy
