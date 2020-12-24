@@ -10,8 +10,6 @@ entry :
 from functools import wraps
 
 import pandas as pd # type: ignore
-from flatbread.config import HERE
-import flatbread.utils.repper as repper
 
 
 def create_log_entry(func, result, *args, **kwargs):
