@@ -8,40 +8,45 @@ class TestGetLevels_MultiIndex(unittest.TestCase):
         self.index = pd._testing.makeMultiIndex(names=['A', 'B'])
 
     def test_get_level_from_negative_index(self):
-        left = levels.get_absolute_level(self.index, level=-1)
+        left = levels._get_absolute_level(self.index, level=-1)
         right = 1
         self.assertTrue(left == right)
 
     def test_get_level_from_positive_index(self):
-        left = levels.get_absolute_level(self.index, level=1)
+        left = levels._get_absolute_level(self.index, level=1)
         right = 1
         self.assertTrue(left == right)
 
     def test_get_level_from_level_name(self):
-        left = levels.get_level_from_alias(self.index, level='B')
+        left = levels._get_level_from_name(self.index, level_name='B')
         right = 1
         self.assertTrue(left == right)
 
     def test_get_level_from_non_existent_level_name(self):
+        df = pd.DataFrame(index=self.index)
         self.assertRaises(
             KeyError,
-            levels.get_level_from_alias,
-            self.index,
-            level='squid')
+            levels._get_level_number,
+            df,
+            axis=0,
+            level='squid'
+        )
 
     def test_validation_of_negative_index_out_of_range(self):
         self.assertRaises(
             IndexError,
-            levels.validate_level,
+            levels._validate_level,
             self.index,
-            level=-3)
+            level=-3
+        )
 
     def test_validation_of_positive_index_out_of_range(self):
         self.assertRaises(
             IndexError,
-            levels.validate_level,
+            levels._validate_level,
             self.index,
-            level=3)
+            level=3
+        )
 
 
 class TestValidateForOperationWithin_Simple(unittest.TestCase):

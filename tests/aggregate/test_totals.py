@@ -3,12 +3,13 @@ from random import randint
 
 import pandas as pd
 
-import flatbread
+import flatbread.config as config
+import flatbread.aggregate.totals as totals
 
 
 class TestTotalsAdd_DataFrameSimple(unittest.TestCase):
     def setUp(self):
-        self.totals_name = flatbread.agg.get_value('totals_name')
+        self.totals_name = config.get_value('aggregation', 'totals_name')
         self.df = pd._testing.makeCustomDataframe(
             nrows=5,
             ncols=4,
@@ -16,44 +17,47 @@ class TestTotalsAdd_DataFrameSimple(unittest.TestCase):
         )
 
     def test_add_column_total_to_rows(self):
-        s = flatbread.totals.add(self.df, axis=0).loc[self.totals_name]
+        s = totals.add(self.df, axis=0).loc[self.totals_name]
         self.assertTrue(s.equals(self.df.sum()))
 
     def test_add_row_total_to_cols(self):
-        s = flatbread.totals.add(self.df, axis=1).loc[:, self.totals_name]
+        s = totals.add(self.df, axis=1).loc[:, self.totals_name]
+        self.assertTrue(s.equals(self.df.sum(axis=1)))
+
+    def test_add_by_axis_name(self):
+        s = totals.add(self.df, axis='columns').loc[:, self.totals_name]
         self.assertTrue(s.equals(self.df.sum(axis=1)))
 
     def test_add_both(self):
-        v = flatbread.totals.add(self.df, axis=2).loc[
-            self.totals_name, self.totals_name
-        ]
-        self.assertTrue(v == self.df.sum().sum())
+        rows, cols = self.totals_name, self.totals_name
+        val = totals.add(self.df, axis=2).loc[rows, cols]
+        self.assertTrue(val == self.df.sum().sum())
 
     def test_preserve_axis_names(self):
-        r1 = flatbread.totals.add(self.df)
-        r2 = flatbread.totals.add(self.df, axis=1)
+        r1 = totals.add(self.df)
+        r2 = totals.add(self.df, axis=1)
         self.assertEqual(self.df.index.names, r1.index.names)
         self.assertEqual(self.df.index.names, r2.index.names)
 
 
 class TestTotalsAdd_DataFrameCategorical(unittest.TestCase):
     def setUp(self):
-        self.totals_name = flatbread.agg.get_value('totals_name')
+        self.totals_name = config.get_value('aggregation', 'totals_name')
         df = pd._testing.makeDataFrame().head(5)
         df.columns = pd.Categorical(df.columns)
         df.index = pd.Categorical(df.index)
         self.df = df
 
     def test_add_column_total_to_rows(self):
-        s = flatbread.totals.add(self.df, axis=0).loc[self.totals_name]
+        s = totals.add(self.df, axis=0).loc[self.totals_name]
         self.assertTrue(s.equals(self.df.sum()))
 
     def test_add_row_total_to_cols(self):
-        s = flatbread.totals.add(self.df, axis=1).loc[:, self.totals_name]
+        s = totals.add(self.df, axis=1).loc[:, self.totals_name]
         self.assertTrue(s.equals(self.df.sum(axis=1)))
 
     def test_add_both(self):
-        v = flatbread.totals.add(self.df, axis=2).loc[
+        v = totals.add(self.df, axis=2).loc[
             self.totals_name, self.totals_name
         ]
         self.assertTrue(v == self.df.sum().sum())
@@ -72,21 +76,21 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
         )
 
     def test_add_column_total_to_rows(self):
-        s = flatbread.totals.add(self.df, axis=0).iloc[-1]
+        s = totals.add(self.df, axis=0).iloc[-1]
         self.assertTrue(s.equals(self.df.sum()))
 
     def test_add_row_total_to_cols(self):
-        s = flatbread.totals.add(self.df, axis=1).iloc[:, -1]
+        s = totals.add(self.df, axis=1).iloc[:, -1]
         self.assertTrue(s.equals(self.df.sum(axis=1)))
 
     def test_add_both(self):
-        v = flatbread.totals.add(self.df, axis=2).iloc[-1, -1]
+        v = totals.add(self.df, axis=2).iloc[-1, -1]
         self.assertTrue(v == self.df.sum().sum())
 
     def test_add_rows_within(self):
         left = (
-            flatbread.totals.add(self.df, level=-1)
-            .xs(flatbread.agg.get_value('subtotals_name'), level=-1)
+            totals.add(self.df, level=-1)
+            .xs(config.get_value('aggregation', 'subtotals_name'), level=-1)
             .values
         )
         right = self.df.groupby(level=-2).sum().values
@@ -94,9 +98,21 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
         self.assertTrue(comparison)
 
     def test_add_cols_within(self):
+        subtotals_name = config.get_value('aggregation', 'subtotals_name')
         left = (
-            flatbread.totals.add(self.df, axis=1, level=1)
-            .xs(flatbread.agg.get_value('subtotals_name'), axis=1, level=1)
+            totals.add(self.df, axis=1, level=1)
+            .xs(subtotals_name, axis=1, level=1)
+            .values
+        )
+        right = self.df.groupby(level=0, axis=1).sum().values
+        comparison = (left == right).all()
+        self.assertTrue(comparison)
+
+    def test_add_by_level_name(self):
+        subtotals_name = config.get_value('aggregation', 'subtotals_name')
+        left = (
+            totals.add(self.df, axis=1, level='C1')
+            .xs(subtotals_name, axis=1, level=1)
             .values
         )
         right = self.df.groupby(level=0, axis=1).sum().values
@@ -106,21 +122,21 @@ class TestTotalsAdd_DataFrameMultiIndex(unittest.TestCase):
     def test_commutative_property(self):
         left = (
             self.df
-            .pipe(flatbread.totals.add)
-            .pipe(flatbread.totals.add, level=1)
+            .pipe(totals.add)
+            .pipe(totals.add, level=1)
         )
         right = (
             self.df
-            .pipe(flatbread.totals.add, level=1)
-            .pipe(flatbread.totals.add)
+            .pipe(totals.add, level=1)
+            .pipe(totals.add)
         )
         self.assertTrue(left.equals(right))
 
     def test_preserve_axis_names(self):
-        r1 = flatbread.totals.add(self.df)
-        r2 = flatbread.totals.add(self.df, axis=1)
-        r3 = flatbread.totals.add(self.df, level=1)
-        r4 = flatbread.totals.add(self.df, axis=1, level=1)
+        r1 = totals.add(self.df)
+        r2 = totals.add(self.df, axis=1)
+        r3 = totals.add(self.df, level=1)
+        r4 = totals.add(self.df, axis=1, level=1)
         self.assertEqual(self.df.index.names, r1.index.names)
         self.assertEqual(self.df.index.names, r2.index.names)
         self.assertEqual(self.df.index.names, r3.index.names)

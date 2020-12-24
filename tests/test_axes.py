@@ -7,7 +7,7 @@ import flatbread.axes as axes
 
 class TestGetAxisNumber_Validation(unittest.TestCase):
     def test_non_existant(self):
-        self.assertRaises(AssertionError, axes.get_axis_number, 'squid')
+        self.assertRaises(AssertionError, axes._get_axis_number, 'squid')
 
 
 class TestAddCategory_CategoricalIndexSimple(unittest.TestCase):
