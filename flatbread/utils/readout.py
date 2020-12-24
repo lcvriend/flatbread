@@ -1,14 +1,14 @@
 """Readout module
 ==============
 
-The readout module contains decorators for for adding readouts (print
-statements) to functions. They can be used to give direct visual feedback to the
-user during the build process. The following decorators are provided:
+The readout module contains decorators for adding readouts (print statements)
+to functions. They can be used to give direct visual feedback to the user
+during the build process. The following decorators are provided:
 
-printout :
-    Add a simple message to be printed before/after processing.
+message :
+    Add a static message to be printed before/after processing.
 column :
-    Calculate an aggregate from a specified column in the resuting DatFrame and
+    Calculate an aggregate from a specified column in the resuting DataFrame and
     print it.
 shape :
     Print the resulting shape of the DataFrame.
@@ -20,48 +20,45 @@ from functools import wraps
 import time
 
 
-def printout(msg, when='before'):
+def message(msg, when='before', print_func_name=True, table_name=None):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             if when == 'before':
-                print(msg)
+                _read_out(msg, func if print_func_name else None, table_name)
             result = func(*args, **kwargs)
             if when == 'after':
-                print(msg)
+                _read_out(msg, func if print_func_name else None, table_name)
             return result
         return wrapper
     return decorator
 
 
-def column(column, agg='max', table=''):
+def column(column, agg='max', print_func_name=True, table_name=None):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
             value = result[column].agg(agg)
-            items = [column, str(value)]
-            readout = ' '.join(items)
-            print(readout)
+            _read_out(str(value), func if print_func_name else None, table_name)
             return result
         return wrapper
     return decorator
 
 
-def shape(table=''):
+def shape(print_func_name=True, table_name=None):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
-            items = [table, str(result.shape)]
-            readout = ' '.join(items)
-            print(readout)
+            shape = str(result.shape)
+            _read_out(shape, func if print_func_name else None, table_name)
             return result
         return wrapper
     return decorator
 
 
-def timer(table=''):
+def timer(print_func_name=True, table_name=None):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -69,9 +66,17 @@ def timer(table=''):
             result = func(*args, **kwargs)
             end = time.time()
             elapsed = str(end - start)
-            items = [table, func.__name__, elapsed]
-            readout = ' '.join(items)
-            print(readout)
+            _read_out(elapsed, func if print_func_name else None, table_name)
             return result
         return wrapper
     return decorator
+
+
+def _read_out(item, func=None, table_name=None):
+    add_brackets = lambda x: f"[{x}]"
+    func_name = add_brackets(func.__name__) if func is not None else ''
+    module_name = add_brackets(func.__module__) if func is not None else ''
+    table_name = add_brackets(table_name) if table_name is not None else ''
+    readout = ''.join([module_name, func_name, table_name, item])
+    print(readout)
+    return None
