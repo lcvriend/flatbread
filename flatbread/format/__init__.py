@@ -1,12 +1,9 @@
-from flatbread.config import CONFIG
+from flatbread.config import load_settings
 
 
-def set_value(key, value=None):
-    if value is None:
-        return CONFIG.format[key]
-    return value
+FORMAT_SETTINGS = {'format': ['na_rep']}
 
 
+@load_settings(FORMAT_SETTINGS)
 def format(df, na_rep=None):
-    na_rep = set_value('na_rep', na_rep)
     return df.style.format(lambda x: f'{x:n}', na_rep=na_rep)
