@@ -1,6 +1,7 @@
 from typing import Any
 
 import pandas as pd # type: ignore
+from pandas._libs import lib
 
 import flatbread.utils as utils
 import flatbread.axes as axes
@@ -53,3 +54,27 @@ def percs(
     if add:
         return percs.add(df, axis=1, level=level, **kwargs)
     return percs.transform(df, axis=1, level=level, **kwargs)
+
+
+def add_category(
+    s:    pd.Series,
+    category: Any,
+) -> pd.Index:
+    "Add `category` to categorical series `s`."
+
+    def add_cat(s, cats):
+        if isinstance(s.dtype, pd.CategoricalDtype):
+            cats = [item for item in cats if item not in s.cat.categories]
+            s = s.cat.add_categories(cats)
+        return s
+
+    if lib.is_scalar(category):
+        category = [category]
+
+    # if isinstance(index, pd.MultiIndex):
+    #     index = index.set_levels(
+    #         add_cat(index.levels[level], category),
+    #         level=level)
+    # else:
+    #     index = add_cat(index, category)
+    return add_cat(s, category)
