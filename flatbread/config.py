@@ -1,7 +1,7 @@
 import json
 import locale
 from functools import wraps
-from typing import Any, Dict, List, Callable, TypeVar
+from typing import Any, Dict, List, Callable, TypeVar, Union
 from pathlib import Path
 
 
@@ -109,7 +109,7 @@ def get_value(
 
 
 def load_settings(
-    settings_to_load: Dict[str, List[str]]
+    settings_to_load: Union[str, Dict[str, List[str]]]
 ) -> Callable[[F], F]:
     """Decorate function with a settings loader.
     If argument in is None, then value
@@ -118,11 +118,14 @@ def load_settings(
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            settings = {
-                key:get_value(section, key, kwargs.get(key))
-                for section, keys in settings_to_load.items()
-                for key in keys
-            }
+            if isinstance(settings_to_load, str):
+                settings = CONFIG[settings_to_load]
+            else:
+                settings = {
+                    key:get_value(section, key, kwargs.get(key))
+                    for section, keys in settings_to_load.items()
+                    for key in keys
+                }
             kwargs.update(settings)
             return func(*args, **kwargs)
         return wrapper
