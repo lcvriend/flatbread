@@ -46,16 +46,16 @@ def add(
 
     Returns
     -------
-    pd.DataFrame
+    pd.DataFrames
     """
 
     if isinstance(level, (int, str)):
         level = [level]
-    for level_ in level:
+    for i in level:
         df = _add(
             df,
             axis=axis,
-            level=level_,
+            level=i,
             totals_name=totals_name,
             subtotals_name=subtotals_name,
         )
@@ -115,10 +115,8 @@ def _add_to_axis(
 ) -> pd.DataFrame:
 
     is_totals_row = lambda x: totals_name in x or subtotals_name in x
-    totals = pd.Series(
-        df.loc[[not is_totals_row(item) for item in df.index]].sum(),
-        name=totals_name
-    ).to_frame().T
+    no_totals = [not is_totals_row(item) for item in df.index]
+    totals = pd.Series(df.loc[no_totals].sum(), name=totals_name).to_frame().T
 
     if isinstance(df.index, pd.MultiIndex):
         nlevels = df.index.nlevels
@@ -132,7 +130,7 @@ def _add_to_axis(
     return pd.concat([df, totals])
 
 
-@levels.validate_index_for_within_operations
+# @levels.validate_index_for_within_operations
 def _add_within_axis(
     df:             pd.DataFrame,
     *,
@@ -153,6 +151,9 @@ def _add_within_axis(
     if axis < 2:
         return _add_to_axis_level(df, axis=axis, **kwargs)
     else:
+        assert df.index.nlevels > level, f"index has no level {level}"
+        assert df.columns.nlevels > level, f"columns have no level {level}"
+
         return df.pipe(_add_within_axis, axis=0, **kwargs
         ).pipe(_add_within_axis, axis=1, **kwargs)
 
@@ -190,9 +191,11 @@ def _add_to_axis_level(
         df.index = axes.add_category(df.index, subtotals_name)
 
     output = df.append(totals)
-    for idx in range(level):
-        index = df.index.levels[idx]
-        output = output.reindex(index, level=idx)
+
+    for i in range(level):
+        # get the labels in order
+        labels = list(dict.fromkeys(df.index.get_level_values(i)))
+        output = output.reindex(labels, level=i)
     return output
 
 
