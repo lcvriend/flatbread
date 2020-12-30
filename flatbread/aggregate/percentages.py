@@ -98,7 +98,6 @@ def add(
         axis  = 1,
         level = -1,
     )
-
     df = df.pipe(
         totals._add_totals,
         axis  = axis,
@@ -109,7 +108,6 @@ def add(
         axis  = 1,
         level = -1,
     )
-
     if drop_totals:
         df = df.pipe(
             totals._drop_totals,
@@ -179,11 +177,11 @@ def transform(
 
     kwargs.update(
         dict(
-            level=level,
-            totals_name=totals_name,
-            subtotals_name=subtotals_name,
-            ndigits=ndigits,
-            drop_totals=drop_totals,
+            level          = level,
+            totals_name    = totals_name,
+            subtotals_name = subtotals_name,
+            ndigits        = ndigits,
+            drop_totals    = drop_totals,
         )
     )
     if axis < 2:
@@ -228,22 +226,23 @@ def _table_wise(
     df,
     *,
     level:          int = 0,
-    totals_name:    str = None,
     subtotals_name: str = None,
     ndigits:        int = None,
     **kwargs
 ) -> pd.DataFrame:
 
-    if level > 0:
-        totals_name = subtotals_name
-    if isinstance(df.index, pd.MultiIndex):
-        totals = (
-            df.xs(totals_name, level=level, drop_level=False)
-            .xs(totals_name, axis=1, level=level, drop_level=False)
-            .reindex_like(df, method='bfill')
-        )
+    if level == 0:
+        totals = df.iloc[-1, -1]
+        if df.index.nlevels > 1 or df.columns.nlevels > 1:
+            frame = pd.DataFrame().reindex_like(df)
+            frame.iloc[-1, -1] = totals
+            totals = frame.bfill().bfill(axis=1)
     else:
-        totals = df.loc[totals_name, totals_name]
+        totals = (
+            df.xs(subtotals_name, level=level, drop_level=False)
+            .xs(subtotals_name, axis=1, level=level, drop_level=False)
+            .reindex_like(df).bfill().bfill(axis=1)
+        )
 
     result = df.div(totals).multiply(100)
     return result.pipe(round_percentages, ndigits=ndigits)
