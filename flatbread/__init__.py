@@ -4,6 +4,7 @@
 The Flatbread Library provides a collection of modules for presenting data.
 """
 
+import flatbread.pivot
 import flatbread.aggregate as aggregate
 import flatbread.aggregate as agg
 import flatbread.aggregate.totals as totals
@@ -15,7 +16,8 @@ import flatbread.build.columns as cols
 import flatbread.build.rows as rows
 import flatbread.build.rows as index
 import flatbread.build.rows as idx
-from flatbread.format import format
+import flatbread.build.test as test
+import flatbread.format as format
 from flatbread.config import CONFIG
 from flatbread.plot.trendline import TrendLine
 from flatbread.utils import sanity, readout, log

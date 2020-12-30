@@ -6,6 +6,19 @@
         "locale": null,
         "na_rep": ""
     },
+    "style": {
+        "table_border_top":    [["border-top", "1px solid lightgray"]],
+        "table_border_bottom": [["border-bottom", "2px double lightgray"]],
+        "row_header_border":   [["border-right", "1px solid lightgray"]],
+        "row_border_levels":   [["border-top", "1px solid lightgray"]],
+        "row_border_subtotal": [["border-top", "1px dotted lightgray"]],
+        "col_border_levels":   [["border-left", "1px solid lightgray"]],
+        "col_border_subtotal": [["border-right", "1px dotted lightgray"]],
+        "style_data":          [["text-align", "right"]],
+        "style_row_header":    [["text-align", "left"], ["font-weight", "normal"]],
+        "style_col_header":    [["text-align", "center"], ["font-weight", "normal"]],
+        "style_subtotal":      [["font-style", "italic"]]
+    },
     "paths": {
         "output": "output",
         "data": "output/data",
@@ -17,6 +30,8 @@
         "subtotals_name": "Subtotal",
         "ndigits": 1,
         "label_abs": "abs",
-        "label_rel": "%"
+        "label_rel": "%",
+        "na_rep": "-",
+        "na_position": "last"
     }
 }
