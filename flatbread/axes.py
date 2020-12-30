@@ -4,7 +4,9 @@ from typing import Any, List, Callable, TypeVar, Tuple, Sequence, cast
 
 import pandas as pd # type: ignore
 
+import flatbread.config as config
 import flatbread.utils as utils
+from flatbread.aggregate import AGG_SETTINGS
 
 
 F = TypeVar('F', bound=Callable[..., Any])
@@ -121,7 +123,7 @@ def add_category(
 
     def add_cat(index, cats):
         if isinstance(index, pd.CategoricalIndex):
-            cats = [item for item in cats if item not in list(index.categories)]
+            cats = [item for item in cats if item not in index.categories]
             index = index.add_categories(cats)
         return index
 
@@ -135,3 +137,70 @@ def add_category(
     else:
         index = add_cat(index, category)
     return index
+
+
+@config.load_settings(AGG_SETTINGS)
+@transpose
+def reindex_na(
+    df,
+    na_rep: Any = None,
+    na_position: str = None,
+    **kwargs
+):
+
+    for i in range(df.index.nlevels):
+        ordered_labels = _get_ordered_labels(df.index, i, na_rep, na_position)
+        kwds = {}
+        if isinstance(df.index, pd.MultiIndex):
+            kwds = dict(level=i)
+        df = df.reindex(ordered_labels, **kwds)
+    return df
+
+
+def _get_ordered_labels(
+    axis,
+    level,
+    na_rep,
+    na_position,
+):
+    def move_na(labels):
+        if na_rep in labels:
+            idx_of_na_rep = labels.index(na_rep)
+            labels.pop(idx_of_na_rep)
+            if na_position == 'first':
+                labels.insert(0, na_rep)
+            else:
+                labels.append(na_rep)
+        return labels
+
+    if isinstance(axis, pd.CategoricalIndex):
+        if na_rep in axis.categories:
+            labels = move_na(list(axis.categories))
+            axis = axis.reorder_categories(labels)
+        return pd.CategoricalIndex(
+            data=axis.get_level_values(level),
+            categories=axis.categories,
+            ordered=axis.ordered,
+            name=axis.name
+        )
+    else:
+        labels = list(dict.fromkeys(axis.get_level_values(level)))
+        labels = move_na(labels)
+        return pd.Index(labels, name=axis.name)
+
+
+@config.load_settings(AGG_SETTINGS)
+@transpose
+def drop_na(df, na_rep=None, **kwargs):
+    index = _drop_na(df.index, na_rep)
+    df = df.reindex(index).rename_axis(index.names)
+    return df
+
+
+def _drop_na(axis, na_rep):
+    if isinstance(axis, pd.MultiIndex):
+        for level in range(axis.nlevels):
+            axis = axis.drop(na_rep, level=level, errors='ignore')
+    else:
+        axis = axis.drop(na_rep, errors='ignore')
+    return axis
