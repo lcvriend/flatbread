@@ -47,10 +47,21 @@ class Config:
     def __getitem__(self, key):
         return self.__dict__[key]
 
-    def save(self):
-        "Save settings permanently."
-        with open(HERE / 'config.json', 'w', encoding='utf8') as f:
+    @property
+    def sections(self):
+        return list(self.__dict__.keys())
+
+    def save(self, path=None):
+        "Save settings permanently. Optionally supply path."
+        if not path:
+            path = self.configfile
+        with open(path, 'w', encoding='utf8') as f:
             json.dump(self.__dict__, f, indent=4)
+
+    def reload(self):
+        "Reload json file."
+        with open(self.configfile, 'r', encoding='utf8') as f:
+            self.__dict__ = json.load(f)
 
     def defaults(self):
         "Set settings to defaults."
@@ -78,12 +89,6 @@ class Config:
         if self.format['locale']:
             locale.setlocale(locale.LC_ALL, self.format['locale'])
 
-    @staticmethod
-    def load(configfile):
-        "Load json file."
-        with open(configfile, 'r', encoding='utf8') as f:
-            return json.load(f)
-
     @classmethod
     def from_json(cls):
         """Construct class from 'config.json', defaults to
@@ -92,6 +97,12 @@ class Config:
             cls.configfile = HERE / 'config.defaults.json'
         settings = cls.load(cls.configfile)
         return cls(settings)
+
+    @staticmethod
+    def load(configfile):
+        "Load json file."
+        with open(configfile, 'r', encoding='utf8') as f:
+            return json.load(f)
 
 
 CONFIG = Config.from_json()

@@ -1,7 +1,6 @@
 {
     "general": {
-        "store_output_in_cwd": true,
-        "as_df": true
+        "store_output_in_cwd": true
     },
     "format": {
         "locale": null,
