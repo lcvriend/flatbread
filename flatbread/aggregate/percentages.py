@@ -1,7 +1,8 @@
-from functools import wraps
+from functools import wraps, partial
 from typing import Any
 
 import pandas as pd # type: ignore
+from pandas._libs import lib
 
 import flatbread.config as config
 import flatbread.utils as utils
@@ -26,13 +27,13 @@ def round_percentages(
 
 @log.entry
 @config.load_settings(AGG_SETTINGS)
-@axes.get_axis_number
-@levels.get_level_number
+# @axes.get_axis_number
+# @levels.get_level_number
 def add(
     df:            pd.DataFrame,
     *,
     axis:           Any  = 0,
-    level:          Any  = 0,
+    level:          Any  = None,
     totals_name:    str  = None,
     subtotals_name: str  = None,
     ndigits:        int  = None,
@@ -84,6 +85,9 @@ def add(
     pd.DataFrame
     """
 
+    get_axis = lambda x: axes._get_axis_number(x) if lib.is_scalar(x) else x
+    axis = get_axis(axis)
+
     percs = df.pipe(
         transform,
         axis           = axis,
@@ -125,13 +129,13 @@ def add(
 @log.entry
 @utils.copy
 @config.load_settings(AGG_SETTINGS)
-@axes.get_axis_number
-@levels.get_level_number
+# @axes.get_axis_number
+# @levels.get_level_number
 def transform(
     df: pd.DataFrame,
     *,
     axis:           Any  = 0,
-    level:          Any  = 0,
+    level:          Any  = None,
     totals_name:    str  = None,
     subtotals_name: str  = None,
     ndigits:        int  = None,
@@ -174,33 +178,44 @@ def transform(
     -------
     pd.DataFrame
     """
+    f = partial(levels._get_level_number, df)
+    get_axis = lambda x: axes._get_axis_number(x) if lib.is_scalar(x) else x
+    get_level = lambda x, y: f(x, y) if lib.is_scalar(x) else x
 
-    kwargs.update(
-        dict(
-            level          = level,
-            totals_name    = totals_name,
-            subtotals_name = subtotals_name,
-            ndigits        = ndigits,
-            drop_totals    = drop_totals,
-        )
+    axis = get_axis(axis)
+    get_level = get_level(axis, level)
+
+    settings = dict(
+        level          = level,
+        totals_name    = totals_name,
+        subtotals_name = subtotals_name,
+        ndigits        = ndigits,
+        drop_totals    = drop_totals,
     )
-    if axis < 2:
-        return _axis_wise(df, axis=axis, **kwargs)
+    kwargs.update(settings)
+
+    if isinstance(axis, int):
+        if axis < 2:
+            return _axis_wise(df, axis=axis, **kwargs)
+        else:
+            return _table_wise(df, axis=axis, **kwargs)
     else:
-        return _table_wise(df, **kwargs)
+        return _table_wise_multilevel(
+            df,
+            axlevels = axis,
+            **kwargs
+        )
 
 
-@config.load_settings(AGG_SETTINGS)
 @axes.transpose
 @totals.add_totals(axis=0)
 @totals.drop_totals(axis=0)
 def _axis_wise(
     df:             pd.DataFrame,
-    *,
-    level:          int = 0,
-    totals_name:    str = None,
-    subtotals_name: str = None,
-    ndigits:        int = None,
+    level:          int,
+    totals_name:    str,
+    subtotals_name: str,
+    ndigits:        int,
     **kwargs
 ) -> pd.DataFrame:
 
@@ -219,15 +234,13 @@ def _axis_wise(
     return result.pipe(round_percentages, ndigits=ndigits)
 
 
-@config.load_settings(AGG_SETTINGS)
 @totals.add_totals(axis=2)
 @totals.drop_totals(axis=2)
 def _table_wise(
-    df,
-    *,
-    level:          int = 0,
-    subtotals_name: str = None,
-    ndigits:        int = None,
+    df:             pd.DataFrame,
+    level:          int,
+    subtotals_name: str,
+    ndigits:        int,
     **kwargs
 ) -> pd.DataFrame:
 
@@ -243,6 +256,32 @@ def _table_wise(
             .xs(subtotals_name, axis=1, level=level, drop_level=False)
             .reindex_like(df).bfill().bfill(axis=1)
         )
+
+    result = df.div(totals).multiply(100)
+    return result.pipe(round_percentages, ndigits=ndigits)
+
+
+# @totals.add_totals(axis=2)
+# @totals.drop_totals(axis=2)
+def _table_wise_multilevel(
+    df:             pd.DataFrame,
+    axlevels:       Any,
+    totals_name:    str,
+    subtotals_name: str,
+    ndigits:        int,
+    **kwargs
+) -> pd.DataFrame:
+
+    axlevels = [min(level) for level in axlevels]
+
+    row_totals = totals_name if axlevels[0] == 0 else subtotals_name
+    col_totals = totals_name if axlevels[1] == 0 else subtotals_name
+
+    totals = (
+        df.xs(row_totals, level=axlevels[0], drop_level=False)
+        .xs(col_totals, axis=1, level=axlevels[1], drop_level=False)
+        .reindex_like(df).bfill().bfill(axis=1)
+    )
 
     result = df.div(totals).multiply(100)
     return result.pipe(round_percentages, ndigits=ndigits)

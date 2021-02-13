@@ -49,9 +49,8 @@ def add(
     pd.DataFrames
     """
 
-    if isinstance(level, (int, str)):
-        level = [level]
-    for i in level:
+    convert = lambda x: [x] if isinstance(x, (int, str)) else x
+    for i in convert(level):
         df = _add(
             df,
             axis=axis,
@@ -154,8 +153,11 @@ def _add_within_axis(
         assert df.index.nlevels > level, f"index has no level {level}"
         assert df.columns.nlevels > level, f"columns have no level {level}"
 
-        return df.pipe(_add_within_axis, axis=0, **kwargs
-        ).pipe(_add_within_axis, axis=1, **kwargs)
+        return df.pipe(
+            _add_within_axis, axis=0, **kwargs
+        ).pipe(
+            _add_within_axis, axis=1, **kwargs
+        )
 
 
 @axes.transpose
@@ -225,19 +227,6 @@ def add_totals(axis):
     return decorator
 
 
-def drop_totals(axis):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(df, **kwargs):
-            drop_totals = kwargs.get('drop_totals', False)
-            result = func(df, **kwargs)
-            if drop_totals:
-                result = _drop_totals(result, axis, **kwargs)
-            return result
-        return wrapper
-    return decorator
-
-
 @config.load_settings(TOTALS_SETTINGS)
 def _add_totals(df, axis=0, totals_name=None, subtotals_name=None, **kwargs):
     level = kwargs.get('level') or 0
@@ -250,6 +239,19 @@ def _add_totals(df, axis=0, totals_name=None, subtotals_name=None, **kwargs):
     if not has_totals:
         df = df.pipe(add, axis=axis, level=level)
     return df
+
+
+def drop_totals(axis):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(df, **kwargs):
+            drop_totals = kwargs.get('drop_totals', False)
+            result = func(df, **kwargs)
+            if drop_totals:
+                result = _drop_totals(result, axis, **kwargs)
+            return result
+        return wrapper
+    return decorator
 
 
 @config.load_settings(TOTALS_SETTINGS)
