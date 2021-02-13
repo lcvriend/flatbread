@@ -98,31 +98,54 @@ CONFIG = Config.from_json()
 
 
 def get_value(
-    section: str,
+    settings: Dict,
     key: str,
     value: Any = None,
 ) -> Any:
     "If `value` is None, load value from CONFIG."
     if value is None:
-        return CONFIG[section][key]
+        return settings[key]
     return value
 
 
 def load_settings(
-    settings_to_load: Union[str, Dict[str, List[str]]]
+    settings_to_load: Union[str, List[str], Dict[str, List[str]]]
 ) -> Callable[[F], F]:
     """Decorate function with a settings loader.
-    If argument in is None, then value
-    will be loaded from CONFIG.
+    If argument is None, then value will be loaded from CONFIG.
+    Can load one or more sections or load specific settings from multiple
+    settings.
+
+    Arguments
+    ---------
+    settings_to_load : str, list of str, dict of list of str
+        str:
+            String refers to name of section to be loaded.
+        list of str:
+            Strings refer to names of sections to be loaded.
+        dict of list of str:
+            Keys refer to the names of the sections to be loaded,
+            strings in list refer to the settings to be loaded from section.
     """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             if isinstance(settings_to_load, str):
-                settings = CONFIG[settings_to_load]
-            else:
+                "print! this is a string"
+                section = CONFIG[settings_to_load]
                 settings = {
                     key:get_value(section, key, kwargs.get(key))
+                    for key in section
+                }
+            elif isinstance(settings_to_load, list):
+                settings = {
+                    key:get_value(CONFIG[section], key, kwargs.get(key))
+                    for section in settings_to_load
+                    for key in CONFIG[section]
+                }
+            else:
+                settings = {
+                    key:get_value(CONFIG[section], key, kwargs.get(key))
                     for section, keys in settings_to_load.items()
                     for key in keys
                 }
