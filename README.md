@@ -5,6 +5,8 @@ Flatbread is a small library which extends the pivot table functionality in pand
 
 ![example](static/pita_table_example_001.svg)
 
+<img src="static/pita_table_example_001.svg" width="720">
+
 The library contains functions which will allow you to easily add **totals/subtotals** to one or more axes/levels of your pivot table. Furthermore, flatbread can calculate **percentages** from the totals/subtotals of each axis/level of your pivot table. You can transform the existing values in your table into percentages, but you can also add the percentages neatly next to your data. If the required (sub)totals are not present, then flatbread will add them automatically in order to perform the calculations. By default the (sub)totals are kept but you can drop them too. The library also contains some functionality built on top of matplotlib for plotting your data.
 
 ## Name
