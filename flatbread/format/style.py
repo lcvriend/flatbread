@@ -1,16 +1,14 @@
+import re
 import flatbread.config as config
 from flatbread.config import CONFIG
 
-
-AGG_SETTINGS = {'aggregation': CONFIG['aggregation']}
-STYLE_SETTINGS = {'style': CONFIG['style']}
-
-
-@config.load_settings(STYLE_SETTINGS)
+@config.load_settings('style')
 def table_style(
     table_border_top = None,
     table_border_bottom = None,
+    header_border_bottom = None,
     row_header_border = None,
+    style_table = None,
     style_col_header = None,
     style_row_header = None,
     style_data = None,
@@ -18,19 +16,26 @@ def table_style(
 ):
     return [
         # table
+        {"selector": '', "props": style_table},
         {"selector": "thead tr:first-child", "props": table_border_top},
         {"selector": "tbody tr:last-child", "props": table_border_bottom},
+
+        # header
+        {"selector": "thead tr:last-child", "props": header_border_bottom},
+
         # columns
         {"selector": "thead th", "props": style_col_header},
+
         # index
         {"selector": "tbody th", "props": style_row_header},
         {"selector": "tbody tr th:last-of-type", "props": row_header_border},
+
         # data
         {"selector": "tbody td", "props": style_data},
     ]
 
 
-@config.load_settings({**STYLE_SETTINGS, **AGG_SETTINGS})
+@config.load_settings(['style', 'aggregation'])
 def level_dividers(
     df,
     row_border_levels = None,
@@ -55,6 +60,7 @@ def _row_level_dividers(df, style, totals_name):
         return [{"selector": "tbody tr:last-child", "props": style}]
     else:
         return []
+
 
 def _row_level_dividers_mi(
     df,
@@ -144,46 +150,8 @@ def get_style(df):
     return table_style() + level_dividers(df)
 
 
-# styles_ = [
-#     # totals
-#     ### row
-#     {"selector": "tbody tr:last-child",
-#     "props": [
-#         ("border-top", "1px solid lightgray"),
-#         ("font-weight", "bold"),
-#     ]},
-
-#     ### columns
-#     {"selector": "th.level0.col6, th.level1.col10, th.level2.col11", "props": [
-#         ("border-right", "1px solid lightgray")
-#     ]},
-
-#     {"selector": "tr .blank:nth-child(14)", "props": [
-#         ("border-right", "1px solid lightgray")
-#     ]},
-
-#     {"selector": "td.col11", "props": [
-#         ("border-right", "1px solid lightgray")
-#     ]},
-
-#     # subtotals
-#     ### row
-#     {"selector": "tbody tr:nth-child(6n+6)",
-#     "props": [
-#         ('font-style', 'italic'),
-#         ('border-top', '1px dotted lightgray'),
-#     ]},
-
-#     ### columns
-#     {"selector": "th.level1.col2, th.level1.col8,th.level2.col3, th.level2.col9", "props": [
-#         ("border-right", "1px dotted lightgray")
-#     ]},
-
-#     {"selector": "tr .blank:nth-child(6), tr .blank:nth-child(12)", "props": [
-#         ("border-right", "1px dotted lightgray")
-#     ]},
-
-#     {"selector": "td.col3, td.col9", "props": [
-#         ("border-right", "1px dotted lightgray")
-#     ]},
-# ]
+def get_inline_css_from_html(html):
+    regex = '<style.*>([\n\s\w\W]*)</style>'
+    html = piv.style().render()
+    match = re.search(regex, html).group(1)
+    return match.replace('}', '}\n')
