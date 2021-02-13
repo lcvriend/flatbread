@@ -13,7 +13,6 @@ from flatbread import levels as levels
 from flatbread.format import style as style
 from flatbread.format import format as format_table
 from flatbread.config import HERE, load_settings
-from flatbread.aggregate import AGG_SETTINGS
 
 
 @pd.api.extensions.register_dataframe_accessor("pita")
@@ -175,7 +174,8 @@ class Pivot:
     def style(self, *args, **kwargs):
         df = self(*args, **kwargs).df.copy()
         styler = df.pipe(format_table)
-        styler.set_table_styles(style.get_style(df), overwrite=False)
+        uuid = styler.uuid
+        styler.set_table_styles(style.get_style(df, uuid), overwrite=False)
         return styler
 
     def totals(
@@ -191,14 +191,15 @@ class Pivot:
         subtotals_name = check_namespace(subtotals_name, 'subtotals_name')
 
         axlevels = self._get_axlevels(axis, level)
-        for ax, level in enumerate(axlevels):
-            self.df = self.df.pipe(
-                aggtotals.add,
-                axis           = ax,
-                level          = level,
-                totals_name    = totals_name,
-                subtotals_name = subtotals_name,
-            )
+        for ax, levels in enumerate(axlevels):
+            for level in levels:
+                self.df = self.df.pipe(
+                    aggtotals.add,
+                    axis           = ax,
+                    level          = level,
+                    totals_name    = totals_name,
+                    subtotals_name = subtotals_name,
+                )
         return self
 
     def percs(
@@ -248,8 +249,8 @@ class Pivot:
             if x is None:
                 return []
             return [x] if isinstance(x, (int, str)) else x
-        level = listify(level)
 
+        level = listify(level)
         if isinstance(axis, (int, str)):
             axis = axes._get_axis_number(axis)
             if axis == 0:
@@ -264,13 +265,14 @@ class Pivot:
                 return [row_level, col_level]
         else:
             axlevels = [listify(item) for item in listify(axis)]
-            return [
-                get_level(0, axlevels[0]),
-                get_level(1, axlevels[1]),
-            ]
+            return (
+                [get_level(0, item) for item in axlevels[0]],
+                [get_level(1, item) for item in axlevels[1]],
+            )
 
     def _repr_html_(self):
-        df = self.df.copy()
-        styler = df.pipe(format_table)
-        styler.set_table_styles(style.get_style(df), overwrite=False)
-        return styler.render()
+        import html
+        doc = self.style().render()
+        inline_css = style.get_inline_css_from_html(doc)
+        # doc += f"<p>{html.escape(inline_css)}</p>"
+        return doc
