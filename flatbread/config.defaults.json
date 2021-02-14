@@ -7,19 +7,54 @@
         "na_rep": ""
     },
     "style": {
-        "table_border_top":    [["border-top", "1px solid #BDBDBD"]],
-        "table_border_bottom": [["border-bottom", "2px double #BDBDBD"]],
-        "header_border_bottom":[["border-bottom", "1px solid #BDBDBD"]],
-        "row_header_border":   [["border-right", "1px solid #BDBDBD"]],
-        "row_border_levels":   [["border-top", "1px solid #BDBDBD"]],
-        "row_border_subtotal": [["border-top", "1px dotted #BDBDBD"]],
-        "col_border_levels":   [["border-left", "1px solid #BDBDBD"]],
-        "col_border_subtotal": [["border-right", "1px dotted #BDBDBD"]],
-        "style_table":         [["border-collapse", "collapse"]],
-        "style_data":          [["text-align", "right"], ["padding", "0.5em"]],
-        "style_row_header":    [["text-align", "left"], ["font-weight", "normal"], ["padding", "0.5em"]],
-        "style_col_header":    [["text-align", "center"], ["font-weight", "normal"], ["padding", "0.5em"]],
-        "style_subtotal":      [["font-style", "italic"]]
+        "table_border_top": {
+            "border-top": "1px solid #BDBDBD"
+        },
+        "table_border_bottom": {
+            "border-bottom": "2px double #BDBDBD"
+        },
+        "header_border_bottom": {
+            "border-bottom": "1px solid #BDBDBD"
+        },
+        "row_header_border": {
+            "border-right": "1px solid #BDBDBD"
+        },
+        "row_border_levels": {
+            "border-top": "1px solid #BDBDBD"
+        },
+        "row_border_subtotal": {
+            "border-top": "1px dotted #BDBDBD"
+        },
+        "col_border_levels": {
+            "border-left": "1px solid #BDBDBD"
+        },
+        "col_border_subtotal": {
+            "border-left": "1px dotted #BDBDBD"
+        },
+        "style_table": {
+            "border-collapse": "collapse"
+        },
+        "style_data": {
+            "text-align": "right", "padding": "0.5em"
+        },
+        "style_row_header": {
+            "text-align": "left",
+            "font-weight": "normal",
+            "padding": "0.5em"
+        },
+        "style_col_header": {
+            "text-align": "center",
+            "font-weight": "normal",
+            "padding": "0.5em"
+        },
+        "style_data_subtotal": {
+            "font-style": "italic"
+        },
+        "style_header_subtotal": {
+            "text-align": "left",
+            "font-weight": "normal",
+            "padding": "0.5em"
+        }
     },
     "paths": {
         "output": "output",
@@ -33,7 +68,7 @@
         "ndigits": 1,
         "label_abs": "abs",
         "label_rel": "%",
-        "na_rep": "-",
+        "na_cat": "-",
         "na_position": "last"
     }
 }

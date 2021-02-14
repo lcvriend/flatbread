@@ -2,8 +2,24 @@ import re
 import flatbread.config as config
 from flatbread.config import CONFIG
 
+
+def dicts_to_tuples(func):
+    """Convert key-word arguments containing a dict into a list of key-value tuples. Used for converting the styling stored in the json into the format
+    that pandas wants it."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        for k1,v1 in kwargs.items():
+            if isinstance(v1, dict):
+                kwargs[k1] = [(k2,v2) for k2,v2 in v1.items()]
+        return func(*args, **kwargs)
+    return wrapper
+
+
 @config.load_settings('style')
-def table_style(
+@dicts_to_tuples
+def add_table_style(
+    *,
     table_border_top = None,
     table_border_bottom = None,
     header_border_bottom = None,
@@ -36,9 +52,11 @@ def table_style(
 
 
 @config.load_settings(['style', 'aggregation'])
-def level_dividers(
+@dicts_to_tuples
+def add_level_dividers(
     df,
     uuid,
+    *,
     row_border_levels = None,
     col_border_levels = None,
     totals_name = None,
@@ -47,7 +65,7 @@ def level_dividers(
     if df.index.nlevels == 1:
         rows = _row_level_dividers(df, row_border_levels, totals_name)
     else:
-        rows = _row_level_dividers_mi(df, row_border_levels)
+        rows = _row_level_dividers_mi(df, uuid, row_border_levels)
 
     if df.columns.nlevels == 1:
         cols = _col_level_dividers(df, col_border_levels, totals_name)
@@ -56,23 +74,30 @@ def level_dividers(
     return rows + cols
 
 
-def _row_level_dividers(df, style, totals_name):
+def _row_level_dividers(df, row_border_levels, totals_name):
+    """Check for totals_name in keys of regular index, if found then add styling
+    to last row of the table body."""
+
     if totals_name in df.index:
-        return [{"selector": "tbody tr:last-child", "props": style}]
+        return [{"selector": "tbody tr:last-child", "props": row_border_levels}]
     else:
         return []
 
 
-def _row_level_dividers_mi(
-    df,
-    row_border_levels,
-):
+def _row_level_dividers_mi(df, uuid, row_border_levels):
+    """Add styling to th and td for each row level in a multiindex, excluding
+    the smallest level."""
+
+    add_uuid = lambda x,uuid: uuid + x
+    uuid = f"#T_{uuid}"
     nlevels = df.index.nlevels
     ndivs = nlevels - 1
 
     def create_style_rules_rows(level):
         row0 = f"th.row_heading.level{level}"
-        rown = f"th.row_heading.level{level}~th, th.row_heading.level{level}~td"
+        rown = (
+            f"th.row_heading.level{level}~th,"
+            f"{uuid} th.row_heading.level{level}~td")
         return [
             {"selector": row0, "props": row_border_levels},
             {"selector": rown, "props": row_border_levels},
@@ -86,16 +111,21 @@ def _row_level_dividers_mi(
 
 
 def _col_level_dividers(df, style, totals_name):
+    """Check for totals_name in keys of regular column index, if found then add
+    styling to last column of the table body."""
+
     if totals_name in df.columns:
         return [
             {"selector": "td:last-child", "props": style},
-            {"selector": "thead th:last-child", "props": style}
+            {"selector": "thead th:last-child", "props": style},
         ]
     else:
         return []
 
 
 def _col_level_dividers_mi(df, uuid, style):
+    """Add styling to th, .blank and td for each col level in a multiindex,
+    excluding the smallest level."""
 
     add_uuid = lambda x,uuid: uuid + x
     uuid = f"#T_{uuid} "
