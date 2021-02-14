@@ -22,15 +22,18 @@ class Pivot:
         'size':  'Int64',
     }
 
-    def __init__(self, pandas_obj):
+    @load_settings(['aggregation', 'format'])
+    def __init__(self, pandas_obj, **kwargs):
         self._obj           = pandas_obj
-        self._df            = None
+        self._df            = pandas_obj
+        self._uuid          = pandas_obj.style.uuid
         self.pipeline       = list()
-        self.columns        = None
         self.index          = None
-        self.na             = None
+        self.columns        = None
+        self.na             = 'drop'
+        self.na_cat         = None
+        self.na_position    = 'last'
         self.na_rep         = None
-        self.add_totals     = None
         self.totals_name    = None
         self.subtotals_name = None
         self.label_abs      = None
@@ -38,8 +41,8 @@ class Pivot:
         self.ndigits        = 1
         self.drop_totals    = False
         self.percentages    = None
+        self.styling        = None
 
-    @load_settings(['aggregation', 'general'])
     def __call__(
         self,
         values         = None,
@@ -50,32 +53,21 @@ class Pivot:
         add_totals     = False,
         axis           = 0,
         level          = 0,
-        totals_name    = None,
-        subtotals_name = None,
-        na             = 'drop',
-        na_rep         = None,
-        na_position    = 'last',
         observed       = True,
         **kwargs
     ):
 
         self.values = values
-        self.columns = columns
         self.index = index
+        self.columns = columns
         self.aggfunc = aggfunc
-        self.na = na
-        self.na_rep = na_rep
-        self.na_position = na_position
-        self.add_totals = True
-        self.totals_name = totals_name
-        self.subtotals_name = subtotals_name
 
         if index or columns:
             self._pivot(
+                aggfunc        = aggfunc,
                 values         = values,
                 index          = index,
                 columns        = columns,
-                aggfunc        = aggfunc,
                 fill_value     = fill_value,
                 observed       = observed,
             )
@@ -84,16 +76,14 @@ class Pivot:
             self.totals(
                 axis           = axis,
                 level          = level,
-                totals_name    = totals_name,
-                subtotals_name = subtotals_name,
+                **kwargs
             )
-
         return self
 
     @property
     def df(self):
         df = self._df if self._df is not None else self._obj
-        return df.pipe(self._hide_na)
+        return df.pipe(self.__hide_na)
 
     @df.setter
     def df(self, df):
@@ -111,17 +101,18 @@ class Pivot:
         if aggfunc is None:
             aggfunc = 'size' if values is None else 'count'
 
-        self.df = self._drop_na(self._obj).pivot_table(
+        self.df = self.__drop_na(self._obj).pivot_table(
+            aggfunc      = aggfunc,
             values       = values,
             index        = index,
             columns      = columns,
-            aggfunc      = aggfunc,
             fill_value   = fill_value,
             observed     = observed,
         ).pipe(self._reindex_na)
+        self._format()
 
-    def _drop_na(self, df):
-        fillna = lambda s: cols.add_category(s, self.na_rep).fillna(self.na_rep)
+    def __drop_na(self, df):
+        fillna = lambda s: cols.add_category(s, self.na_cat).fillna(self.na_cat)
         to_list = lambda x: [x] if lib.is_scalar(x) else x
 
         df = df.copy()
@@ -138,45 +129,42 @@ class Pivot:
         return df.pipe(
             axes.reindex_na,
             axis=0,
-            na_rep=self.na_rep,
+            na_rep=self.na_cat,
             na_position=self.na_position,
         ).pipe(
             axes.reindex_na,
             axis=1,
-            na_rep=self.na_rep,
+            na_rep=self.na_cat,
             na_position=self.na_position,
         )
 
-    def _hide_na(self, df):
+    def __hide_na(self, df):
         if self.na == 'hide':
             df = df.copy()
             return df.pipe(
                 axes.drop_na,
                 axis=0,
-                na_rep=self.na_rep,
+                na_rep=self.na_cat,
             ).pipe(
                 axes.drop_na,
                 axis=1,
-                na_rep=self.na_rep,
+                na_rep=self.na_cat,
             )
         return df
 
-    def format(self, df, aggfunc):
+    def _format(self):
         def get_dtype(col):
             if self.percentages == 'transform' or self.label_rel in col:
                 return float
             else:
-                return self.dtypes.get(aggfunc, 'float')
+                return self.dtypes.get(self.aggfunc, 'float')
 
-        dtypes_to_set = {col:get_dtype(col) for col in df.columns}
-        self.df = df.astype(dtypes_to_set)
+        dtypes_to_set = {col:get_dtype(col) for col in self.df.columns}
+        self.df = self.df.astype(dtypes_to_set)
 
-    def style(self, *args, **kwargs):
-        df = self(*args, **kwargs).df.copy()
-        styler = df.pipe(format_table)
-        uuid = styler.uuid
-        styler.set_table_styles(style.get_style(df, uuid), overwrite=False)
-        return styler
+    def style(self, **kwargs):
+        self.styling = style.get_style(self.df, self._uuid, **kwargs)
+        return self
 
     def totals(
         self,
@@ -200,6 +188,7 @@ class Pivot:
                     totals_name    = totals_name,
                     subtotals_name = subtotals_name,
                 )
+        self._format()
         return self
 
     def percs(
@@ -207,6 +196,7 @@ class Pivot:
         axis           = 0,
         level          = 0,
         how            = 'add',
+        drop_totals    = False,
         totals_name    = None,
         subtotals_name = None,
         label_abs      = None,
@@ -223,7 +213,7 @@ class Pivot:
                 label_abs      = label_abs,
                 label_rel      = label_rel,
                 ndigits        = ndigits,
-                drop_totals    = not self.add_totals,
+                drop_totals    = drop_totals,
             )
         elif how == 'transform':
             self.df = self.df.pipe(
@@ -235,8 +225,9 @@ class Pivot:
                 label_abs      = label_abs,
                 label_rel      = label_rel,
                 ndigits        = ndigits,
-                drop_totals    = not self.add_totals,
+                drop_totals    = drop_totals,
             )
+        self._format()
         return self
 
     def _output_dtype(self, aggfunc=None):
@@ -271,8 +262,7 @@ class Pivot:
             )
 
     def _repr_html_(self):
-        import html
-        doc = self.style().render()
-        inline_css = style.get_inline_css_from_html(doc)
-        # doc += f"<p>{html.escape(inline_css)}</p>"
-        return doc
+        styler = self.df.style.set_uuid(self._uuid).format(lambda x: f'{x:n}', na_rep=self.na_rep)
+        self.style()
+        styler.set_table_styles(self.styling, overwrite=False)
+        return styler.render()
