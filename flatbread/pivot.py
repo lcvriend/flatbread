@@ -41,7 +41,6 @@ class Pivot:
         self.ndigits        = 1
         self.drop_totals    = False
         self.percentages    = None
-        self.styling        = None
 
     def __call__(
         self,
@@ -163,8 +162,15 @@ class Pivot:
         self.df = self.df.astype(dtypes_to_set)
 
     def style(self, **kwargs):
-        self.styling = style.get_style(self.df, self._uuid, **kwargs)
-        return self
+        formatter = lambda x: f'{x:n}'
+
+        styler = self.df.style.set_uuid(self._uuid
+        ).format(formatter, na_rep=self.na_rep)
+
+        rules = style.get_style(self.df, self._uuid, **kwargs)
+        styler.set_table_styles(rules, overwrite=False)
+
+        return styler
 
     def totals(
         self,
@@ -262,7 +268,4 @@ class Pivot:
             )
 
     def _repr_html_(self):
-        styler = self.df.style.set_uuid(self._uuid).format(lambda x: f'{x:n}', na_rep=self.na_rep)
-        self.style()
-        styler.set_table_styles(self.styling, overwrite=False)
-        return styler.render()
+        return self.style().render()
