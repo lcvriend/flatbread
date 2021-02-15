@@ -1,22 +1,19 @@
-from functools import partial, wraps
-from collections.abc import Iterable
+from functools import partial
 
 import pandas as pd
 from pandas._libs import lib
 
-from flatbread import aggregate
 from flatbread.aggregate import totals as aggtotals
 from flatbread.aggregate import percentages as percs
 from flatbread.build import columns as cols
-from flatbread import axes as axes
-from flatbread import levels as levels
-from flatbread.format import style as style
-from flatbread.format import format as format_table
+from flatbread import axes
+from flatbread import levels
+from flatbread import style
 from flatbread.config import HERE, load_settings
 
 
 @pd.api.extensions.register_dataframe_accessor("pita")
-class Pivot:
+class PivotTable:
     dtypes = {
         'count': 'Int64',
         'size':  'Int64',
@@ -79,97 +76,14 @@ class Pivot:
             )
         return self
 
-    @property
-    def df(self):
-        df = self._df if self._df is not None else self._obj
-        return df.pipe(self.__hide_na)
-
-    @df.setter
-    def df(self, df):
-        self._df = df
-
-    def _pivot(
-        self,
-        aggfunc    = None,
-        values     = None,
-        index      = None,
-        columns    = None,
-        fill_value = None,
-        observed   = None,
-    ):
-        if aggfunc is None:
-            aggfunc = 'size' if values is None else 'count'
-
-        self.df = self.__drop_na(self._obj).pivot_table(
-            aggfunc      = aggfunc,
-            values       = values,
-            index        = index,
-            columns      = columns,
-            fill_value   = fill_value,
-            observed     = observed,
-        ).pipe(self._reindex_na)
-        self._cast()
-
-    def __drop_na(self, df):
-        fillna = lambda s: cols.add_category(s, self.na_cat).fillna(self.na_cat)
-        to_list = lambda x: [x] if lib.is_scalar(x) else x
-
-        df = df.copy()
-        if self.na == 'drop':
-            return df.dropna(subset=to_list(self.columns))
-        else:
-            all_items     = to_list(self.columns) + to_list(self.index)
-            selection     = [item for item in all_items if item is not None]
-            df[selection] = df[selection].apply(fillna)
-            return df
-
-    def _reindex_na(self, df):
-        df = df.copy()
-        return df.pipe(
-            axes.reindex_na,
-            axis=0,
-            na_rep=self.na_cat,
-            na_position=self.na_position,
-        ).pipe(
-            axes.reindex_na,
-            axis=1,
-            na_rep=self.na_cat,
-            na_position=self.na_position,
-        )
-
-    def __hide_na(self, df):
-        if self.na == 'hide':
-            df = df.copy()
-            return df.pipe(
-                axes.drop_na,
-                axis=0,
-                na_rep=self.na_cat,
-            ).pipe(
-                axes.drop_na,
-                axis=1,
-                na_rep=self.na_cat,
-            )
-        return df
-
-    def _cast(self):
-        def get_dtype(col):
-            if self.percentages == 'transform' or self.label_rel in col:
-                return float
-            else:
-                return self.dtypes.get(self.aggfunc, float)
-
-        dtypes_to_set = {col:get_dtype(col) for col in self.df.columns if get_dtype(col)}
-        self.df = self.df.astype(dtypes_to_set)
-
-    def style(self, **kwargs):
-        formatter = lambda x: f'{x:n}'
-
+    def style(self, formatter=None, **kwargs):
+        default = lambda x: f'{x:n}'
+        formatter = default if formatter is None else formatter
         styler = self.df.style.set_uuid(self._uuid
         ).format(formatter, na_rep=self.na_rep)
 
         rules = style.get_style(self.df, self._uuid, **kwargs)
         styler.set_table_styles(rules, overwrite=False)
-
         return styler
 
     def totals(
@@ -235,6 +149,88 @@ class Pivot:
             )
         self._cast()
         return self
+
+    @property
+    def df(self):
+        df = self._df if self._df is not None else self._obj
+        return df.pipe(self.__hide_na)
+
+    @df.setter
+    def df(self, df):
+        self._df = df
+
+    def _pivot(
+        self,
+        aggfunc    = None,
+        values     = None,
+        index      = None,
+        columns    = None,
+        fill_value = None,
+        observed   = None,
+    ):
+        if aggfunc is None:
+            aggfunc = 'size' if values is None else 'count'
+
+        self.df = self.__drop_na(self._obj).pivot_table(
+            aggfunc      = aggfunc,
+            values       = values,
+            index        = index,
+            columns      = columns,
+            fill_value   = fill_value,
+            observed     = observed,
+        ).pipe(self.__reindex_na)
+        self._cast()
+
+    def __drop_na(self, df):
+        fillna = lambda s: cols.add_category(s, self.na_cat).fillna(self.na_cat)
+        to_list = lambda x: [x] if lib.is_scalar(x) else x
+
+        df = df.copy()
+        if self.na == 'drop':
+            return df.dropna(subset=to_list(self.columns))
+        else:
+            all_items     = to_list(self.columns) + to_list(self.index)
+            selection     = [item for item in all_items if item is not None]
+            df[selection] = df[selection].apply(fillna)
+            return df
+
+    def __reindex_na(self, df):
+        df = df.copy()
+        return df.pipe(
+            axes.reindex_na,
+            axis=0,
+            na_rep=self.na_cat,
+            na_position=self.na_position,
+        ).pipe(
+            axes.reindex_na,
+            axis=1,
+            na_rep=self.na_cat,
+            na_position=self.na_position,
+        )
+
+    def __hide_na(self, df):
+        if self.na == 'hide':
+            df = df.copy()
+            return df.pipe(
+                axes.drop_na,
+                axis=0,
+                na_rep=self.na_cat,
+            ).pipe(
+                axes.drop_na,
+                axis=1,
+                na_rep=self.na_cat,
+            )
+        return df
+
+    def _cast(self):
+        def get_dtype(col):
+            if self.percentages == 'transform' or self.label_rel in col:
+                return float
+            else:
+                return self.dtypes.get(self.aggfunc, float)
+
+        dtypes_to_set = {col:get_dtype(col) for col in self.df.columns if get_dtype(col)}
+        self.df = self.df.astype(dtypes_to_set)
 
 
     def _get_axlevels(self, axis, level):
