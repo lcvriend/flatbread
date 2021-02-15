@@ -2,6 +2,25 @@
     "general": {
         "store_output_in_cwd": true
     },
+    "paths": {
+        "output": "output",
+        "data": "output/data",
+        "tables": "output/tables",
+        "graphs": "output/graphs"
+    },
+    "aggregation": {
+        "totals_name": "Total",
+        "subtotals_name": "Subtotal",
+        "percs_method": "add",
+        "ndigits": 1,
+        "label_abs": "abs",
+        "label_rel": "%"
+    },
+    "na": {
+        "na": "drop",
+        "na_cat": "-",
+        "na_position": "last"
+    },
     "format": {
         "locale": null,
         "na_rep": ""
@@ -55,20 +74,5 @@
             "font-weight": "normal",
             "padding": "0.5em"
         }
-    },
-    "paths": {
-        "output": "output",
-        "data": "output/data",
-        "tables": "output/tables",
-        "graphs": "output/graphs"
-    },
-    "aggregation": {
-        "totals_name": "Total",
-        "subtotals_name": "Subtotal",
-        "ndigits": 1,
-        "label_abs": "abs",
-        "label_rel": "%",
-        "na_cat": "-",
-        "na_position": "last"
     }
 }
