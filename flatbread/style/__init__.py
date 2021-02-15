@@ -1,6 +1,7 @@
 import re
-import flatbread.config as config
 from functools import wraps
+
+import flatbread.config as config
 from flatbread.config import CONFIG
 
 
