@@ -108,7 +108,7 @@ class Pivot:
             fill_value   = fill_value,
             observed     = observed,
         ).pipe(self._reindex_na)
-        self._format()
+        self._cast()
 
     def __drop_na(self, df):
         fillna = lambda s: cols.add_category(s, self.na_cat).fillna(self.na_cat)
@@ -151,12 +151,12 @@ class Pivot:
             )
         return df
 
-    def _format(self):
+    def _cast(self):
         def get_dtype(col):
             if self.percentages == 'transform' or self.label_rel in col:
                 return float
             else:
-                return self.dtypes.get(self.aggfunc, None)
+                return self.dtypes.get(aggfunc, float)
 
         dtypes_to_set = {col:get_dtype(col) for col in self.df.columns if get_dtype(col)}
         self.df = self.df.astype(dtypes_to_set)
@@ -194,7 +194,7 @@ class Pivot:
                     totals_name    = totals_name,
                     subtotals_name = subtotals_name,
                 )
-        self._format()
+        self._cast()
         return self
 
     def percs(
@@ -233,11 +233,9 @@ class Pivot:
                 ndigits        = ndigits,
                 drop_totals    = drop_totals,
             )
-        self._format()
+        self._cast()
         return self
 
-    def _output_dtype(self, aggfunc=None):
-        return self.dtypes.get(aggfunc, float)
 
     def _get_axlevels(self, axis, level):
         get_level = partial(levels._get_level_number, self._obj)
