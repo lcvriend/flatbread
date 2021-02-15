@@ -156,7 +156,7 @@ class Pivot:
             if self.percentages == 'transform' or self.label_rel in col:
                 return float
             else:
-                return self.dtypes.get(aggfunc, float)
+                return self.dtypes.get(self.aggfunc, float)
 
         dtypes_to_set = {col:get_dtype(col) for col in self.df.columns if get_dtype(col)}
         self.df = self.df.astype(dtypes_to_set)
