@@ -44,7 +44,7 @@ def unittest(column, aggregation, test, comparison):
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
-            value = result[column].agg(operation)
+            value = result[column].agg(aggregation)
             method = test.title().replace(' ', '').replace('_', '')
             message = f"[{func.__module__}][{func.__name__}]"
             tester = getattr(TestCase(), f"assert{method}")
