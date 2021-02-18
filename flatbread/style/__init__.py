@@ -27,6 +27,7 @@ def add_table_style(
     header_border_bottom = None,
     row_header_border = None,
     style_table = None,
+    style_caption = None,
     style_col_header = None,
     style_row_header = None,
     style_data = None,
@@ -34,9 +35,12 @@ def add_table_style(
 ):
     return [
         # table
-        {"selector": '', "props": style_table},
+        {"selector": "", "props": style_table},
         {"selector": "thead tr:first-child", "props": table_border_top},
         {"selector": "tbody tr:last-child", "props": table_border_bottom},
+
+        #caption
+        {"selector": "caption", "props": style_caption},
 
         # header
         {"selector": "thead tr:last-child", "props": header_border_bottom},
@@ -51,6 +55,28 @@ def add_table_style(
         # data
         {"selector": "tbody td", "props": style_data},
     ]
+
+
+@config.load_settings('style')
+@dicts_to_tuples
+def add_flatbread_style(
+    uuid,
+    *,
+    style_title=None,
+    **kwargs
+):
+    args = locals()
+    todo = list()
+
+    selectors = dict(
+        style_title = "h3",
+    )
+
+    for k,v in args.items():
+        if k == 'uuid' or k == 'kwargs' or not v:
+            continue
+        todo.append(dict(selector=selectors[k], props=v))
+    return todo
 
 
 @config.load_settings(['style', 'aggregation'])

@@ -50,8 +50,13 @@
         "col_border_subtotal": {
             "border-left": "1px dotted #BDBDBD"
         },
+        "style_title": null,
         "style_table": {
             "border-collapse": "collapse"
+        },
+        "style_caption": {
+            "caption-side": "bottom",
+            "padding": "0.5em"
         },
         "style_data": {
             "text-align": "right", "padding": "0.5em"
