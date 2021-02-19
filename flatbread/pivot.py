@@ -287,11 +287,12 @@ class PivotTable:
         axis           = 0,
         level          = 0,
         how            = None,
-        totals_name    = None,
-        subtotals_name = None,
         label_abs      = None,
         label_rel      = None,
         ndigits        = 1,
+        unit           = 100,
+        totals_name    = None,
+        subtotals_name = None,
         drop_totals    = False,
     ):
         """Add percentages to output or transform output to percentages.
@@ -318,16 +319,18 @@ class PivotTable:
             Level number or name for the level on which to calculate the
             percentages. Level 0 uses row/column totals, otherwise subtotals within
             the specified level are used.
-        totals_name : str, default CONFIG.aggregation['totals_name']
-            Name identifying the row/column totals.
-        subtotals_name : str, default CONFIG.aggregation['subtotals_name']
-            Name identifying the row/column subtotals.
         ndigits : int, default CONFIG.aggregation['ndigits']
             Number of digits used for rounding the percentages.
+        unit : int, default 100
+            Unit of prevalence.
         label_abs : str, default CONFIG.aggregation['label_abs']
             Value used for labelling the absolute columns.
         label_abs : str, default CONFIG.aggregation['label_rel']
             Value used for labelling the relative columns.
+        totals_name : str, default CONFIG.aggregation['totals_name']
+            Name identifying the row/column totals.
+        subtotals_name : str, default CONFIG.aggregation['subtotals_name']
+            Name identifying the row/column subtotals.
         drop_totals : bool, default False
             Drop row/column totals from output.
         """
@@ -338,11 +341,12 @@ class PivotTable:
                 percs.add,
                 axis           = axis,
                 level          = level,
-                totals_name    = totals_name,
-                subtotals_name = subtotals_name,
                 label_abs      = label_abs,
                 label_rel      = label_rel,
                 ndigits        = ndigits,
+                unit           = unit,
+                totals_name    = totals_name,
+                subtotals_name = subtotals_name,
                 drop_totals    = drop_totals,
             )
         elif self.percs_method == 'transform':
@@ -350,11 +354,12 @@ class PivotTable:
                 percs.transform,
                 axis           = axis,
                 level          = level,
-                totals_name    = totals_name,
-                subtotals_name = subtotals_name,
                 label_abs      = label_abs,
                 label_rel      = label_rel,
                 ndigits        = ndigits,
+                unit           = unit,
+                totals_name    = totals_name,
+                subtotals_name = subtotals_name,
                 drop_totals    = drop_totals,
             )
         self.__cast()

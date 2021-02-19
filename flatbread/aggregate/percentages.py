@@ -34,11 +34,12 @@ def add(
     *,
     axis:           Any  = 0,
     level:          Any  = None,
-    totals_name:    str  = None,
-    subtotals_name: str  = None,
     ndigits:        int  = None,
+    unit:           int  = 100,
     label_abs:      str  = None,
     label_rel:      str  = None,
+    totals_name:    str  = None,
+    subtotals_name: str  = None,
     drop_totals:    bool = False,
     **kwargs
 ) -> pd.DataFrame:
@@ -67,16 +68,18 @@ def add(
         Level number or name for the level on which to calculate the
         percentages. Level 0 uses row/column totals, otherwise subtotals within
         the specified level are used.
-    totals_name : str, default CONFIG.aggregation['totals_name']
-        Name identifying the row/column totals.
-    subtotals_name : str, default CONFIG.aggregation['subtotals_name']
-        Name identifying the row/column subtotals.
     ndigits : int, default CONFIG.aggregation['ndigits']
         Number of digits used for rounding the percentages.
+    unit : int, default 100
+        Unit of prevalence.
     label_abs : str, default CONFIG.aggregation['label_abs']
         Value used for labelling the absolute columns.
     label_abs : str, default CONFIG.aggregation['label_rel']
         Value used for labelling the relative columns.
+    totals_name : str, default CONFIG.aggregation['totals_name']
+        Name identifying the row/column totals.
+    subtotals_name : str, default CONFIG.aggregation['subtotals_name']
+        Name identifying the row/column subtotals.
     drop_totals : bool, default False
         Drop row/column totals from output.
 
@@ -92,9 +95,10 @@ def add(
         transform,
         axis           = axis,
         level          = level,
+        unit           = unit,
+        ndigits        = ndigits,
         totals_name    = totals_name,
         subtotals_name = subtotals_name,
-        ndigits        = ndigits,
         drop_totals    = drop_totals,
     ).pipe(
         axes.add_axis_level,
@@ -136,9 +140,10 @@ def transform(
     *,
     axis:           Any  = 0,
     level:          Any  = None,
+    ndigits:        int  = None,
+    unit:           int  = 100,
     totals_name:    str  = None,
     subtotals_name: str  = None,
-    ndigits:        int  = None,
     drop_totals:    bool = False,
     **kwargs
 ) -> pd.DataFrame:
@@ -164,13 +169,15 @@ def transform(
         Level number or name for the level on which to calculate the
         percentages. Level 0 uses row/column totals, otherwise subtotals within
         the specified level are used.
+    ndigits : int, default CONFIG.aggregation['ndigits']
+        Number of digits used for rounding the percentages.
+        Set to -1 to not round.
+    unit : int, default 100
+        Unit of prevalence.
     totals_name : str, default ONFIG.aggregation['totals_name']
         Name identifying the row/column totals.
     subtotals_name : str, default CONFIG.aggregation['subtotals_name']
         Name identifying the row/column subtotals.
-    ndigits : int, default CONFIG.aggregation['ndigits']
-        Number of digits used for rounding the percentages.
-        Set to -1 to not round.
     drop_totals : bool, default False
         Drop row/column totals from output.
 
@@ -190,6 +197,7 @@ def transform(
         totals_name    = totals_name,
         subtotals_name = subtotals_name,
         ndigits        = ndigits,
+        unit           = unit,
         drop_totals    = drop_totals,
     )
     kwargs.update(settings)
@@ -216,6 +224,7 @@ def _axis_wise(
     totals_name:    str,
     subtotals_name: str,
     ndigits:        int,
+    unit:           int,
     **kwargs
 ) -> pd.DataFrame:
 
@@ -230,7 +239,7 @@ def _axis_wise(
     else:
         totals = df.loc[totals_name]
 
-    result = df.div(totals).multiply(100)
+    result = df.div(totals).multiply(unit)
     return result.pipe(round_percentages, ndigits=ndigits)
 
 
@@ -241,6 +250,7 @@ def _table_wise(
     level:          int,
     subtotals_name: str,
     ndigits:        int,
+    unit:           int,
     **kwargs
 ) -> pd.DataFrame:
 
@@ -257,7 +267,7 @@ def _table_wise(
             .reindex_like(df).bfill().bfill(axis=1)
         )
 
-    result = df.div(totals).multiply(100)
+    result = df.div(totals).multiply(unit)
     return result.pipe(round_percentages, ndigits=ndigits)
 
 
@@ -269,6 +279,7 @@ def _table_wise_multilevel(
     totals_name:    str,
     subtotals_name: str,
     ndigits:        int,
+    unit:           int,
     **kwargs
 ) -> pd.DataFrame:
 
@@ -283,5 +294,5 @@ def _table_wise_multilevel(
         .reindex_like(df).bfill().bfill(axis=1)
     )
 
-    result = df.div(totals).multiply(100)
+    result = df.div(totals).multiply(unit)
     return result.pipe(round_percentages, ndigits=ndigits)
