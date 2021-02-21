@@ -5,8 +5,6 @@ provide a bit more functionality to pandas pivot table capabilities while
 also remaining as close as possible to pandas native objects.
 """
 
-from functools import partial
-
 import pandas as pd
 from pandas._libs import lib
 from pandas.io.formats.style import Styler
@@ -16,7 +14,6 @@ from flatbread.aggregate import totals as aggtotals
 from flatbread.aggregate import percentages as percs
 from flatbread.build import columns as cols
 from flatbread import axes
-from flatbread import levels
 from flatbread import style
 from flatbread.config import HERE, load_settings
 
