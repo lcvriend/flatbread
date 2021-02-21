@@ -20,7 +20,7 @@ def round_percentages(
     "Round percentages in a way that they always add up to 100%."
     if ndigits < 0:
         return s
-    cumsum = s.cumsum().round(ndigits)
+    cumsum = s.fillna(0).cumsum().round(ndigits)
     prev_baseline = cumsum.shift(1).fillna(0)
     return cumsum - prev_baseline
 
