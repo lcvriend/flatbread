@@ -26,8 +26,9 @@ AXES_ALIAS = {
 
 
 def transpose(func):
-    """Decorator that transposes df if `axis` == 1, then operates on it and transposes it back. Consumes the `axis` kwarg."""
-
+    """
+    Decorator that transposes df if `axis` == 1, then operates on it and transposes it back. Consumes the `axis` kwarg.
+    """
     @wraps(func)
     def wrapper(df, *args, **kwargs):
         axis = kwargs.pop('axis', 0)
@@ -75,7 +76,6 @@ def add_item_to_key(
     level: int = 0,
 ) -> Tuple[Any, ...]:
     "Insert `item` into `key` at a specified `level`."
-
     key = key_to_list(key)
     if level < 0:
         key.append(item)
@@ -90,7 +90,6 @@ def replace_item_in_key(
     level: int = 0,
 ) -> Tuple[Any, ...]:
     "Replace item in `key` at `level` with `item`."
-
     key = key_to_list(key)
     key[level] = item
     return tuple(key)
@@ -98,7 +97,6 @@ def replace_item_in_key(
 
 def key_to_list(key: Any) -> List[Any]:
     "Convert `key` to list."
-
     if isinstance(key, (str, int, float, Decimal)):
         return [key]
     else:
@@ -110,7 +108,6 @@ def order_categories(
     categories: Sequence,
 ) -> pd.Series:
     "Order `categories` in series `s`."
-
     return pd.Categorical(s, categories, ordered=True)
 
 
@@ -120,7 +117,6 @@ def add_category(
     level:    int = 0
 ) -> pd.Index:
     "Add `category` to categorical `index` at specified `level`."
-
     def add_cat(index, cats):
         if isinstance(index, pd.CategoricalIndex):
             cats = [item for item in cats if item not in index.categories]
@@ -147,7 +143,6 @@ def reindex_na(
     na_position: str = None,
     **kwargs
 ):
-
     for i in range(df.index.nlevels):
         ordered_labels = _get_ordered_labels(df.index, i, na_rep, na_position)
         kwds = {}

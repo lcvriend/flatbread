@@ -1,9 +1,3 @@
-"""Trendline Module
-================
-
-This module contains the TrendLine class for generating trendline graphs.
-"""
-
 import re
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
@@ -44,7 +38,8 @@ LAYOUT = dict(
 
 
 class TrendLine(object):
-    """TrendLine
+    """
+    TrendLine
     =========
     Object for plotting time series data.
     For convenience the x-axis can also be assigned to categorical variables.
@@ -115,7 +110,6 @@ class TrendLine(object):
     from_df :
         Create a timeseries from a df using `flatbread.axes.timeseries_offset`
     """
-
     general: Dict[str, Any] = {}
     comparison: Dict[str, Any] = {}
     size: Dict[str, Tuple[int, int]] = {}
@@ -144,7 +138,8 @@ class TrendLine(object):
         colors      = None,
         extension   = 'png',
     ):
-        """Initialize the TrendLine object.
+        """
+        Initialize the TrendLine object.
 
         Parameters
         ==========
@@ -189,7 +184,6 @@ class TrendLine(object):
         extension : str, default 'png'
             Extension designating the save format.
         """
-
         self.ts          = ts
         self.start       = start
         self.end         = end
