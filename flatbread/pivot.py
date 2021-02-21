@@ -1,8 +1,6 @@
-"""Pivot module
-============
-
+"""
 The pivot module provides the PivotTable object as an extension to the
-DataFrame. It is accessible through the `pita` accessor. The goal is to
+DataFrame. It is accessible through the ``pita`` accessor. The goal is to
 provide a bit more functionality to pandas pivot table capabilities while
 also remaining as close as possible to pandas native objects.
 """
@@ -12,7 +10,7 @@ from functools import partial
 import pandas as pd
 from pandas._libs import lib
 from pandas.io.formats.style import Styler
-
+from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 
 from flatbread.aggregate import totals as aggtotals
 from flatbread.aggregate import percentages as percs
@@ -22,16 +20,31 @@ from flatbread import levels
 from flatbread import style
 from flatbread.config import HERE, load_settings
 
-# print(HERE)
 
-FbStyler = Styler.from_custom_template(
-    HERE / "style",
-    "flatbread.tpl"
-)
+class FlatbreadStyler(Styler):
+    env = Environment(
+        loader=ChoiceLoader([
+            FileSystemLoader(HERE / "style",),  # contains ours
+            Styler.loader,  # the default
+        ])
+    )
+    template = env.get_template("flatbread.tpl")
+
+    def to_html(self, path=None):
+        "Return html, if ``path`` is given write to path instead."
+        html = self.render()
+        if path is not None:
+            with open(path, 'w', encoding='utf8') as f:
+                f.write(html)
+            return None
+        return html
 
 
 @pd.api.extensions.register_dataframe_accessor("pita")
 class PivotTable:
+    """
+    DataFrame accessor ``pita`` extending pivot table capabilities.
+    """
     dtypes = {
         'count': 'Int64',
         'size':  'Int64',
@@ -84,37 +97,42 @@ class PivotTable:
         level      = 0,
         **kwargs
     ):
-        """View DataFrame as a spreadsheet-style pivot table.
+        """
+        View DataFrame as a spreadsheet-style pivot table.
 
-        ### Pivot data
+        **Pivot data**
+
         If index and/or columns are given, then the data will first be pivoted
-        using `pivot_table`.
+        using ``pivot_table``.
 
         See: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot_table.html
 
-        ### Missing values
-        If `na` is `keep` or `hide` then the missing values will be handled
-        before grouping. Normally, when pivoting records that do not fall into
-        a group are dropped. Instead these records will be assigned to a special
-        NA-group, that can factor into the calculations for percentages/totals.
+        **Missing values**
 
-        ### Totals
-        Set `add_totals` to True to add (sub)totals to `axis` and `level` of
-        the output.
+        If ``na`` is ``keep`` or ``hide`` then the missing values will be
+        handled before grouping. Normally, when pivoting records that do not
+        fall into a group are dropped. Instead these records will be assigned
+        to a special NA-group, that can factor into the calculations for
+        percentages/totals.
 
-        ### Further processing
+        **Totals**
+
+        Set ``add_totals`` to True to add (sub)totals to ``axis`` and ``level``
+        of the output.
+
+        **Further processing**
+
         Additional operations may be chained to add more features to the output:
 
-        Totals :
+        :meth:`flatbread.pivot.PivotTable.totals`
             Add (sub)totals to the output.
-        Percs :
+        :meth:`flatbread.pivot.PivotTable.percs`
             Add percentages to the output or transform to percentages.
-        Style :
+        :meth:`flatbread.pivot.PivotTable.style`
             Add formatting and styling to the output.
 
         Arguments
         ---------
-        ### PIVOT_TABLE
         values : column to aggregate, optional
         index : column, Grouper, array, or list of the previous
             If an array is passed, it must be the same length as the data. The
@@ -127,9 +145,10 @@ class PivotTable:
             group by on the pivot table column. If an array is passed, it is
             being used as the same manner as column values.
         aggfunc : function, list of functions, dict, default size or count
-            Contrary to `pivot_table` default behavior, `pita` will act as a
-            crosstab. If no values are given, then `size` is used to aggregate
-            otherwise `count`.
+            Contrary to ``pivot_table`` default behavior, ``pita`` will act as
+            a crosstab. If no values are given, then ``size`` is used to
+            aggregate otherwise ``count``.
+
             If list of functions passed, the resulting pivot table will have
             hierarchical columns whose top level are the function names
             (inferred from the function objects themselves). If dict is passed,
@@ -142,37 +161,33 @@ class PivotTable:
             This only applies if any of the groupers are Categoricals. If True:
             only show observed values for categorical groupers. If False: show
             all values for categorical groupers.
-
-        ### TOTALS
         add_totals : bool, default False
             Add (sub)totals to table.
-        axis : {0 or 'index', 1 or 'columns', 2 or 'all', None}, default 0
+        axis : {0, 'index', 1, 'columns', 2, 'all'} or tuple, default 0
             Axis to add totals:
-            0 : add row with column totals
-            1 : add column with row totals
-            2 : add row and column totals
-            If None supply `level` with a tuple for each axis.
-        level : scalar, sequence, tuple of (sequence of) scalars, default 0
-            Level number/name of the level to use for calculating the totals.
-            - Level 0 adds row/column totals, otherwise subtotals are added
-            within the specified level.
-            - Multiple levels may be supplied in a list; (sub)totals will be
-            added to each level in the list.
-            - If no `axis` is supplied, then `level` may consist of a tuple of
-            scalars/lists of scalars. The first element in the tuple designates
-            the levels in the index, the second element the levels in the
-            columns.
-        totals_name : scalar, default 'Total'
-            Name for the row/column totals.
-        subtotals_name : scalar, default 'Subtotal'
-            Name for the row/column subtotals.
 
-        ### NA
+            * index (0) : add row with column totals
+            * columns (1) : add column with row totals
+            * all (2) : add row and column totals
+
+            Tuple (size 2) mapping level(s) to rows/columns may also be
+            supplied (will ignore ``level``).
+        level : int, level name, or sequence of such, default 0
+            Level number or name for the level to use for calculating the
+            totals. Level 0 adds row/column totals, otherwise subtotals are
+            added within the specified level. Multiple levels may be supplied
+            in a list.
+        totals_name : str, default 'Total'
+            Name for the row/column totals.
+        subtotals_name : str, default 'Subtotal'
+            Name for the row/column subtotals.
         na : {'drop', 'keep', 'hide'}, default 'drop'
             How to handle records that do not fall into any category of a group:
-            drop : exclude these records from the view completely
-            keep : keep these records and assign them to a `na_cat` group
-            hide : these records but hide them from output
+
+            * drop : exclude these records from the view completely
+            * keep : keep these records and assign them to a `na_cat` group
+            * hide : these records but hide them from output
+
             If keep/hide is selected then totals and percentages will be
             calculated over the whole dataset.
         na_cat : scalar, default '-'
@@ -218,25 +233,6 @@ class PivotTable:
             )
         return self
 
-    def style(self, formatter=None, na_rep=None, **kwargs):
-        """Format and style the output.
-
-        Arguments
-        ---------
-        formatter : func, default lambda x: f'{x:n}'
-            pandas.io.formats.style.Styler.format
-        """
-        default = lambda x: f'{x:n}'
-        formatter = default if formatter is None else formatter
-
-
-        # styler = self.df.style.format(formatter, na_rep=self.na_rep)
-        styler = FbStyler(self.df).format(formatter, na_rep=self.na_rep)
-        rules = style.get_style(self.df, styler.uuid, **kwargs)
-        styler.set_table_styles(rules, overwrite=False)
-        self.flatbread_styles = style.add_flatbread_style(styler.uuid, **kwargs)
-        return styler
-
     def totals(
         self,
         axis           = 0,
@@ -245,40 +241,46 @@ class PivotTable:
         subtotals_name = None,
         **kwargs
     ):
-        """Add (sub)totals to output.
+        """
+        Add (sub)totals to output.
 
         Arguments
         ---------
-        axis : {0 or 'index', 1 or 'columns', 2 or 'all', None}, default 0
+        axis : {0, 'index', 1, 'columns', 2, 'all'} or tuple, default 0
             Axis to add totals:
-            0 : add row with column totals
-            1 : add column with row totals
-            2 : add row and column totals
-            If None supply `level` with a tuple for each axis.
-        level : int, level name, or sequence of such, tuple of levels, default 0
-            Level number/name of the level to use for calculating the totals.
-            Level 0 adds row/column totals, otherwise subtotals are added within
-            the specified level. Multiple levels may be supplied in a list. If
-        totals_name : str, default CONFIG.aggregation['totals_name']
-            Name for the row/column totals.
-        subtotals_name : str, default CONFIG.aggregation['subtotals_name']
-            Name for the row/column subtotals.
-        """
 
+            * index (0) : add row with column totals
+            * columns (1) : add column with row totals
+            * all (2) : add row and column totals
+
+            Tuple (size 2) mapping level(s) to rows/columns may also be
+            supplied (will ignore ``level``).
+        level : int, level name, or sequence of such, default 0
+            Level number or name for the level to use for calculating the
+            totals. Level 0 adds row/column totals, otherwise subtotals are
+            added within the specified level. Multiple levels may be supplied
+            in a list.
+        totals_name : str, default 'Total'
+            Name for the row/column totals.
+        subtotals_name : str, default 'Subtotal'
+            Name for the row/column subtotals.
+
+        Returns
+        -------
+        PivotTable
+            An Excel style pivot table
+        """
         check_namespace = lambda x,y: getattr(self, y, None) if x is None else x
         totals_name = check_namespace(totals_name, 'totals_name')
         subtotals_name = check_namespace(subtotals_name, 'subtotals_name')
 
-        axlevels = self.__get_axlevels(axis, level)
-        for ax, levels in enumerate(axlevels):
-            for level in levels:
-                self._df = self._df.pipe(
-                    aggtotals.add,
-                    axis           = ax,
-                    level          = level,
-                    totals_name    = totals_name,
-                    subtotals_name = subtotals_name,
-                )
+        self._df = self._df.pipe(
+            aggtotals.add,
+            axis           = axis,
+            level          = level,
+            totals_name    = totals_name,
+            subtotals_name = subtotals_name,
+        )
         self.__cast()
         return self
 
@@ -287,62 +289,68 @@ class PivotTable:
         axis           = 0,
         level          = 0,
         how            = None,
-        totals_name    = None,
-        subtotals_name = None,
+        ndigits        = 1,
+        unit           = 100,
         label_abs      = None,
         label_rel      = None,
-        ndigits        = 1,
+        totals_name    = None,
+        subtotals_name = None,
         drop_totals    = False,
     ):
-        """Add percentages to output or transform output to percentages.
-
-        This operation will result in a table containing the absolute values as
-        well as the percentage values. The absolute and percentage columns will
-        be labelled by an added level to the column index.
+        """
+        Add percentages to output or transform output to percentages.
 
         (Sub)totals are required to calculate the percentages. If (sub)totals
-        are present (`totals_name` and `subtotals_name` are used to identify
+        are present (``totals_name`` and ``subtotals_name`` are used to identify
         totals within the table) these will be used. When no (sub)totals are
-        found, they will be added to the table. Set `drop_totals` to False to
+        found, they will be added to the table. Set ``drop_totals`` to False to
         exlude them from the output.
+
+        Set ``unit`` in order to calculate other fractions.
 
         Arguments
         ---------
-        df : pd.DataFrame
         axis : {0 or 'index', 1 or 'columns', 2 or 'all'}, default 0
             Axis to use for calculating the percentages:
-            0 : percentages of each row by the column totals
-            1 : percentages of each column by the row totals
-            2 : percentages of each field by the table total
+
+            * 0 : percentages of each row by the column totals
+            * 1 : percentages of each column by the row totals
+            * 2 : percentages of each field by the table total
         level : int, level name, default 0
             Level number or name for the level on which to calculate the
-            percentages. Level 0 uses row/column totals, otherwise subtotals within
-            the specified level are used.
-        totals_name : str, default CONFIG.aggregation['totals_name']
-            Name identifying the row/column totals.
-        subtotals_name : str, default CONFIG.aggregation['subtotals_name']
-            Name identifying the row/column subtotals.
-        ndigits : int, default CONFIG.aggregation['ndigits']
+            percentages. Level 0 uses row/column totals, otherwise subtotals
+            within the specified level are used.
+        how : {'add', 'transform'}, default 'add'
+
+        ndigits : int, default 1
             Number of digits used for rounding the percentages.
-        label_abs : str, default CONFIG.aggregation['label_abs']
-            Value used for labelling the absolute columns.
-        label_abs : str, default CONFIG.aggregation['label_rel']
-            Value used for labelling the relative columns.
+            Set to -1 for no rounding.
+        unit : int, default 100,
+            Unit of prevalence.
+        totals_name : str, default 'Total'
+            Name identifying the row/column totals.
+        subtotals_name : str, default 'Subtotal'
+            Name identifying the row/column subtotals.
         drop_totals : bool, default False
             Drop row/column totals from output.
-        """
 
+        Returns
+        -------
+        PivotTable
+            An Excel style pivot table
+        """
         self.percs_method = how if how is not None else self.percs_method
         if self.percs_method == 'add':
             self._df = self._df.pipe(
                 percs.add,
                 axis           = axis,
                 level          = level,
-                totals_name    = totals_name,
-                subtotals_name = subtotals_name,
+                ndigits        = ndigits,
+                unit           = unit,
                 label_abs      = label_abs,
                 label_rel      = label_rel,
-                ndigits        = ndigits,
+                totals_name    = totals_name,
+                subtotals_name = subtotals_name,
                 drop_totals    = drop_totals,
             )
         elif self.percs_method == 'transform':
@@ -350,15 +358,43 @@ class PivotTable:
                 percs.transform,
                 axis           = axis,
                 level          = level,
-                totals_name    = totals_name,
-                subtotals_name = subtotals_name,
+                ndigits        = ndigits,
+                unit           = unit,
                 label_abs      = label_abs,
                 label_rel      = label_rel,
-                ndigits        = ndigits,
+                totals_name    = totals_name,
+                subtotals_name = subtotals_name,
                 drop_totals    = drop_totals,
             )
         self.__cast()
         return self
+
+    def style(self, formatter=None, na_rep=None, **kwargs):
+        """
+        Format and style the output.
+
+        Arguments
+        ---------
+        formatter : func, default lambda x: f'{x:n}'
+            pandas.io.formats.style.Styler.format
+
+        Returns
+        -------
+        FlatbreadStyler
+            Subclass of pandas.io.formats.style.Styler
+        """
+        default = lambda x: f'{x:n}'
+        formatter = default if formatter is None else formatter
+        # styler = self.df.style.format(formatter, na_rep=self.na_rep)
+        styler = FlatbreadStyler(self.df).format(formatter, na_rep=self.na_rep)
+        rules = style.get_style(self.df, styler.uuid, **kwargs)
+        styler.set_table_styles(rules, overwrite=False)
+        self.flatbread_styles = style.add_flatbread_style(styler.uuid, **kwargs)
+        return styler
+
+    def to_html(self, path=None):
+        "Return html, if ``path`` is given write to path instead."
+        return self.style().to_html(path=path)
 
     @property
     def df(self):
@@ -371,10 +407,12 @@ class PivotTable:
         self._df = df
 
     def add_caption(self, caption):
+        "Add caption to table."
         self.caption = caption
         return self
 
     def add_title(self, title):
+        "Add title to table."
         self.title = title
         return self
 
@@ -450,35 +488,6 @@ class PivotTable:
 
         dtypes_to_set = {col:get_dtype(col) for col in self._df.columns if get_dtype(col)}
         self._df = self._df.astype(dtypes_to_set)
-
-
-    def __get_axlevels(self, axis, level):
-        get_level = partial(levels._get_level_number, self._obj)
-
-        def listify(x):
-            if x is None:
-                return []
-            return [x] if isinstance(x, (int, str)) else x
-
-        level = listify(level)
-        if isinstance(axis, (int, str)):
-            axis = axes._get_axis_number(axis)
-            if axis == 0:
-                level = [get_level(0, item) for item in level]
-                return (level, [])
-            elif axis == 1:
-                level = [get_level(1, item) for item in level]
-                return ([], level)
-            else:
-                row_level = [get_level(0, item) for item in level]
-                col_level = [get_level(1, item) for item in level]
-                return [row_level, col_level]
-        else:
-            axlevels = [listify(item) for item in listify(axis)]
-            return (
-                [get_level(0, item) for item in axlevels[0]],
-                [get_level(1, item) for item in axlevels[1]],
-            )
 
     def _repr_html_(self):
         return self.style().render(

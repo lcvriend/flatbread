@@ -24,40 +24,45 @@ def add(
     subtotals_name: str = None,
     **kwargs
 ) -> pd.DataFrame:
-
-    """Add totals to `df` on `level` of `axis`.
+    """
+    Add totals to `df` on `level` of `axis`.
 
     Arguments
     ---------
     df : pd.DataFrame
-    axis : {0 or 'index', 1 or 'columns', 2 or 'all'}, default 0
+    axis : {0, 'index', 1, 'columns', 2, 'all'} or tuple, default 0
         Axis to add totals:
-        0 : add row with column totals
-        1 : add column with row totals
-        2 : add row and column totals
+
+        * index (0) : add row with column totals
+        * columns (1) : add column with row totals
+        * all (2) : add row and column totals
+
+        Tuple (size 2) mapping level(s) to rows/columns may also be supplied
+        (will ignore ``level``).
     level : int, level name, or sequence of such, default 0
         Level number or name for the level to use for calculating the totals.
         Level 0 adds row/column totals, otherwise subtotals are added within
         the specified level. Multiple levels may be supplied in a list.
-    totals_name : str, default CONFIG.aggregation['totals_name']
+    totals_name : str, default 'Total'
         Name for the row/column totals.
-    subtotals_name : str, default CONFIG.aggregation['subtotals_name']
+    subtotals_name : str, default 'Subtotal'
         Name for the row/column subtotals.
 
     Returns
     -------
-    pd.DataFrames
+    pd.DataFrame
+        DataFrame with added (sub)totals.
     """
-
-    convert = lambda x: [x] if isinstance(x, (int, str)) else x
-    for i in convert(level):
-        df = _add(
-            df,
-            axis=axis,
-            level=i,
-            totals_name=totals_name,
-            subtotals_name=subtotals_name,
-        )
+    axlevels = levels.get_axlevels(df, axis, level)
+    for ax, lvls in enumerate(axlevels):
+        for level in lvls:
+            df = df.pipe(
+                _add,
+                axis           = ax,
+                level          = level,
+                totals_name    = totals_name,
+                subtotals_name = subtotals_name,
+            )
     return df
 
 
@@ -72,7 +77,6 @@ def _add(
     subtotals_name: str = None,
     **kwargs
 ) -> pd.DataFrame:
-
     if level == 0:
         if axis < 2:
             return _add_to_axis(
@@ -139,7 +143,6 @@ def _add_within_axis(
     subtotals_name: str = None,
     **kwargs
 ) -> pd.DataFrame:
-
     kwargs.update(
         dict(
             level=level,
@@ -169,7 +172,6 @@ def _add_to_axis_level(
     subtotals_name: str = None,
     **kwargs
 ) -> pd.DataFrame:
-
     is_totals_row = lambda x: totals_name in x or subtotals_name in x
     totals = df.loc[
         [not is_totals_row(item) for item in df.index]
@@ -199,17 +201,6 @@ def _add_to_axis_level(
         labels = list(dict.fromkeys(df.index.get_level_values(i)))
         output = output.reindex(labels, level=i)
     return output
-
-
-# @copy
-# @log.entry
-# def add_totals_group(df, group_name):
-#     levels = list(range(df.index.nlevels))
-#     group = df.groupby(level=levels[1:]).sum()
-#     group.index = pd.MultiIndex.from_tuples(
-#         [add_item_to_key(key, group_name) for key in group.index]
-#     )
-#     return df.append(group)
 
 
 ################################################################################### DECORATORS

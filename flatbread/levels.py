@@ -1,8 +1,11 @@
-from functools import wraps
+from functools import wraps, partial
 from typing import Any, Callable, TypeVar, Union, cast
 
 import pandas as pd # type: ignore
+from pandas._libs.lib import is_scalar
 
+
+import flatbread.axes as axes
 
 F = TypeVar('F', bound=Callable[..., Any])
 
@@ -116,3 +119,47 @@ def _validate_level(
             f"Level {level} is out of range for index."
         )
     return None
+
+
+def get_axlevels(df, axis, level=None):
+    """
+    Return tuple of levels. First element maps to rows, second to columns.
+    Both axis and levels are converted to their number(s). It is also possible
+    to pass ``axis`` a tuple directly. In this case ``level`` will be ignored.
+
+    Arguments
+    ---------
+    axis : scalar, sequence of scalars, tuple of levels
+    level : scalar, sequence of scalars
+
+    Returns
+    -------
+    tuple
+        Tuple mapping levels to axes.
+    """
+    get_level = partial(_get_level_number, df)
+
+    def listify(x):
+        if x is None:
+            return []
+        return [x] if is_scalar(x) else x
+
+    level = listify(level)
+    if isinstance(axis, (int, str)):
+        axis = axes._get_axis_number(axis)
+        if axis == 0:
+            level = [get_level(0, item) for item in level]
+            return (level, [])
+        elif axis == 1:
+            level = [get_level(1, item) for item in level]
+            return ([], level)
+        else:
+            row_level = [get_level(0, item) for item in level]
+            col_level = [get_level(1, item) for item in level]
+            return [row_level, col_level]
+    else:
+        axlevels = [listify(item) for item in listify(axis)]
+        return (
+            [get_level(0, item) for item in axlevels[0]],
+            [get_level(1, item) for item in axlevels[1]],
+        )
