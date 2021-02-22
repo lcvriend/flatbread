@@ -47,7 +47,6 @@ class PivotTable:
         'size':  'Int64',
     }
 
-    @load_settings(['aggregation', 'na', 'format'])
     def __init__(
         self,
         pandas_obj,
@@ -81,6 +80,7 @@ class PivotTable:
         self.title          = None
         self.caption        = None
 
+    @load_settings(['aggregation', 'na'])
     def __call__(
         self,
         values     = None,
@@ -230,6 +230,7 @@ class PivotTable:
             )
         return self
 
+    @load_settings(['aggregation', 'na'])
     def totals(
         self,
         axis           = 0,
@@ -281,18 +282,20 @@ class PivotTable:
         self.__cast()
         return self
 
+    @load_settings(['aggregation', 'na'])
     def percs(
         self,
         axis           = 0,
         level          = 0,
         how            = None,
-        ndigits        = 1,
+        ndigits        = None,
         unit           = 100,
         label_abs      = None,
         label_rel      = None,
         totals_name    = None,
         subtotals_name = None,
         drop_totals    = False,
+        **kwargs
     ):
         """
         Add percentages to output or transform output to percentages.
@@ -366,6 +369,7 @@ class PivotTable:
         self.__cast()
         return self
 
+    @load_settings(['aggregation', 'na'])
     def style(self, formatter=None, na_rep=None, **kwargs):
         """
         Format and style the output.

@@ -12,8 +12,7 @@ HERE = Path(__file__).resolve().parent
 
 
 class Config:
-    """Config
-    ======
+    """
     Object for loading and storing settings.
 
     Loads 'config.json' if it exists or else 'config.defaults.json' from library
@@ -39,8 +38,10 @@ class Config:
     """
 
     configfile = HERE / 'config.json'
+    _configdefault = HERE / 'config.defaults.json'
 
-    def __init__(self, settings):
+    def __init__(self, jsonpath, settings):
+        self.path_to_active = jsonpath
         self.__dict__ = settings
         self.set_locale()
 
@@ -60,13 +61,12 @@ class Config:
 
     def reload(self):
         "Reload json file."
-        with open(self.configfile, 'r', encoding='utf8') as f:
+        with open(self.path_to_active, 'r', encoding='utf8') as f:
             self.__dict__ = json.load(f)
 
     def defaults(self):
         "Set settings to defaults."
-        self.configfile = HERE / 'config.defaults.json'
-        self.__dict__ = self.load(self.configfile)
+        self.__dict__ = self.load(self._configdefault)
 
     def factory_reset(self):
         "Reset settings (deletes saved settings too)."
@@ -93,10 +93,11 @@ class Config:
     def from_json(cls):
         """Construct class from 'config.json', defaults to
         'config.defaults.json' if it does not exist."""
-        if not cls.configfile.exists():
-            cls.configfile = HERE / 'config.defaults.json'
-        settings = cls.load(cls.configfile)
-        return cls(settings)
+        configfile = cls.configfile
+        if not configfile.exists():
+            configfile = cls._configdefault
+        settings = cls.load(configfile)
+        return cls(configfile, settings)
 
     @staticmethod
     def load(configfile):

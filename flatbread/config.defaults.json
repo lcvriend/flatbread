@@ -59,7 +59,8 @@
             "padding": "0.5em"
         },
         "style_data": {
-            "text-align": "right", "padding": "0.5em"
+            "text-align": "right",
+            "padding": "0.5em"
         },
         "style_row_header": {
             "text-align": "left",
