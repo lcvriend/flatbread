@@ -1,5 +1,4 @@
 import random
-import re
 import string
 
 import pandas as pd
@@ -134,10 +133,3 @@ def dataset_numbers(recipe, k=100):
     for i, val in enumerate(floats):
         data[f'float{i}'] = [random.random() * val for i in range(k)]
     return pd.DataFrame(data)
-
-
-def extract_part(html, part):
-    html = re.search(f"<{part}.*>[\w\W]*</{part}>", html).group()
-    html = re.sub("\s{2,}", '\n', html)
-    print(html)
-    return None
