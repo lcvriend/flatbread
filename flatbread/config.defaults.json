@@ -62,6 +62,10 @@
             "text-align": "right",
             "padding": "0.5em"
         },
+        "style_data_row": null,
+        "style_data_row_hover": {
+            "background-color": "#DEDEDE"
+        },
         "style_row_header": {
             "text-align": "left",
             "font-weight": "normal",
