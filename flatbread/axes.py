@@ -103,6 +103,14 @@ def key_to_list(key: Any) -> List[Any]:
         return list(key)
 
 
+def check_idx_for_key(index: pd.Index, key: Any) -> bool:
+    "Check if key is in index"
+    if isinstance(index, pd.MultiIndex):
+        return any(key in i for i in index)
+    else:
+        return any(key == i for i in index)
+
+
 def order_categories(
     s:          pd.Series,
     categories: Sequence,
