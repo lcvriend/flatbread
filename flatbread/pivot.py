@@ -7,34 +7,14 @@ also remaining as close as possible to pandas native objects.
 
 import pandas as pd
 from pandas._libs import lib
-from pandas.io.formats.style import Styler
-from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 
 from flatbread.aggregate import totals as aggtotals
 from flatbread.aggregate import percentages as percs
 from flatbread.build import columns as cols
 from flatbread import axes
 from flatbread import style
+from flatbread.style import FlatbreadStyler
 from flatbread.config import HERE, load_settings
-
-
-class FlatbreadStyler(Styler):
-    env = Environment(
-        loader=ChoiceLoader([
-            FileSystemLoader(HERE / "style",),  # contains ours
-            Styler.loader,  # the default
-        ])
-    )
-    template = env.get_template("flatbread.tpl")
-
-    def to_html(self, path=None):
-        "Return html, if ``path`` is given write to path instead."
-        html = self.render()
-        if path is not None:
-            with open(path, 'w', encoding='utf8') as f:
-                f.write(html)
-            return None
-        return html
 
 
 @pd.api.extensions.register_dataframe_accessor("pita")
@@ -79,6 +59,7 @@ class PivotTable:
         self.percs_method   = percs_method
         self.title          = None
         self.caption        = None
+        self.style          = FlatbreadStyler(self)
 
     @load_settings(['aggregation', 'na'])
     def __call__(
@@ -268,9 +249,8 @@ class PivotTable:
         PivotTable
             An Excel style pivot table
         """
-        check_namespace = lambda x,y: getattr(self, y, None) if x is None else x
-        totals_name = check_namespace(totals_name, 'totals_name')
-        subtotals_name = check_namespace(subtotals_name, 'subtotals_name')
+        totals_name = self.__update_namespace('totals_name', totals_name)
+        subtotals_name = self.__update_namespace('subtotals_name', totals_name)
 
         self._df = self._df.pipe(
             aggtotals.add,
@@ -339,6 +319,9 @@ class PivotTable:
         PivotTable
             An Excel style pivot table
         """
+        totals_name = self.__update_namespace('totals_name', totals_name)
+        subtotals_name = self.__update_namespace('subtotals_name', totals_name)
+
         self.percs_method = how if how is not None else self.percs_method
         if self.percs_method == 'add':
             self._df = self._df.pipe(
@@ -369,33 +352,9 @@ class PivotTable:
         self.__cast()
         return self
 
-    @load_settings(['aggregation', 'na'])
-    def style(self, formatter=None, na_rep=None, **kwargs):
-        """
-        Format and style the output.
-
-        Arguments
-        ---------
-        formatter : func, default lambda x: f'{x:n}'
-            pandas.io.formats.style.Styler.format
-
-        Returns
-        -------
-        FlatbreadStyler
-            Subclass of pandas.io.formats.style.Styler
-        """
-        default = lambda x: f'{x:n}'
-        formatter = default if formatter is None else formatter
-        # styler = self.df.style.format(formatter, na_rep=self.na_rep)
-        styler = FlatbreadStyler(self.df).format(formatter, na_rep=self.na_rep)
-        rules = style.get_style(self.df, styler.uuid, **kwargs)
-        styler.set_table_styles(rules, overwrite=False)
-        self.flatbread_styles = style.add_flatbread_style(styler.uuid, **kwargs)
-        return styler
-
     def to_html(self, path=None):
         "Return html, if ``path`` is given write to path instead."
-        return self.style().to_html(path=path)
+        return self.style.to_html(path=path)
 
     @property
     def df(self):
@@ -482,7 +441,8 @@ class PivotTable:
 
     def __cast(self):
         def get_dtype(col):
-            if self.percs_method== 'transform' or self.label_rel in col:
+            test = lambda x,lbl: x in lbl if isinstance(x, tuple) else x == lbl
+            if self.percs_method == 'transform' or test(col, self.label_rel):
                 return float
             else:
                 return self.dtypes.get(self.aggfunc, float)
@@ -490,9 +450,10 @@ class PivotTable:
         dtypes_to_set = {col:get_dtype(col) for col in self._df.columns if get_dtype(col)}
         self._df = self._df.astype(dtypes_to_set)
 
+    def __update_namespace(self, var_name, val):
+        val = getattr(self, var_name, None) if val is None else val
+        setattr(self, var_name, val)
+        return val
+
     def _repr_html_(self):
-        return self.style().render(
-            flatbread_styles=self.flatbread_styles,
-            table_title=self.title,
-            caption=self.caption,
-        )
+        return self.style.render()

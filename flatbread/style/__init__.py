@@ -1,339 +1,108 @@
-import re
-from functools import wraps
+"""
+Functions for building up pivot table styling.
+"""
 
-import flatbread.config as config
-from flatbread.config import CONFIG
-
-
-def dicts_to_tuples(func):
-    """Convert key-word arguments containing a dict into a list of key-value tuples. Used for converting the styling stored in the json into the format
-    that pandas wants it."""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        for k1,v1 in kwargs.items():
-            if isinstance(v1, dict):
-                kwargs[k1] = [(k2,v2) for k2,v2 in v1.items()]
-        return func(*args, **kwargs)
-    return wrapper
+from collections import defaultdict
+from typing import (
+    Any,
+    Callable,
+    DefaultDict,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 
 
-@config.load_settings('style')
-@dicts_to_tuples
-def add_table_style(
-    *,
-    table_border_top = None,
-    table_border_bottom = None,
-    header_border_bottom = None,
-    row_header_border = None,
-    style_table = None,
-    style_caption = None,
-    style_col_header = None,
-    style_row_header = None,
-    style_data = None,
-    **kwargs
-):
-    return [
-        # table
-        {"selector": "", "props": style_table},
-        {"selector": "thead tr:first-child", "props": table_border_top},
-        {"selector": "tbody tr:last-child", "props": table_border_bottom},
+import pandas as pd
+from pandas.core.dtypes.inference import is_float, is_integer
+from pandas.io.formats.style import Styler
+from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 
-        #caption
-        {"selector": "caption", "props": style_caption},
-
-        # header
-        {"selector": "thead tr:last-child", "props": header_border_bottom},
-
-        # columns
-        {"selector": "thead th", "props": style_col_header},
-
-        # index
-        {"selector": "tbody th", "props": style_row_header},
-        {"selector": "tbody tr th:last-of-type", "props": row_header_border},
-
-        # data
-        {"selector": "tbody td", "props": style_data},
-    ]
+import flatbread.style._helpers as helpers
+from flatbread.style.table import add_table_style, add_flatbread_style
+from flatbread.style.levels import add_level_dividers
+from flatbread.style.subtotals import add_subtotals_style
+from flatbread.config import HERE
 
 
-@config.load_settings('style')
-@dicts_to_tuples
-def add_flatbread_style(
-    uuid,
-    *,
-    style_title=None,
-    **kwargs
-):
-    args = locals()
-    todo = list()
-
-    selectors = dict(
-        style_title = "h3",
+class FlatbreadStyler(Styler):
+    env = Environment(
+        loader=ChoiceLoader([
+            FileSystemLoader(HERE / "style/templates"),
+            Styler.loader,
+        ])
     )
+    template = env.get_template("flatbread.tpl")
 
-    for k,v in args.items():
-        if k == 'uuid' or k == 'kwargs' or not v:
-            continue
-        todo.append(dict(selector=selectors[k], props=v))
-    return todo
+    def __init__(
+        self,
+        pivottable,
+        *args,
+        **kwargs,
+    ):
+        self.pita = pivottable
+        super().__init__(self.pita.df, *args, **kwargs)
 
+        def default_display_func(x):
+            if self.na_rep is not None and pd.isna(x):
+                return self.na_rep
+            elif is_float(x):
+                n_precision = len(str(int(x))) + self.precision
+                display_format = f"{x:.{n_precision}n}"
+                return display_format
+            elif is_integer(x):
+                display_format = f"{x:n}"
+                return display_format
+            else:
+                return x
 
-@config.load_settings(['style', 'aggregation'])
-@dicts_to_tuples
-def add_level_dividers(
-    df,
-    uuid,
-    *,
-    row_border_levels = None,
-    col_border_levels = None,
-    totals_name = None,
-    **kwargs
-):
-    if df.index.nlevels == 1:
-        rows = _row_level_dividers(df, row_border_levels, totals_name)
-    else:
-        rows = _row_level_dividers_mi(df, uuid, row_border_levels)
+        self._display_funcs = defaultdict(lambda: default_display_func)
+        self.pita_styles = self._get_styles()
+        self.flatbread_styles = add_flatbread_style(self.uuid, **kwargs)
 
-    if df.columns.nlevels == 1:
-        cols = _col_level_dividers(df, col_border_levels, totals_name)
-    else:
-        cols = _col_level_dividers_mi(df, uuid, col_border_levels)
-    return rows + cols
+    def to_html(self, path=None):
+        "Return html, if ``path`` is given write to path instead."
+        html = self.render()
+        if path is not None:
+            with open(path, 'w', encoding='utf8') as f:
+                f.write(html)
+            return None
+        return html
 
+    @helpers.dicts_to_tuples
+    def _get_styles(self, **kwargs):
+        "Build and combine all styling, then return it."
+        table = add_table_style(**kwargs)
+        levels = add_level_dividers(
+            self.pita.df,
+            self.uuid,
+            totals_name=self.pita.totals_name,
+            **kwargs
+        )
+        subtotals = add_subtotals_style(
+            self.pita.df,
+            self.uuid,
+            subtotals_name=self.pita.subtotals_name,
+            **kwargs
+        )
+        return table + levels + subtotals
 
-def _row_level_dividers(df, row_border_levels, totals_name):
-    """Check for totals_name in keys of regular index, if found then add styling
-    to last row of the table body."""
+    def set_table_styles(self, *args, axis=0, **kwargs):
+        super().set_table_styles(*args, axis=axis, overwrite=False)
+        self.pita_styles = self._get_styles(**kwargs)
+        self.flatbread_styles = add_flatbread_style(self.uuid, **kwargs)
 
-    if totals_name in df.index:
-        return [{"selector": "tbody tr:last-child", "props": row_border_levels}]
-    else:
-        return []
-
-
-def _row_level_dividers_mi(df, uuid, row_border_levels):
-    """Add styling to th and td for each row level in a multiindex, excluding
-    the smallest level."""
-
-    add_uuid = lambda x,uuid: uuid + x
-    uuid = f"#T_{uuid}"
-    nlevels = df.index.nlevels
-    ndivs = nlevels - 1
-
-    def create_style_rules_rows(level):
-        row0 = f"th.row_heading.level{level}"
-        rown = (
-            f"th.row_heading.level{level}~th,"
-            f"{uuid} th.row_heading.level{level}~td")
-        return [
-            {"selector": row0, "props": row_border_levels},
-            {"selector": rown, "props": row_border_levels},
-        ]
-
-    return [
-        rule for level in range(ndivs)
-        for rule in create_style_rules_rows(level)
-        if rule is not None
-    ]
-
-
-def _col_level_dividers(df, style, totals_name):
-    """Check for totals_name in keys of regular column index, if found then add
-    styling to last column of the table body."""
-
-    if totals_name in df.columns:
-        return [
-            {"selector": "td:last-child", "props": style},
-            {"selector": "thead th:last-child", "props": style},
-        ]
-    else:
-        return []
-
-
-def _col_level_dividers_mi(df, uuid, style):
-    """Add styling to th, .blank and td for each col level in a multiindex,
-    excluding the smallest level."""
-
-    add_uuid = lambda x,uuid: uuid + x
-    uuid = f"#T_{uuid} "
-
-    def create_rules_for_thead(level, from_level):
-        codes = [col[0:from_level + 1] for col in df.columns]
-        prev = codes[0]
-        selectors = list()
-        for colnum, code in enumerate(codes):
-            if code != prev:
-                selector = f"th.level{level}.col{colnum}"
-                selectors.append(add_uuid(selector, uuid))
-            prev = code
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    def create_rules_for_blanks(from_level):
-        offset = len(df.index.names) + 1
-        codes = [col[0:from_level + 1] for col in df.columns]
-        prev = codes[0]
-        selectors = list()
-        for colnum, code in enumerate(codes):
-            if code != prev:
-                selector = f"tr .blank:nth-child({colnum + offset})"
-                selectors.append(add_uuid(selector, uuid))
-            prev = code
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    def create_rules_for_tbody(from_level):
-        codes = [col[0:from_level + 1] for col in df.columns]
-        prev = codes[0]
-        selectors = list()
-        for colnum, code in enumerate(codes):
-            if code != prev:
-                selector = f"td.col{colnum}"
-                selectors.append(add_uuid(selector, uuid))
-            prev = code
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    nlevels = df.columns.nlevels
-    ndivs = list()
-    sticky = None
-    for i in range(nlevels):
-        if i < nlevels - 1:
-            ndivs.append((i, i))
-            sticky = i
+    def render(self, **kwargs):
+        if self.table_styles is not None:
+            self.table_styles.extend(self.pita_styles)
         else:
-            ndivs.append((i, sticky))
-
-    dividers_thead = [
-        rule for level in ndivs
-        for rule in create_rules_for_thead(*level)
-    ]
-    dividers_blanks = create_rules_for_blanks(ndivs[-1][1])
-    dividers_tbody = create_rules_for_tbody(ndivs[-1][1])
-    return dividers_thead + dividers_tbody + dividers_blanks
-
-
-@config.load_settings(['style', 'aggregation'])
-@dicts_to_tuples
-def add_subtotals_style(
-    df,
-    uuid,
-    *,
-    style_data_subtotal=None,
-    style_header_subtotal=None,
-    row_border_subtotal=None,
-    col_border_subtotal=None,
-    subtotals_name=None,
-    **kwargs
-):
-    rows = _subtotal_rows(
-        df,
-        uuid,
-        style_data_subtotal,
-        style_header_subtotal,
-        row_border_subtotal,
-        subtotals_name,
-    )
-    cols = _subtotal_cols(
-        df,
-        uuid,
-        style_data_subtotal,
-        style_header_subtotal,
-        col_border_subtotal,
-        subtotals_name,
-    )
-    return rows + cols
-
-
-def _subtotal_rows(
-    df,
-    uuid,
-    style_data_subtotal,
-    style_header_subtotal,
-    row_border_subtotal,
-    subtotals_name,
-):
-    add_uuid = lambda x,uuid: uuid + x
-    uuid = f"#T_{uuid} "
-    rows = [i for i, key in enumerate(df.index) if subtotals_name in key]
-
-    def create_rules_for_data(rows):
-        style = style_data_subtotal + row_border_subtotal
-        selectors = list()
-        for row in rows:
-            for col in range(df.shape[1]):
-                selector = f"td.row{row}.col{col}"
-                selectors.append(add_uuid(selector, uuid))
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    def create_rules_for_index(rows):
-        style = style_header_subtotal + row_border_subtotal
-        selectors = list()
-        for row in rows:
-            start = df.index[row].index(subtotals_name)
-            for level in range(start, df.index.nlevels):
-                selector = f"th.level{level}.row{row}"
-                selectors.append(add_uuid(selector, uuid))
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    data = create_rules_for_data(rows) if rows else []
-    index = create_rules_for_index(rows) if rows else []
-    return data + index
-
-
-def _subtotal_cols(
-    df,
-    uuid,
-    style_data_subtotal,
-    style_header_subtotal,
-    col_border_subtotal,
-    subtotals_name,
-):
-    add_uuid = lambda x,uuid: uuid + x
-    uuid = f"#T_{uuid} "
-    cols = [i for i, key in enumerate(df.columns) if subtotals_name in key]
-
-    def create_rules_for_data(cols):
-        style = style_data_subtotal + col_border_subtotal
-        selectors = list()
-        for col in cols:
-            for row in range(df.shape[0]):
-                selector = f"td.row{row}.col{col}"
-                selectors.append(add_uuid(selector, uuid))
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    def create_rules_for_index(cols):
-        style = style_header_subtotal + col_border_subtotal
-        selectors = list()
-        for col in cols:
-            start = df.columns[col].index(subtotals_name)
-            for level in range(start, df.columns.nlevels):
-                selector = f"th.level{level}.col{col}"
-                selectors.append(add_uuid(selector, uuid))
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    def create_rules_for_blanks(cols):
-        style = style_header_subtotal + col_border_subtotal
-        offset = len(df.index.names) + 1
-        selectors = list()
-        for col in cols:
-            selector = f"tr .blank:nth-child({col + offset})"
-            selectors.append(add_uuid(selector, uuid))
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    data = create_rules_for_data(cols) if cols else []
-    index = create_rules_for_index(cols) if cols else []
-    blanks = create_rules_for_blanks(cols) if cols else []
-    return data + index + blanks
-
-
-@dicts_to_tuples
-def get_style(df, uuid, **kwargs):
-    table = add_table_style(**kwargs)
-    levels = add_level_dividers(df, uuid, **kwargs)
-    subtotals = add_subtotals_style(df, uuid, **kwargs)
-    return table + levels + subtotals
-
-
-def get_inline_css_from_html(html):
-    regex = '<style.*>([\n\s\w\W]*)</style>'
-    match = re.search(regex, html).group(1)
-    return match.replace('}', '}\n')
+            self.table_styles = self.pita_styles
+        return super().render(
+            flatbread_styles=self.flatbread_styles,
+            table_title=self.pita.title,
+            caption=self.pita.caption,
+            **kwargs
+        )
