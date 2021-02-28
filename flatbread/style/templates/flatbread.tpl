@@ -10,7 +10,7 @@
 {{ super() }}
 {% endblock table_styles %}
 {% block table %}
-<div id="flatbread_{{uuid}}">
+<div id="flatbread_{{uuid}}" class="flatbread">
 {% block table_title %}
 {% if table_title %}<h3>{{table_title}}</h3>{% endif %}
 {% endblock table_title %}
