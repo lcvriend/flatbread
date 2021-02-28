@@ -4,7 +4,6 @@ import flatbread.aggregate as agg
 import flatbread.aggregate.totals as totals
 import flatbread.aggregate.percentages as percentages
 import flatbread.aggregate.percentages as percs
-import flatbread.build.drop as drop
 import flatbread.build.columns as columns
 import flatbread.build.columns as cols
 import flatbread.build.rows as rows

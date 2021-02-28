@@ -1,5 +1,5 @@
 """
-The pivot module provides the PivotTable object as an extension to the
+The :py:class:`flatbread.pivot.PivotTable` extension to the
 DataFrame. It is accessible through the ``pita`` accessor. The goal is to
 provide a bit more functionality to pandas pivot table capabilities while
 also remaining as close as possible to pandas native objects.
@@ -27,6 +27,7 @@ class PivotTable:
         'size':  'Int64',
     }
 
+    @load_settings(['aggregation', 'na', 'format'])
     def __init__(
         self,
         pandas_obj,
@@ -83,7 +84,7 @@ class PivotTable:
         If index and/or columns are given, then the data will first be pivoted
         using ``pivot_table``.
 
-        See: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot_table.html
+        See: :py:meth:`pandas.DataFrame.pivot_table`
 
         **Missing values**
 
@@ -441,7 +442,7 @@ class PivotTable:
 
     def __cast(self):
         def get_dtype(col):
-            test = lambda x,lbl: x in lbl if isinstance(x, tuple) else x == lbl
+            test = lambda x,lbl: lbl in x if isinstance(x, tuple) else x == lbl
             if self.percs_method == 'transform' or test(col, self.label_rel):
                 return float
             else:

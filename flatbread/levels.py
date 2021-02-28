@@ -1,11 +1,15 @@
+"""
+Helper functions for dealing with DataFrame levels.
+"""
+
 from functools import wraps, partial
 from typing import Any, Callable, TypeVar, Union, cast
 
 import pandas as pd # type: ignore
 from pandas._libs.lib import is_scalar
 
-
 import flatbread.axes as axes
+
 
 F = TypeVar('F', bound=Callable[..., Any])
 
@@ -25,9 +29,7 @@ def _get_level_number(
     axis: int,
     level: Union[str, int],
 ) -> int:
-
-    "Return level as int from `axis` of `df` by `level`."
-
+    "Return level as int from ``axis`` of ``df`` by ``level``."
     if axis == 1:
         index = df.T.index
     else:
@@ -53,14 +55,12 @@ def _validate_index_for_within_operations(
     df: pd.DataFrame,
     level: int
 ) -> None:
-
-    """Validate `index` for <within> operations.
+    """Validate ``index`` for <within> operations.
 
     Raises exception if:
-    - `index` is not a MultiIndex.
-    - `level` is not > 0.
+    - ``index`` is not a MultiIndex.
+    - ``level`` is not > 0.
     """
-
     index = df.index
     if index.nlevels == 1:
         raise ValueError(
@@ -81,9 +81,7 @@ def _get_level_from_name(
     index: pd.Index,
     level_name: Any
 ) -> int:
-
-    "Find level corresponding to `level_name` in `index`."
-
+    "Find level corresponding to ``level_name`` in ``index``."
     if not level_name in index.names:
         raise KeyError(
             f"Level '{level_name}' was not found in index."
@@ -95,9 +93,7 @@ def _get_absolute_level(
     index: pd.MultiIndex,
     level: int
 ) -> int:
-
-    "Return `level` as absolute."
-
+    "Return ``level`` as absolute."
     if level < 0:
         level = index.nlevels + level
     return level
@@ -107,13 +103,11 @@ def _validate_level(
     index: pd.Index,
     level: int
 ) -> None:
-
-    """Validate `level`.
+    """Validate ``level``.
 
     Raise exception if:
-    - `level` <= nlevels
+    - ``level`` <= nlevels
     """
-
     if abs(level) > index.nlevels:
         raise IndexError(
             f"Level {level} is out of range for index."

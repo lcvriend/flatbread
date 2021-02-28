@@ -1,3 +1,7 @@
+"""
+Build tables with fake data for testing purposes.
+"""
+
 import random
 import string
 

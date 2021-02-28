@@ -1,4 +1,8 @@
-from typing import Any
+"""
+Toolbox for operating on columns of table.
+"""
+
+from typing import Any, Sequence
 
 import pandas as pd # type: ignore
 from pandas._libs import lib
@@ -25,8 +29,7 @@ def add_level(
     level_name: Any,
     level:      int,
 ) -> pd.DataFrame:
-    "Add `level` with value `item` named `level_name` to columns."
-
+    "Add ``level`` with value ``item`` named ``level_name`` to columns."
     return axes.add_axis_level(
         df,
         item,
@@ -42,6 +45,7 @@ def totals(
     level: Any = 0,
     **kwargs
 ) -> pd.DataFrame:
+    "Add totals to columns of ``df`` on ``level``."
     return totals.add(df, axis=1, level=level, **kwargs)
 
 
@@ -51,6 +55,10 @@ def percs(
     add = False,
     **kwargs
 ) -> pd.DataFrame:
+    """
+    Add percentages or transform columns of ``df`` into percentages on
+    ``level``.
+    """
     if add:
         return percs.add(df, axis=1, level=level, **kwargs)
     return percs.transform(df, axis=1, level=level, **kwargs)
@@ -60,7 +68,7 @@ def add_category(
     s:    pd.Series,
     category: Any,
 ) -> pd.Index:
-    "Add `category` to categorical series `s`."
+    "Add ``category`` to categorical series ``s``."
 
     def add_cat(s, cats):
         if isinstance(s.dtype, pd.CategoricalDtype):
@@ -78,3 +86,9 @@ def add_category(
     # else:
     #     index = add_cat(index, category)
     return add_cat(s, category)
+
+
+@utils.copy
+def drop(df: pd.DataFrame, columns: Sequence) -> pd.DataFrame:
+    "Drop ``columns`` from ``df``."
+    return df.drop(columns, axis=1)

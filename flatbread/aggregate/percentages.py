@@ -1,3 +1,8 @@
+"""
+Functions for transforming table data into percentages and optionally
+adding it alongside the original data.
+"""
+
 from functools import wraps, partial
 from typing import Any
 

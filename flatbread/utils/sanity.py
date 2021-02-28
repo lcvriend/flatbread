@@ -1,16 +1,14 @@
-"""Sanity Module
-=============
-
-The sanity module provides decorators for checking if all goes well within the
+"""
+Provides decorators for checking if all goes well within the processing
 pipeline. The decorator tests if the output DataFrame meets a specified
 requirement. If the check fails an assertion error is raised. The following
 decorators are provided:
 
-unittest :
+:py:func:`flatbread.utils.sanity.unittest` :
     Perform a unittest from the TestCase class on a column of the data.
     First an aggregation is performed on the column, then the resulting value is
     tested against the the comparison scalar.
-length :
+:py:func:`flatbread.utils.sanity.length` :
     Check if the length of the input DataFrame is equal to/smaller than/greater than the output DataFrame.
 """
 
@@ -19,13 +17,14 @@ from functools import wraps
 
 
 def unittest(column, aggregation, test, comparison):
-    """Decorator adds unittest as a sanity check to a function. The check
+    """
+    Decorator adds unittest as a sanity check to a function. The check
     consists of an operation (`aggregation`) which aggregates the values in
     `column` into a scalar. This result will be compared to the `comparison`
     scalar using `test`. If the check fails an AssertionException is raised.
 
     Parameters
-    ==========
+    ----------
     column : str
         Column name.
     aggregation : str, func
@@ -38,8 +37,11 @@ def unittest(column, aggregation, test, comparison):
             e.g. assertGreaterEqual -> 'greater equal'
     comparison : scalar
         The value to compare the result to.
-    """
 
+    Returns
+    -------
+    func
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -55,12 +57,13 @@ def unittest(column, aggregation, test, comparison):
 
 
 def length(operator):
-    """Decorator adds a length test as sanity check to a function. If the check
+    """
+    Decorator adds a length test as sanity check to a function. If the check
     fails an AssertionException is raised. The input length will be tested
     against the output length using `operator`.
 
     Parameters
-    ==========
+    ----------
     operator : str
         Operator to use for comparing in and output
         <  : lesser than
@@ -69,8 +72,11 @@ def length(operator):
         != : not equal to
         >  : smaller than
         >= : smaller than or equal to
-    """
 
+    Returns
+    -------
+    func
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):

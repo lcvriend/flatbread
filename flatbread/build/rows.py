@@ -1,4 +1,8 @@
-from typing import Any
+"""
+Toolbox for operating on rows of table.
+"""
+
+from typing import Any, Sequence
 
 import pandas as pd # type: ignore
 
@@ -23,7 +27,7 @@ def add_level(
     level_name: Any,
     level:      int,
 ) -> pd.DataFrame:
-    "Add `level` filled with `item` named `level_name` to index."
+    "Add ``level`` filled with ``item`` named ``level_name`` to index."
 
     return axes.add_axis_level(
         df, item,
@@ -38,6 +42,7 @@ def totals(
     level: Any = 0,
     **kwargs
 ) -> pd.DataFrame:
+    "Add totals to rows of ``df`` on ``level``."
     return totals.add(df, level=level, **kwargs)
 
 
@@ -47,6 +52,7 @@ def percs(
     add = False,
     **kwargs
 ) -> pd.DataFrame:
+    "Add percentages or transform rows of ``df`` into percentages on ``level``."
     if add:
         return percs.add(df, level=level, **kwargs)
     return percs.transform(df, level=level, **kwargs)
@@ -57,8 +63,8 @@ def timeseries(df, datefield):
 
 
 def timeseries_offset(df, datefield, yearfield, offset_year):
-    """Create `df` with offset DateTimeIndex from `datefield`.
-    The offset will be determined by `yearfield` and `offset_year`.
+    """Create ``df`` with offset DateTimeIndex from ``datefield``.
+    The offset will be determined by ``yearfield`` and ``offset_year``.
     """
 
     ts = (
@@ -70,3 +76,9 @@ def timeseries_offset(df, datefield, yearfield, offset_year):
     )
     ts.index = pd.to_datetime(ts.index)
     return ts.sort_index()
+
+
+@utils.copy
+def rows(df: pd.DataFrame, rows: Sequence) -> pd.DataFrame:
+    "Drop ``rows`` from ``df``."
+    return df.drop(rows)

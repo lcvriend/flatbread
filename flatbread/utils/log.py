@@ -1,10 +1,9 @@
-"""Log module
-==========
+"""
+Logging the build process:
 
-The log module provides a decorator for logging the build process:
-
-entry :
-    Create a log to be stored in the DataFrame attrs under 'flatbread_log'.
+:py:func:`flatbread.utils.log.entry` :
+    Decorator for creating a log to be stored in the DataFrame attrs under
+    'flatbread_log'.
 """
 
 from functools import wraps
@@ -27,10 +26,11 @@ def create_log_entry(func, result, *args, **kwargs):
 
 
 def entry(func):
-    """Decorator for logging the build process and storing it in the attrs of
+    """
+    Decorator for logging the build process and storing it in the attrs of
     the df under 'flatbread_log'. The first item in the log contains the
-    original df."""
-
+    original df.
+    """
     @wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)

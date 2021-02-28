@@ -44,7 +44,8 @@ def _subtotal_rows(
 ):
     add_uuid = lambda x,uuid: uuid + x
     uuid = f"#T_{uuid} "
-    rows = [i for i, key in enumerate(df.index) if subtotals_name in key]
+    test = lambda x,lbl: lbl in x if isinstance(x, tuple) else lbl == x
+    rows = [i for i, key in enumerate(df.index) if test(key, subtotals_name)]
 
     def create_rules_for_data(rows):
         style = style_data_subtotal + row_border_subtotal

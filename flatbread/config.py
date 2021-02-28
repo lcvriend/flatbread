@@ -1,3 +1,9 @@
+"""
+Flatbread's configuration. :py:class:`flatbread.config.Config` handles the
+config logic. The :py:func:`flatbread.config.load_settings` decorator is used
+throughout the project to automatically load defaults when calling a function.
+"""
+
 import json
 import locale
 from functools import wraps
@@ -17,24 +23,6 @@ class Config:
 
     Loads 'config.json' if it exists or else 'config.defaults.json' from library
     folder. Sections are accessed by dot notation.
-
-    Methods
-    -------
-    save :
-        Save settings.
-    defaults :
-        Load default settings (without overwriting any stored saved settings).
-    factory_reset :
-        Restore default settings (overwrite any stored saved settings).
-    get_path : str
-        Return item in `paths` as Path object.
-    set_locale : str
-        Set locale if one was provided in 'format' section under ['locale'].
-
-    Constructors
-    ------------
-    from_json :
-        Construct config object from json file.
     """
 
     configfile = HERE / 'config.json'
@@ -114,7 +102,7 @@ def get_value(
     key: str,
     value: Any = None,
 ) -> Any:
-    "If `value` is None, load value from CONFIG."
+    "If ``value`` is None, load value from ``key`` in ``settings``."
     if value is None:
         return settings[key]
     return value
@@ -123,7 +111,8 @@ def get_value(
 def load_settings(
     settings_to_load: Union[str, List[str], Dict[str, List[str]]]
 ) -> Callable[[F], F]:
-    """Decorate function with a settings loader.
+    """
+    Decorate function with a settings loader.
     If argument is None, then value will be loaded from CONFIG.
     Can load one or more sections or load specific settings from multiple
     settings.
@@ -138,6 +127,11 @@ def load_settings(
         dict of list of str:
             Keys refer to the names of the sections to be loaded,
             strings in list refer to the settings to be loaded from section.
+
+    Return
+    ------
+    func
+        Function with settings loader.
     """
     def decorator(func):
         @wraps(func)

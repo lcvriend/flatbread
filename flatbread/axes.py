@@ -1,3 +1,7 @@
+"""
+Helper functions for dealing with DataFrame levels.
+"""
+
 from decimal import Decimal
 from functools import wraps
 from typing import Any, List, Callable, TypeVar, Tuple, Sequence, cast

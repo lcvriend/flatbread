@@ -1,3 +1,7 @@
+"""
+Functions for adding totals/subtotals to tables.
+"""
+
 from collections.abc import Iterable
 from functools import wraps
 from typing import Any

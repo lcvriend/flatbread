@@ -1,18 +1,16 @@
-"""Readout module
-==============
+"""
+Decorators for adding readouts (print statements) to functions. They can be
+used to give direct visual feedback to the user during the build process. The
+following decorators are provided:
 
-The readout module contains decorators for adding readouts (print statements)
-to functions. They can be used to give direct visual feedback to the user
-during the build process. The following decorators are provided:
-
-message :
+:py:func:`flatbread.utils.readout.message` :
     Add a static message to be printed before/after processing.
-column :
+:py:func:`flatbread.utils.readout.column` :
     Calculate an aggregate from a specified column in the resuting DataFrame and
     print it.
-shape :
+:py:func:`flatbread.utils.readout.shape` :
     Print the resulting shape of the DataFrame.
-timer :
+:py:func:`flatbread.utils.readout.timer` :
     Measure time it takes for a function to process and print it.
 """
 

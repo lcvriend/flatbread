@@ -1,3 +1,9 @@
+"""
+General utility functions.
+
+:py:mod:`flatbread.utils.log`
+"""
+
 from functools import wraps
 
 

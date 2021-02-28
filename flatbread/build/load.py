@@ -1,3 +1,7 @@
+"""
+Provide access to some of pandas' data loaders.
+"""
+
 import pandas as pd # type: ignore
 
 import flatbread.utils as utils
