@@ -1,5 +1,14 @@
 """
-Functions for building up pivot table styling.
+Styling for flatbread's pivot tables. Contains
+:py:class:`flatbread.style.FlatbreadStyler` which subclasses :py:class:`pandas.io.formats.style.Styler`.
+Modules contain functions for building up the styling for flatbread's tables:
+
+:py:mod:`flatbread.style.levels` :
+    Add borders between groups and total rows/columns.
+:py:mod:`flatbread.style.subtotals` :
+    Add styling for subtotal rows/columns.
+:py:mod:`flatbread.style.table` :
+    Add styling for table and table container.
 """
 
 from collections import defaultdict
@@ -62,6 +71,7 @@ class FlatbreadStyler(Styler):
         self._display_funcs = defaultdict(lambda: default_display_func)
         self.pita_styles = self._get_styles()
         self.flatbread_styles = add_flatbread_style(self.uuid, **kwargs)
+        self.na_rep = self.pita.na_rep
 
     def to_html(self, path=None):
         "Return html, if ``path`` is given write to path instead."
@@ -91,11 +101,18 @@ class FlatbreadStyler(Styler):
         return table + levels + subtotals
 
     def set_table_styles(self, *args, axis=0, **kwargs):
-        super().set_table_styles(*args, axis=axis, overwrite=False)
+        if args:
+            super().set_table_styles(*args, axis=axis, overwrite=False)
         self.pita_styles = self._get_styles(**kwargs)
         self.flatbread_styles = add_flatbread_style(self.uuid, **kwargs)
 
     def render(self, **kwargs):
+        self.data = self.pita.df
+        self.index = self.data.index
+        self.columns = self.data.columns
+
+        self.set_table_styles()
+
         if self.table_styles is not None:
             self.table_styles.extend(self.pita_styles)
         else:
