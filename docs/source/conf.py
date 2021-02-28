@@ -32,13 +32,17 @@ release = '0.0.8'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    # 'sphinx.ext.intersphinx',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
 ]
 
+# autodoc settings
 autodoc_member_order = 'bysource'
 
-# Napoleon settings
+# intersphinx settings
+intersphinx_mapping = {'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None)}
+
+# napoleon settings
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = False
