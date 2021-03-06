@@ -77,6 +77,12 @@ class Config:
         if self.format['locale']:
             locale.setlocale(locale.LC_ALL, self.format['locale'])
 
+    def load_style(self, style):
+        "Load preset by name or style by path."
+        presets = {i.stem:i for i in (HERE / 'style/presets').glob('*.json')}
+        path = presets.get(style, Path(style))
+        self.style = self.load(path)['style']
+
     @classmethod
     def from_json(cls):
         """Construct class from 'config.json', defaults to

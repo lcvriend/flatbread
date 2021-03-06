@@ -1,0 +1,63 @@
+{
+    "style": {
+        "table_border_top": null,
+        "table_border_bottom": {
+            "border-bottom": "4px double black"
+        },
+        "header_border_bottom": null,
+        "row_header_border": {
+            "border-right": "1px solid black"
+        },
+        "row_border_levels": {
+            "border-top": "1px solid black"
+        },
+        "row_border_subtotal": {
+            "border-top": "1px dotted black"
+        },
+        "col_border_levels": null,
+        "col_border_subtotal": {
+            "border-left": "1px dotted black"
+        },
+        "style_title": null,
+        "style_table": {
+            "background": "white",
+            "border-collapse": "collapse",
+            "font-family": "Georgia, serif",
+            "color": "black",
+            "border": "1px solid black"
+        },
+        "style_caption": {
+            "caption-side": "bottom",
+            "padding": "0.5em"
+        },
+        "style_data": {
+            "text-align": "right",
+            "padding": "0.5em"
+        },
+        "style_data_row": null,
+        "style_data_row_hover": {
+            "background-color": "#878787"
+        },
+        "style_row_header": {
+            "text-align": "left",
+            "font-weight": "normal",
+            "padding": "0.5em"
+        },
+        "style_col_header": {
+            "text-align": "center",
+            "font-weight": "normal",
+            "padding": "0.5em",
+            "background": "black",
+            "color": "white",
+            "font-variant": "small-caps"
+        },
+        "style_data_subtotal": {
+            "font-style": "italic"
+        },
+        "style_header_subtotal": {
+            "text-align": "left",
+            "font-weight": "normal",
+            "padding": "0.5em"
+        }
+    }
+}
