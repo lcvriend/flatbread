@@ -78,7 +78,7 @@ def add_table_style(
         {"selector": "tbody tr", "props": style_data_row},
         {"selector": "tbody tr:hover", "props": style_data_row_hover},
     ]
-    return [style for style in styles if style['props'] is not None]
+    return [style for style in styles if style['props']]
 
 
 @config.load_settings('style')

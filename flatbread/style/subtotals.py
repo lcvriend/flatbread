@@ -1,4 +1,5 @@
 import flatbread.config as config
+import flatbread.utils as utils
 import flatbread.style._helpers as helpers
 
 
@@ -15,6 +16,12 @@ def add_subtotals_style(
     subtotals_name=None,
     **kwargs
 ):
+
+    style_data_subtotal = utils.listify(style_data_subtotal)
+    style_header_subtotal = utils.listify(style_header_subtotal)
+    row_border_subtotal = utils.listify(row_border_subtotal)
+    col_border_subtotal = utils.listify(col_border_subtotal)
+
     rows = _subtotal_rows(
         df,
         uuid,
@@ -48,7 +55,8 @@ def _subtotal_rows(
     rows = [i for i, key in enumerate(df.index) if test(key, subtotals_name)]
 
     def create_rules_for_data(rows):
-        style = style_data_subtotal + row_border_subtotal
+        style_elements = style_data_subtotal + row_border_subtotal
+        style = [i for i in style_elements if i]
         selectors = list()
         for row in rows:
             for col in range(df.shape[1]):
@@ -61,7 +69,8 @@ def _subtotal_rows(
         return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
 
     def create_rules_for_index(rows):
-        style = style_header_subtotal + row_border_subtotal
+        style_elements = style_header_subtotal + row_border_subtotal
+        style = [i for i in style_elements if i]
         selectors = list()
         for row in rows:
             start = df.index[row].index(subtotals_name)
@@ -89,7 +98,8 @@ def _subtotal_cols(
     cols = [i for i, key in enumerate(df.columns) if test(key, subtotals_name)]
 
     def create_rules_for_data(cols):
-        style = style_data_subtotal + col_border_subtotal
+        style_elements = style_data_subtotal + col_border_subtotal
+        style = [i for i in style_elements if i]
         selectors = list()
         for col in cols:
             for row in range(df.shape[0]):
@@ -98,7 +108,8 @@ def _subtotal_cols(
         return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
 
     def create_rules_for_index(cols):
-        style = style_header_subtotal + col_border_subtotal
+        style_elements = style_header_subtotal + col_border_subtotal
+        style = [i for i in style_elements if i]
         selectors = list()
         for col in cols:
             start = df.columns[col].index(subtotals_name)

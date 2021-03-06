@@ -9,6 +9,7 @@ import pandas as pd # type: ignore
 from pandas._libs.lib import is_scalar
 
 import flatbread.axes as axes
+import flatbread.utils as utils
 
 
 F = TypeVar('F', bound=Callable[..., Any])
@@ -132,13 +133,7 @@ def get_axlevels(df, axis, level=None):
         Tuple mapping levels to axes.
     """
     get_level = partial(_get_level_number, df)
-
-    def listify(x):
-        if x is None:
-            return []
-        return [x] if is_scalar(x) else x
-
-    level = listify(level)
+    level = utils.listify(level)
     if isinstance(axis, (int, str)):
         axis = axes._get_axis_number(axis)
         if axis == 0:
@@ -152,7 +147,7 @@ def get_axlevels(df, axis, level=None):
             col_level = [get_level(1, item) for item in level]
             return [row_level, col_level]
     else:
-        axlevels = [listify(item) for item in listify(axis)]
+        axlevels = [utils.listify(item) for item in utils.listify(axis)]
         return (
             [get_level(0, item) for item in axlevels[0]],
             [get_level(1, item) for item in axlevels[1]],

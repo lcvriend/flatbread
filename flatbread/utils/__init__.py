@@ -5,6 +5,7 @@ General utility functions.
 """
 
 from functools import wraps
+from pandas._libs.lib import is_scalar
 
 
 def copy(func):
@@ -14,3 +15,9 @@ def copy(func):
         result = func(df, *args, **kwargs)
         return result
     return wrapper
+
+
+def listify(x):
+    if x is None:
+        return []
+    return [x] if is_scalar(x) else list(x)

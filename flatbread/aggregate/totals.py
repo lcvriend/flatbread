@@ -182,7 +182,7 @@ def _add_to_axis_level(
     ].groupby(level=list(range(level)), sort=False).sum()
 
     def make_key(key, item, nlevels):
-        key = axes.key_to_list(key)
+        key = utils.listify(key)
         key.append(item)
         if len(key) < nlevels:
             key = key + [''] * (nlevels - len(key))

@@ -80,7 +80,7 @@ def add_item_to_key(
     level: int = 0,
 ) -> Tuple[Any, ...]:
     "Insert `item` into `key` at a specified `level`."
-    key = key_to_list(key)
+    key = utils.listify(key)
     if level < 0:
         key.append(item)
     else:
@@ -94,17 +94,9 @@ def replace_item_in_key(
     level: int = 0,
 ) -> Tuple[Any, ...]:
     "Replace item in `key` at `level` with `item`."
-    key = key_to_list(key)
+    key = utils.listify(key)
     key[level] = item
     return tuple(key)
-
-
-def key_to_list(key: Any) -> List[Any]:
-    "Convert `key` to list."
-    if isinstance(key, (str, int, float, Decimal)):
-        return [key]
-    else:
-        return list(key)
 
 
 def check_idx_for_key(index: pd.Index, key: Any) -> bool:
