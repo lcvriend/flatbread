@@ -1,6 +1,9 @@
 {
     "general": {
+        "store_output_in_cwd": true,
         "use_is_selector": false,
+        "add_important_to_props_on_render": true,
+        "add_important_to_props_on_export": false
     },
     "paths": {
         "output": "output",
@@ -64,7 +67,7 @@
         },
         "style_data_row": null,
         "style_data_row_hover": {
-            "background-color": "#DEDEDE"
+            "background-color": "#878787"
         },
         "style_row_header": {
             "text-align": "left",

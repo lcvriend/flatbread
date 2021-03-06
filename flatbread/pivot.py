@@ -12,7 +12,6 @@ from flatbread.aggregate import totals as aggtotals
 from flatbread.aggregate import percentages as percs
 from flatbread.build import columns as cols
 from flatbread import axes
-from flatbread import style
 from flatbread.style import FlatbreadStyler
 from flatbread.config import HERE, load_settings
 
@@ -41,6 +40,7 @@ class PivotTable:
         label_rel      = None,
         ndigits        = None,
         percs_method   = None,
+        aggfunc        = None,
         **kwargs
     ):
         self._obj           = pandas_obj
@@ -58,6 +58,7 @@ class PivotTable:
         self.label_rel      = label_rel
         self.ndigits        = ndigits
         self.percs_method   = percs_method
+        self.aggfunc        = aggfunc
         self.title          = None
         self.caption        = None
         self.style          = FlatbreadStyler(self)
@@ -183,6 +184,8 @@ class PivotTable:
             An Excel style pivot table
         """
 
+        self.style = FlatbreadStyler(self)
+
         for k, v in kwargs.items():
             if k in self.__dict__:
                 self.__dict__[k] = v
@@ -210,6 +213,7 @@ class PivotTable:
                 level = level,
                 **kwargs
             )
+        self.style.data = self.df
         return self
 
     @load_settings(['aggregation', 'na'])
@@ -250,8 +254,10 @@ class PivotTable:
         PivotTable
             An Excel style pivot table
         """
-        totals_name = self.__update_namespace('totals_name', totals_name)
-        subtotals_name = self.__update_namespace('subtotals_name', totals_name)
+        totals_name = self.__update_namespace(
+            'totals_name', totals_name)
+        subtotals_name = self.__update_namespace(
+            'subtotals_name', subtotals_name)
 
         self._df = self._df.pipe(
             aggtotals.add,
@@ -320,8 +326,10 @@ class PivotTable:
         PivotTable
             An Excel style pivot table
         """
-        totals_name = self.__update_namespace('totals_name', totals_name)
-        subtotals_name = self.__update_namespace('subtotals_name', totals_name)
+        totals_name = self.__update_namespace(
+            'totals_name', totals_name)
+        subtotals_name = self.__update_namespace(
+            'subtotals_name', subtotals_name)
 
         self.percs_method = how if how is not None else self.percs_method
         if self.percs_method == 'add':

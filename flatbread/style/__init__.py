@@ -23,6 +23,7 @@ from typing import (
     Tuple,
     Union,
 )
+from uuid import uuid4
 
 
 import pandas as pd
@@ -34,7 +35,7 @@ import flatbread.style._helpers as helpers
 from flatbread.style.table import add_table_style, add_flatbread_style
 from flatbread.style.levels import add_level_dividers
 from flatbread.style.subtotals import add_subtotals_style
-from flatbread.config import HERE
+from flatbread.config import HERE, load_settings
 
 
 class FlatbreadStyler(Styler):
@@ -46,10 +47,16 @@ class FlatbreadStyler(Styler):
     )
     template = env.get_template("flatbread.tpl")
 
+    @load_settings({'general': [
+        'add_important_to_props_on_render',
+        'add_important_to_props_on_export',
+    ]})
     def __init__(
         self,
         pivottable,
         *args,
+        add_important_to_props_on_render=None,
+        add_important_to_props_on_export=None,
         **kwargs,
     ):
         self.pita = pivottable
@@ -69,13 +76,16 @@ class FlatbreadStyler(Styler):
                 return x
 
         self._display_funcs = defaultdict(lambda: default_display_func)
-        self.pita_styles = self._get_styles()
-        self.flatbread_styles = add_flatbread_style(self.uuid, **kwargs)
+        self.pita_styles = {}
+        # self.pita_styles = self._get_styles()
+        # self.flatbread_styles = add_flatbread_style(self.uuid, **kwargs)
         self.na_rep = self.pita.na_rep
+        self.add_important_to_props_on_render = add_important_to_props_on_render
+        self.add_important_to_props_on_export = add_important_to_props_on_export
 
     def to_html(self, path=None):
         "Return html, if ``path`` is given write to path instead."
-        html = self.render()
+        html = self.render(export=True)
         if path is not None:
             with open(path, 'w', encoding='utf8') as f:
                 f.write(html)
@@ -83,6 +93,7 @@ class FlatbreadStyler(Styler):
         return html
 
     @helpers.dicts_to_tuples
+    @helpers.drop_rules_with_no_props
     def _get_styles(self, **kwargs):
         "Build and combine all styling, then return it."
         table = add_table_style(**kwargs)
@@ -103,22 +114,48 @@ class FlatbreadStyler(Styler):
     def set_table_styles(self, *args, axis=0, **kwargs):
         if args:
             super().set_table_styles(*args, axis=axis, overwrite=False)
-        self.pita_styles = self._get_styles(**kwargs)
-        self.flatbread_styles = add_flatbread_style(self.uuid, **kwargs)
+        if kwargs:
+            self.pita_styles = kwargs
+        return self
 
-    def render(self, **kwargs):
+    def clear(self):
+        super().clear()
+        self.pita_styles = dict()
+
+    def render(self, export=False, **kwargs):
         self.data = self.pita.df
         self.index = self.data.index
         self.columns = self.data.columns
 
-        self.set_table_styles()
+        kwargs = {} if kwargs is None else kwargs
+        style_pivottable = self._get_styles(
+            **self.pita_styles, **kwargs)
+        style_container = add_flatbread_style(self.uuid, **kwargs)
 
         if self.table_styles is not None:
-            self.table_styles.extend(self.pita_styles)
+            self.table_styles.extend(style_pivottable)
         else:
-            self.table_styles = self.pita_styles
+            self.table_styles = style_pivottable
+
+        # because all styling is built up at in one go
+        # we need to clean up duplicates
+        # this could be avoided if set_table_styles
+        # only targets the items that are actually changed
+        # this would require a restructuring of the code
+        self.table_styles = helpers.clean_up_double_css_rules(self.table_styles)
+
+        # vscode (insiders) overrides the css from flatbread
+        # in order to prevent this, a !important is added to the prop values
+        # this is can be turned on/off globally through CONFIG
+        # when saving to html this option is disabled.
+        perf = (
+            self.add_important_to_props_on_export
+            if export else self.add_important_to_props_on_render)
+        do = 'add' if perf else 'remove'
+        self.table_styles = helpers.add_remove_important(self.table_styles, do)
+
         return super().render(
-            flatbread_styles=self.flatbread_styles,
+            flatbread_styles=style_container,
             table_title=self.pita.title,
             caption=self.pita.caption,
             **kwargs
