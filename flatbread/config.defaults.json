@@ -1,6 +1,6 @@
 {
     "general": {
-        "store_output_in_cwd": true
+        "use_is_selector": false,
     },
     "paths": {
         "output": "output",
