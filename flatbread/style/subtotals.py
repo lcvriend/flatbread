@@ -52,7 +52,11 @@ def _subtotal_rows(
         selectors = list()
         for row in rows:
             for col in range(df.shape[1]):
-                selector = f"td.row{row}.col{col}"
+                # :not(#\9) is necessary to increase specificity by 1
+                # if this is not added and the subtotal is added to
+                # not the lowest available level, then the regular
+                # level border will override the subtotal styling
+                selector = f"td.row{row}.col{col}:not(#\9)"
                 selectors.append(add_uuid(selector, uuid))
         return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
 
@@ -62,7 +66,7 @@ def _subtotal_rows(
         for row in rows:
             start = df.index[row].index(subtotals_name)
             for level in range(start, df.index.nlevels):
-                selector = f"th.level{level}.row{row}"
+                selector = f"th.level{level}.row{row}:not(#\9)"
                 selectors.append(add_uuid(selector, uuid))
         return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
 
