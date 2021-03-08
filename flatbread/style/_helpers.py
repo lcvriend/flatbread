@@ -43,7 +43,6 @@ def add_remove_important(rules, add_remove):
         remove = remove_important_from_props,
     )
     func = selector[add_remove]
-    print(func.__name__)
     return [{
         'selector': rule['selector'],
         'props': func(rule['props'])
@@ -85,7 +84,7 @@ def drop_rules_with_no_props(func):
 
 
 def _drop_rules_with_no_props(rules):
-    return [rule for rule in rules if rule['props'] and rule['selector']]
+    return [rule for rule in rules if rule['props']]
 
 
 def extract_content_from_html(html, tag):

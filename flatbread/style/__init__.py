@@ -34,6 +34,7 @@ from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 import flatbread.style._helpers as helpers
 from flatbread.style.table import add_table_style, add_flatbread_style
 from flatbread.style.levels import add_level_dividers
+from flatbread.style.totals import add_totals_style
 from flatbread.style.subtotals import add_subtotals_style
 from flatbread.config import HERE, load_settings
 
@@ -103,13 +104,19 @@ class FlatbreadStyler(Styler):
             totals_name=self.pita.totals_name,
             **kwargs
         )
+        totals = add_totals_style(
+            self.pita.df,
+            self.uuid,
+            totals_name=self.pita.totals_name,
+            **kwargs
+        )
         subtotals = add_subtotals_style(
             self.pita.df,
             self.uuid,
             subtotals_name=self.pita.subtotals_name,
             **kwargs
         )
-        return table + levels + subtotals
+        return table + levels + totals + subtotals
 
     def set_table_styles(self, *args, axis=0, **kwargs):
         if args:

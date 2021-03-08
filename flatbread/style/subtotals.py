@@ -1,133 +1,45 @@
-import flatbread.config as config
-import flatbread.utils as utils
-import flatbread.style._helpers as helpers
+import flatbread.config as c
+import flatbread.utils as u
+import flatbread.style._helpers as h
+import flatbread.style.generic as g
 
 
-@config.load_settings(['style', 'aggregation'])
-@helpers.dicts_to_tuples
+@c.load_settings(['general', 'style', 'aggregation'])
+@h.dicts_to_tuples
 def add_subtotals_style(
     df,
     uuid,
     *,
-    style_data_subtotal=None,
-    style_header_subtotal=None,
-    row_border_subtotal=None,
-    col_border_subtotal=None,
+    subtotal_data_cell_style=None,
+    subtotal_header_cell_style=None,
+    subtotal_row_border=None,
+    subtotal_col_border=None,
     subtotals_name=None,
+    use_is_selector=None,
     **kwargs
 ):
+    subtotal_header_cell_style = u.listify(subtotal_header_cell_style)
+    subtotal_data_cell_style = u.listify(subtotal_data_cell_style)
+    subtotal_row_border = u.listify(subtotal_row_border)
+    subtotal_col_border = u.listify(subtotal_col_border)
 
-    style_data_subtotal = utils.listify(style_data_subtotal)
-    style_header_subtotal = utils.listify(style_header_subtotal)
-    row_border_subtotal = utils.listify(row_border_subtotal)
-    col_border_subtotal = utils.listify(col_border_subtotal)
+    make_rows = g._aggfunc_rows_with_is if use_is_selector else g._aggfunc_rows
+    make_cols = g._aggfunc_cols_with_is if use_is_selector else g._aggfunc_cols
 
-    rows = _subtotal_rows(
+    rows = make_rows(
         df,
-        uuid,
-        style_data_subtotal,
-        style_header_subtotal,
-        row_border_subtotal,
+        subtotal_data_cell_style,
+        subtotal_header_cell_style,
+        subtotal_row_border,
         subtotals_name,
+        uuid,
     )
-    cols = _subtotal_cols(
+    cols = make_cols(
         df,
-        uuid,
-        style_data_subtotal,
-        style_header_subtotal,
-        col_border_subtotal,
+        subtotal_data_cell_style,
+        subtotal_header_cell_style,
+        subtotal_col_border,
         subtotals_name,
+        uuid,
     )
     return rows + cols
-
-
-def _subtotal_rows(
-    df,
-    uuid,
-    style_data_subtotal,
-    style_header_subtotal,
-    row_border_subtotal,
-    subtotals_name,
-):
-    add_uuid = lambda x,uuid: uuid + x
-    uuid = f"#T_{uuid} "
-    test = lambda x,lbl: lbl in x if isinstance(x, tuple) else lbl == x
-    rows = [i for i, key in enumerate(df.index) if test(key, subtotals_name)]
-
-    def create_rules_for_data(rows):
-        style_elements = style_data_subtotal + row_border_subtotal
-        style = [i for i in style_elements if i]
-        selectors = list()
-        for row in rows:
-            for col in range(df.shape[1]):
-                # :not(#\9) is necessary to increase specificity by 1
-                # if this is not added and the subtotal is added to
-                # not the lowest available level, then the regular
-                # level border will override the subtotal styling
-                selector = f"td.row{row}.col{col}:not(#\9)"
-                selectors.append(add_uuid(selector, uuid))
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    def create_rules_for_index(rows):
-        style_elements = style_header_subtotal + row_border_subtotal
-        style = [i for i in style_elements if i]
-        selectors = list()
-        for row in rows:
-            start = df.index[row].index(subtotals_name)
-            for level in range(start, df.index.nlevels):
-                selector = f"th.level{level}.row{row}:not(#\9)"
-                selectors.append(add_uuid(selector, uuid))
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    data = create_rules_for_data(rows) if rows else []
-    index = create_rules_for_index(rows) if rows else []
-    return data + index
-
-
-def _subtotal_cols(
-    df,
-    uuid,
-    style_data_subtotal,
-    style_header_subtotal,
-    col_border_subtotal,
-    subtotals_name,
-):
-    add_uuid = lambda x,uuid: uuid + x
-    uuid = f"#T_{uuid} "
-    test = lambda x,lbl: lbl in x if isinstance(x, tuple) else lbl == x
-    cols = [i for i, key in enumerate(df.columns) if test(key, subtotals_name)]
-
-    def create_rules_for_data(cols):
-        style_elements = style_data_subtotal + col_border_subtotal
-        style = [i for i in style_elements if i]
-        selectors = list()
-        for col in cols:
-            for row in range(df.shape[0]):
-                selector = f"td.row{row}.col{col}"
-                selectors.append(add_uuid(selector, uuid))
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    def create_rules_for_index(cols):
-        style_elements = style_header_subtotal + col_border_subtotal
-        style = [i for i in style_elements if i]
-        selectors = list()
-        for col in cols:
-            start = df.columns[col].index(subtotals_name)
-            for level in range(start, df.columns.nlevels):
-                selector = f"th.level{level}.col{col}"
-                selectors.append(add_uuid(selector, uuid))
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    def create_rules_for_blanks(cols):
-        style = style_header_subtotal + col_border_subtotal
-        offset = len(df.index.names) + 1
-        selectors = list()
-        for col in cols:
-            selector = f"tr .blank:nth-child({col + offset})"
-            selectors.append(add_uuid(selector, uuid))
-        return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
-
-    data = create_rules_for_data(cols) if cols else []
-    index = create_rules_for_index(cols) if cols else []
-    blanks = create_rules_for_blanks(cols) if cols else []
-    return data + index + blanks

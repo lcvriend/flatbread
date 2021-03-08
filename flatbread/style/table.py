@@ -8,15 +8,15 @@ def add_table_style(
     *,
     table_border_top = None,
     table_border_bottom = None,
-    header_border_bottom = None,
-    row_header_border = None,
-    style_table = None,
-    style_caption = None,
-    style_col_header = None,
-    style_row_header = None,
-    style_data = None,
-    style_data_row = None,
-    style_data_row_hover = None,
+    columns_data_border = None,
+    index_data_border = None,
+    table_style = None,
+    caption_style = None,
+    columns_header_cell_style = None,
+    index_header_cell_style = None,
+    data_cell_style = None,
+    data_row_style = None,
+    data_row_style_hover = None,
     **kwargs
 ):
     """
@@ -31,23 +31,23 @@ def add_table_style(
         Style for the top border of the table.
     table_border_bottom : dict or list of tuples, optional
         Style for the bottom border of the table.
-    header_border_bottom : dict or list of tuples, optional
+    columns_data_border : dict or list of tuples, optional
         Style for the bottom border of the header.
-    row_header_border : dict or list of tuples, optional
+    index_data_border : dict or list of tuples, optional
         Style for the border of the table row index.
-    style_table : dict or list of tuples, optional
+    table_style : dict or list of tuples, optional
         Style applied to the table elemment.
-    style_caption : dict or list of tuples, optional
+    caption_style : dict or list of tuples, optional
         Style applied to the caption element.
-    style_col_header : dict or list of tuples, optional
+    columns_header_cell_style : dict or list of tuples, optional
         Style applied to the column header.
-    style_row_header : dict or list of tuples, optional
+    index_header_cell_style : dict or list of tuples, optional
         Style applied to the row header.
-    style_data : dict or list of tuples, optional
+    data_style : dict or list of tuples, optional
         Style applied to the data cells.
-    style_data_row : dict or list of tuples, optional
+    data_row_style : dict or list of tuples, optional
         Style applied to the data rows.
-    style_data_row_hover : dict or list of tuples, optional
+    data_row_style_hover : dict or list of tuples, optional
         Style applied on hover over data rows.
 
     Returns
@@ -56,27 +56,27 @@ def add_table_style(
     """
     styles = [
         # table
-        {"selector": "", "props": style_table},
+        {"selector": "", "props": table_style},
         {"selector": "thead tr:first-child", "props": table_border_top},
         {"selector": "tbody tr:last-child", "props": table_border_bottom},
 
         #caption
-        {"selector": "caption", "props": style_caption},
+        {"selector": "caption", "props": caption_style},
 
         # header
-        {"selector": "thead tr:last-child", "props": header_border_bottom},
+        {"selector": "thead tr:last-child", "props": columns_data_border},
 
         # columns
-        {"selector": "thead th", "props": style_col_header},
+        {"selector": "thead th", "props": columns_header_cell_style},
 
         # index
-        {"selector": "tbody th", "props": style_row_header},
-        {"selector": "tbody tr th:last-of-type", "props": row_header_border},
+        {"selector": "tbody th", "props": index_header_cell_style},
+        {"selector": "tbody tr th:last-of-type", "props": index_data_border},
 
         # data
-        {"selector": "tbody td", "props": style_data},
-        {"selector": "tbody tr", "props": style_data_row},
-        {"selector": "tbody tr:hover", "props": style_data_row_hover},
+        {"selector": "tbody td", "props": data_cell_style},
+        {"selector": "tbody tr", "props": data_row_style},
+        {"selector": "tbody tr:hover", "props": data_row_style_hover},
     ]
     return [style for style in styles if style['props']]
 
@@ -86,7 +86,7 @@ def add_table_style(
 def add_flatbread_style(
     uuid,
     *,
-    style_title=None,
+    title_style = None,
     **kwargs
 ):
     """
@@ -101,7 +101,7 @@ def add_flatbread_style(
 
     Arguments
     ---------
-    style_title : dict or list of tuples, optional
+    title_style : dict or list of tuples, optional
         Style applied to the title of the table (if one is added).
 
     Returns
@@ -112,7 +112,7 @@ def add_flatbread_style(
     todo = list()
 
     selectors = dict(
-        style_title = "h3",
+        title_style = "h3",
     )
 
     for k,v in args.items():

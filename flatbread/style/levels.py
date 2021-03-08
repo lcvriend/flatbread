@@ -8,8 +8,8 @@ def add_level_dividers(
     df,
     uuid,
     *,
-    row_border_levels = None,
-    col_border_levels = None,
+    level_row_border = None,
+    level_col_border = None,
     totals_name = None,
     use_is_selector = None,
     **kwargs
@@ -19,9 +19,9 @@ def add_level_dividers(
 
     Arguments
     ---------
-    row_border_levels : dict or list of tuples, optional
+    level_row_border : dict or list of tuples, optional
         Style for the border between two row levels.
-    col_border_levels : dict or list of tuples, optional
+    level_col_border : dict or list of tuples, optional
         Style for the border between two column levels.
     totals_name : scalar
         Name for the totals row/column.
@@ -29,37 +29,15 @@ def add_level_dividers(
         Use the ``:is()`` selector. Makes the resulting css cleaner. Not yet
         supported everywhere.
     """
-    if df.index.nlevels == 1:
-        rows = _row_level_dividers(df, row_border_levels, totals_name)
-    else:
-        if use_is_selector:
-            rows = _row_level_dividers_mi_with_is(df, row_border_levels)
-        else:
-            rows = _row_level_dividers_mi(df, uuid, row_border_levels)
-
-    if df.columns.nlevels == 1:
-        cols = _col_level_dividers(df, col_border_levels, totals_name)
-    else:
-        if use_is_selector:
-            cols = _col_level_dividers_mi_with_is(df, col_border_levels)
-        else:
-            cols = _col_level_dividers_mi(df, uuid, col_border_levels)
+    has_lvls = lambda idx: idx.nlevels > 1
+    make_rows = _row_level_div_with_is if use_is_selector else _row_level_div
+    make_cols = _col_level_div_with_is if use_is_selector else _col_level_div
+    rows = make_rows(df, level_row_border, uuid) if has_lvls(df.index) else []
+    cols = make_cols(df, level_col_border, uuid) if has_lvls(df.columns) else []
     return rows + cols
 
 
-def _row_level_dividers(df, row_border_levels, totals_name):
-    """
-    Check for totals_name in keys of regular index, if found then add styling
-    to last row of the table body.
-    """
-    if totals_name in df.index:
-        return [{
-            "selector": "tbody tr:last-child", "props": row_border_levels}]
-    else:
-        return []
-
-
-def _row_level_dividers_mi(df, uuid, row_border_levels):
+def _row_level_div(df, style, uuid):
     """
     Add styling to th and td for each row level in a multiindex, excluding
     the smallest level.
@@ -73,8 +51,8 @@ def _row_level_dividers_mi(df, uuid, row_border_levels):
             f"th.row_heading.level{level}~th,"
             f"{uuid} th.row_heading.level{level}~td")
         return [
-            {"selector": row0, "props": row_border_levels},
-            {"selector": rown, "props": row_border_levels},
+            {"selector": row0, "props": style},
+            {"selector": rown, "props": style},
         ]
 
     return [
@@ -84,7 +62,7 @@ def _row_level_dividers_mi(df, uuid, row_border_levels):
     ]
 
 
-def _row_level_dividers_mi_with_is(df, row_border_levels):
+def _row_level_div_with_is(df, style, *args):
     """
     Add styling to th and td for each row level in a multiindex, excluding
     the smallest level.
@@ -97,7 +75,7 @@ def _row_level_dividers_mi_with_is(df, row_border_levels):
             f"th.row_heading.level{level}~td",
         ]
         selector = f":is({', '.join(s for s in selectors)})"
-        return [{"selector": selector, "props": row_border_levels}]
+        return [{"selector": selector, "props": style}]
     return [
         rule for level in range(ndivs)
         for rule in create_style_rules_rows(level)
@@ -105,21 +83,7 @@ def _row_level_dividers_mi_with_is(df, row_border_levels):
     ]
 
 
-def _col_level_dividers(df, style, totals_name):
-    """
-    Check for totals_name in keys of regular column index, if found then add
-    styling to last column of the table body.
-    """
-    if totals_name in df.columns:
-        return [
-            {"selector": "td:last-child", "props": style},
-            {"selector": "thead th:last-child", "props": style},
-        ]
-    else:
-        return []
-
-
-def _col_level_dividers_mi(df, uuid, style):
+def _col_level_div(df, style, uuid):
     """
     Add styling to th, .blank and td for each col level in a multiindex,
     excluding the smallest level.
@@ -181,7 +145,7 @@ def _col_level_dividers_mi(df, uuid, style):
     return dividers_thead + dividers_tbody + dividers_blanks
 
 
-def _col_level_dividers_mi_with_is(df, style):
+def _col_level_div_with_is(df, style, *args):
     """Add styling to th, .blank and td for each col level in a multiindex,
     excluding the smallest level."""
 
