@@ -120,8 +120,8 @@ def _add_to_axis(
     subtotals_name: str = None,
     **kwargs
 ) -> pd.DataFrame:
-
-    is_totals_row = lambda x: totals_name in x or subtotals_name in x
+    test = lambda x,lbl: lbl in x if isinstance(x, tuple) else lbl == x
+    is_totals_row = lambda x: test(x, totals_name) or test(x, subtotals_name)
     no_totals = [not is_totals_row(item) for item in df.index]
     totals = pd.Series(df.loc[no_totals].sum(), name=totals_name).to_frame().T
 
