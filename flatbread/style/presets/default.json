@@ -1,62 +1,74 @@
 {
-    "style": {
-        "table_border_top": {
-            "border-top": "1px solid #BDBDBD"
-        },
-        "table_border_bottom": {
-            "border-bottom": "2px double #BDBDBD"
-        },
-        "header_border_bottom": {
-            "border-bottom": "1px solid #BDBDBD"
-        },
-        "row_header_border": {
-            "border-right": "1px solid #BDBDBD"
-        },
-        "row_border_levels": {
-            "border-top": "1px solid #BDBDBD"
-        },
-        "row_border_subtotal": {
-            "border-top": "1px dotted #BDBDBD"
-        },
-        "col_border_levels": {
-            "border-left": "1px solid #BDBDBD"
-        },
-        "col_border_subtotal": {
-            "border-left": "1px dotted #BDBDBD"
-        },
-        "style_title": null,
-        "style_table": {
-            "border-collapse": "collapse"
-        },
-        "style_caption": {
-            "caption-side": "bottom",
-            "padding": "0.5em"
-        },
-        "style_data": {
-            "text-align": "right",
-            "padding": "0.5em"
-        },
-        "style_data_row": null,
-        "style_data_row_hover": {
-            "background-color": "#878787"
-        },
-        "style_row_header": {
-            "text-align": "left",
-            "font-weight": "normal",
-            "padding": "0.5em"
-        },
-        "style_col_header": {
-            "text-align": "center",
-            "font-weight": "normal",
-            "padding": "0.5em"
-        },
-        "style_data_subtotal": {
-            "font-style": "italic"
-        },
-        "style_header_subtotal": {
-            "text-align": "left",
-            "font-weight": "normal",
-            "padding": "0.5em"
-        }
+    "table_border_top": {
+        "border-top": "1px solid #BDBDBD"
+    },
+    "table_border_bottom": {
+        "border-bottom": "2px double #BDBDBD"
+    },
+    "table_style": {
+        "border-collapse": "collapse"
+    },
+    "title_style": null,
+    "caption_style": {
+        "caption-side": "bottom",
+        "padding": "0.5em"
+    },
+    "columns_data_border": {
+        "border-bottom": "1px solid #BDBDBD"
+    },
+    "columns_header_cell_style": {
+        "text-align": "center",
+        "font-weight": "bold",
+        "padding": "0.5em"
+    },
+    "index_data_border": {
+        "border-right": "1px solid #BDBDBD"
+    },
+    "index_header_cell_style": {
+        "text-align": "left",
+        "font-weight": "bold",
+        "padding": "0.5em"
+    },
+    "level_row_border": {
+        "border-top": "1px solid #BDBDBD"
+    },
+    "level_col_border": {
+        "border-left": "1px solid #BDBDBD"
+    },
+    "data_cell_style": {
+        "text-align": "right",
+        "padding": "0.5em"
+    },
+    "data_row_style": null,
+    "data_row_style_hover": {
+        "background-color": "#878787"
+    },
+    "total_row_border": {
+        "border-top": "1px solid #BDBDBD"
+    },
+    "total_col_border": {
+        "border-left": "1px solid #BDBDBD"
+    },
+    "total_data_cell_style": {
+        "font-weight": "bold"
+    },
+    "total_header_cell_style": {
+        "font-weight": "bold",
+        "text-align": "left",
+        "padding": "0.5em"
+    },
+    "subtotal_row_border": {
+        "border-top": "1px dotted #BDBDBD"
+    },
+    "subtotal_col_border": {
+        "border-left": "1px dotted #BDBDBD"
+    },
+    "subtotal_data_cell_style": {
+        "font-style": "italic"
+    },
+    "subtotal_header_cell_style": {
+        "text-align": "left",
+        "font-weight": "bold",
+        "padding": "0.5em"
     }
 }

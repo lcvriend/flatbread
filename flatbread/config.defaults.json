@@ -3,7 +3,8 @@
         "store_output_in_cwd": true,
         "use_is_selector": false,
         "add_important_to_props_on_render": true,
-        "add_important_to_props_on_export": false
+        "add_important_to_props_on_export": false,
+        "preset": "default"
     },
     "paths": {
         "output": "output",
@@ -27,79 +28,5 @@
     "format": {
         "locale": null,
         "na_rep": ""
-    },
-    "style": {
-        "table_border_top": {
-            "border-top": "1px solid #BDBDBD"
-        },
-        "table_border_bottom": {
-            "border-bottom": "2px double #BDBDBD"
-        },
-        "table_style": {
-            "border-collapse": "collapse"
-        },
-        "title_style": null,
-        "caption_style": {
-            "caption-side": "bottom",
-            "padding": "0.5em"
-        },
-        "columns_data_border": {
-            "border-bottom": "1px solid #BDBDBD"
-        },
-        "columns_header_cell_style": {
-            "text-align": "center",
-            "font-weight": "normal",
-            "padding": "0.5em"
-        },
-        "index_data_border": {
-            "border-right": "1px solid #BDBDBD"
-        },
-        "index_header_cell_style": {
-            "text-align": "left",
-            "font-weight": "normal",
-            "padding": "0.5em"
-        },
-        "level_row_border": {
-            "border-top": "1px solid #BDBDBD"
-        },
-        "level_col_border": {
-            "border-left": "1px solid #BDBDBD"
-        },
-        "data_cell_style": {
-            "text-align": "right",
-            "padding": "0.5em"
-        },
-        "data_row_style": null,
-        "data_row_style_hover": {
-            "background-color": "#878787"
-        },
-        "total_row_border": {
-            "border-top": "1px solid #BDBDBD"
-        },
-        "total_col_border": {
-            "border-left": "1px solid #BDBDBD"
-        },
-        "total_data_cell_style": {
-            "font-weight": "bold"
-        },
-        "total_header_cell_style": {
-            "text-align": "left",
-            "font-weight": "bold",
-            "padding": "0.5em"
-        },
-        "subtotal_row_border": {
-            "border-top": "1px dotted #BDBDBD"
-        },
-        "subtotal_col_border": {
-            "border-left": "1px dotted #BDBDBD"
-        },
-        "subtotal_data_cell_style": {
-            "font-style": "italic"
-        },
-        "subtotal_header_cell_style": {
-            "text-align": "left",
-            "font-weight": "normal",
-            "padding": "0.5em"
-        }
     }
 }
