@@ -1,47 +1,41 @@
 {
-    "table_border_top": null,
+    "table_border_top": {
+        "border-top": "1px solid #BDBDBD"
+    },
     "table_border_bottom": {
-        "border-bottom": "4px double #100c08"
+        "border-bottom": "2px double #BDBDBD"
     },
     "table_style": {
-        "background": "#f8f8ff",
-        "border-collapse": "collapse",
-        "font-family": "Georgia, serif",
-        "color": "#100c08",
-        "border": "1px solid #100c08"
+        "border-collapse": "collapse"
     },
-    "title_style": {
-        "font-family": "Georgia, serif"
-    },
+    "title_style": null,
     "caption_style": {
-        "font-family": "Georgia, serif",
         "caption-side": "bottom",
         "padding": "0.5em"
     },
-    "columns_data_border": null,
+    "columns_data_border": {
+        "border-bottom": "1px solid #BDBDBD"
+    },
     "columns_header_cell_style": {
         "text-align": "center",
-        "font-weight": "normal",
-        "padding": "0.5em",
-        "background": "#100c08",
-        "color": "#f8f8ff",
-        "font-variant": "small-caps"
+        "font-weight": "bold",
+        "padding": "0.5em"
     },
     "index_data_border": {
-        "border-right": "1px solid #100c08"
+        "border-right": "1px solid #BDBDBD"
     },
     "index_header_cell_style": {
-        "color": "#100c08",
         "text-align": "left",
-        "font-weight": "normal",
+        "font-weight": "bold",
         "padding": "0.5em"
     },
     "level_row_border": {
-        "border-top": "1px solid #100c08"
+        "border-top": "1px solid #BDBDBD"
     },
-    "level_col_border": null,
+    "level_col_border": {
+        "border-left": "1px solid #BDBDBD"
+    },
     "data_cell_style": {
-        "color": "#100c08",
         "text-align": "right",
         "padding": "0.5em"
     },
@@ -63,35 +57,35 @@
         "text-align": "right"
     },
     "body_row_style": null,
-    "body_row_style_hover": {
-        "background-color": "#a9a9a9"
-    },
+    "body_row_style_hover": null,
     "body_row_style_even": null,
     "body_row_style_odd": null,
     "total_row_border": {
-        "border-top": "1px solid #100c08"
+        "border-top": "1px solid #BDBDBD"
     },
     "total_col_border": {
-        "border-left": "1px solid #100c08"
+        "border-left": "1px solid #BDBDBD"
     },
     "total_data_cell_style": {
         "font-weight": "bold"
     },
     "total_header_cell_style": {
-        "text-align": "left",
         "font-weight": "bold",
+        "text-align": "left",
         "padding": "0.5em"
     },
     "subtotal_row_border": {
-        "border-top": "1px dotted #100c08"
+        "border-top": "1px dotted #BDBDBD"
     },
     "subtotal_col_border": {
-        "border-left": "1px dotted #100c08"
+        "border-left": "1px dotted #BDBDBD"
     },
-    "subtotal_data_cell_style": null,
+    "subtotal_data_cell_style": {
+        "font-style": "italic"
+    },
     "subtotal_header_cell_style": {
         "text-align": "left",
-        "font-weight": "normal",
+        "font-weight": "bold",
         "padding": "0.5em"
     }
 }

@@ -1,3 +1,11 @@
+from pandas.api.types import (
+    is_bool_dtype,
+    is_categorical_dtype,
+    is_datetime64_any_dtype,
+    is_numeric_dtype,
+    is_string_dtype,
+)
+
 import flatbread.config as config
 import flatbread.style._helpers as helpers
 
@@ -15,8 +23,10 @@ def add_table_style(
     columns_header_cell_style = None,
     index_header_cell_style = None,
     data_cell_style = None,
-    data_row_style = None,
-    data_row_style_hover = None,
+    body_row_style = None,
+    body_row_style_hover = None,
+    body_row_style_odd = None,
+    body_row_style_even = None,
     **kwargs
 ):
     """
@@ -45,10 +55,12 @@ def add_table_style(
         Style applied to the row header.
     data_style : dict or list of tuples, optional
         Style applied to the data cells.
-    data_row_style : dict or list of tuples, optional
-        Style applied to the data rows.
-    data_row_style_hover : dict or list of tuples, optional
-        Style applied on hover over data rows.
+    body_row_style : dict or list of tuples, optional
+        Style applied to the body rows.
+    body_row_style_hover : dict or list of tuples, optional
+        Style applied on hover over body rows.
+    body_row_style_odd : dict or list of tuples, optional
+    body_row_style_even : dict or list of tuples, optional
 
     Returns
     -------
@@ -73,12 +85,48 @@ def add_table_style(
         {"selector": "tbody th", "props": index_header_cell_style},
         {"selector": "tbody tr th:last-of-type", "props": index_data_border},
 
+        # rows
+        {"selector": "tbody tr", "props": body_row_style},
+        {"selector": "tbody tr:hover:not(#\9)", "props": body_row_style_hover},
+        {"selector": "tbody tr:nth-of-type(odd)", "props": body_row_style_odd},
+        {"selector": "tbody tr:nth-of-type(even)", "props": body_row_style_even},
+
         # data
         {"selector": "tbody td", "props": data_cell_style},
-        {"selector": "tbody tr", "props": data_row_style},
-        {"selector": "tbody tr:hover", "props": data_row_style_hover},
     ]
     return [style for style in styles if style['props']]
+
+
+@config.load_settings('style')
+@helpers.dicts_to_tuples
+def add_column_styles(
+    df,
+    data_column_number = None,
+    data_column_string = None,
+    data_column_boolean = None,
+    data_column_datetime = None,
+    data_column_categorical = None,
+    **kwargs,
+):
+    """
+    TBD
+    """
+    tests = {
+        is_bool_dtype: data_column_boolean,
+        is_numeric_dtype: data_column_number,
+        is_string_dtype: data_column_string,
+        is_datetime64_any_dtype: data_column_datetime,
+        is_categorical_dtype: data_column_categorical,
+    }
+    # ignore test if no style has been defined for it
+    tests = {func:props for func, props in tests.items() if props}
+    styles = {}
+    for col in df.columns:
+        for test, props in tests.items():
+            if test(df[col]):
+                styles[col] = [{'selector': 'td', 'props': props}]
+                break
+    return styles
 
 
 @config.load_settings('style')

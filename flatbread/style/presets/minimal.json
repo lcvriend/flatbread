@@ -39,10 +39,29 @@
         "text-align": "right",
         "padding": "0.5em"
     },
-    "data_row_style": null,
-    "data_row_style_hover": {
-        "background-color": "#878787"
+    "data_column_number": {
+        "text-align": "right"
     },
+    "data_column_string": {
+        "text-align": "left"
+    },
+    "data_column_datetime": {
+        "text-align": "right"
+    },
+    "data_column_categorical": {
+        "text-align": "left",
+        "font-variant": "small-caps"
+    },
+    "data_column_boolean": {
+        "font-family": "monospace",
+        "text-align": "right"
+    },
+    "body_row_style": null,
+    "body_row_style_hover": {
+        "background-color": "#E0E0E0"
+    },
+    "body_row_style_even": null,
+    "body_row_style_odd": null,
     "total_row_border": {
         "border-top": "1px solid #BDBDBD"
     },

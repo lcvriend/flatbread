@@ -32,7 +32,11 @@ from pandas.io.formats.style import Styler
 from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 
 import flatbread.style._helpers as helpers
-from flatbread.style.table import add_table_style, add_flatbread_style
+from flatbread.style.table import (
+    add_table_style,
+    add_column_styles,
+    add_flatbread_style,
+)
 from flatbread.style.levels import add_level_dividers
 from flatbread.style.totals import add_totals_style
 from flatbread.style.subtotals import add_subtotals_style
@@ -78,8 +82,6 @@ class FlatbreadStyler(Styler):
 
         self._display_funcs = defaultdict(lambda: default_display_func)
         self.pita_styles = {}
-        # self.pita_styles = self._get_styles()
-        # self.flatbread_styles = add_flatbread_style(self.uuid, **kwargs)
         self.na_rep = self.pita.na_rep
         self.add_important_to_props_on_render = add_important_to_props_on_render
         self.add_important_to_props_on_export = add_important_to_props_on_export
@@ -151,15 +153,17 @@ class FlatbreadStyler(Styler):
         # this would require a restructuring of the code
         self.table_styles = helpers.clean_up_double_css_rules(self.table_styles)
 
-        # vscode (insiders) overrides the css from flatbread
-        # in order to prevent this, a !important is added to the prop values
+        # vscode (insiders atm) overrides the css from flatbread
+        # in order to prevent this, an !important is added to the prop values
         # this is can be turned on/off globally through CONFIG
-        # when saving to html this option is disabled.
         perf = (
             self.add_important_to_props_on_export
             if export else self.add_important_to_props_on_render)
         do = 'add' if perf else 'remove'
         self.table_styles = helpers.add_remove_important(self.table_styles, do)
+
+        colstyles = add_column_styles(self.pita.df, **kwargs)
+        super().set_table_styles(colstyles, overwrite=False)
 
         return super().render(
             flatbread_styles=style_container,
