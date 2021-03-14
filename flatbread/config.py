@@ -31,7 +31,7 @@ class Config:
     def __init__(self, jsonpath, settings):
         self.path_to_active = jsonpath
         self.__dict__ = settings
-        self.load_style(self.general['preset'])
+        self.set_style(self.general['preset'])
         self.set_locale()
 
     def __getitem__(self, key):
@@ -78,7 +78,7 @@ class Config:
         if self.format['locale']:
             locale.setlocale(locale.LC_ALL, self.format['locale'])
 
-    def load_style(self, style):
+    def set_style(self, style):
         "Load preset by name or style by path."
         presets = {i.stem:i for i in (HERE / 'style/presets').glob('*.json')}
         path = presets.get(style, Path(style))
