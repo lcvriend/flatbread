@@ -4,7 +4,7 @@
         "use_is_selector": false,
         "add_important_to_props_on_render": true,
         "add_important_to_props_on_export": false,
-        "preset": "default"
+        "preset": "_repr_html_"
     },
     "paths": {
         "output": "output",
