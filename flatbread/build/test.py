@@ -121,19 +121,35 @@ def dataset_numbers(recipe, k=100):
     ---------
     recipe : list of int/float
         Each element in the list represents a column.
-        The value represents the number range.
-        If the value is a float, then the output will be floats.
-        If the value is an int, then the output will be integers.
+        If the element is a number then it represents the output range.
+        The element type determines the output type:
+        - A float will create floats
+        - An int will create integers
+        If the element is a tuple then the constituent values are used as
+        inputs for a gaussian distribution where the first item is mu (mean)
+        and the second sigma (std). The type of the mean will determine the
+        output (float or int).
     k : int, default 100
         Number of rows to create.
     """
     data = dict()
-    ints = [i for i in recipe if isinstance(i, int)]
-    floats = [i for i in recipe if isinstance(i, float)]
+
+    is_tup = lambda x: isinstance(x, tuple)
+    is_int = lambda x: isinstance(x, int)
+    is_flt = lambda x: isinstance(x, float)
+
+    ints = [i for i in recipe if is_int(i) or (is_tup(i) and is_int(i[0]))]
+    floats = [i for i in recipe if is_flt(i) or (is_tup(i) and is_flt(i[0]))]
 
     for i, val in enumerate(ints):
-        data[f'int{i}'] = [random.randint(0, val) for i in range(k)]
+        formula = lambda x: random.randint(0, x)
+        if is_tup(val):
+            formula = lambda x: int(random.gauss(x[0], x[1]))
+        data[f'int{i}'] = [formula(val) for i in range(k)]
 
     for i, val in enumerate(floats):
-        data[f'float{i}'] = [random.random() * val for i in range(k)]
+        formula = lambda x: random.random() * x
+        if is_tup(val):
+            formula = lambda x: random.gauss(x[0], x[1])
+        data[f'float{i}'] = [formula(val) for i in range(k)]
     return pd.DataFrame(data)
