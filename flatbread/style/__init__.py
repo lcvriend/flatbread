@@ -82,6 +82,7 @@ class FlatbreadStyler(Styler):
 
         self._display_funcs = defaultdict(lambda: default_display_func)
         self.pita_styles = {}
+        self.column_styles = {}
         self.na_rep = self.pita.na_rep
         self.add_important_to_props_on_render = add_important_to_props_on_render
         self.add_important_to_props_on_export = add_important_to_props_on_export
@@ -162,7 +163,11 @@ class FlatbreadStyler(Styler):
         do = 'add' if perf else 'remove'
         self.table_styles = helpers.add_remove_important(self.table_styles, do)
 
-        colstyles = add_column_styles(self.pita.df, **kwargs)
+        colstyles = add_column_styles(
+            self.pita.df,
+            **self.pita_styles,
+            **kwargs,
+        )
         super().set_table_styles(colstyles, overwrite=False)
 
         return super().render(
