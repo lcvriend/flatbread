@@ -22,7 +22,10 @@ def round_percentages(
     s: pd.Series,
     ndigits: int = -1
 ) -> pd.Series:
-    "Round percentages in a way that they always add up to 100%."
+    """
+    Round percentages in a way that they always add up to 100%.
+    Taken from `this SO answer <https://stackoverflow.com/a/13483486/10403856>`_
+    """
     if ndigits < 0:
         return s
     cumsum = s.fillna(0).cumsum().round(ndigits)
