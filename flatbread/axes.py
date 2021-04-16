@@ -67,10 +67,10 @@ def add_axis_level(
     level_name: Any = None,
 ) -> pd.DataFrame:
     "Add `level` with `level_name` to axis in `df`."
-
     cols = (add_item_to_key(key, item, level) for key in df.index)
     names = add_item_to_key(df.index.names, level_name, level)
-    df.index = pd.MultiIndex.from_tuples(cols).rename(names)
+    new_index = pd.MultiIndex.from_tuples(cols).rename(names)
+    df.index = new_index
     return df
 
 
