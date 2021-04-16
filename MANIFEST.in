@@ -1,2 +1,3 @@
 include flatbread/config.defaults.json
 include flatbread/style/templates/*.tpl
+include flatbread/style/presets/*.json
