@@ -9,7 +9,7 @@ import pandas as pd
 from pandas._libs import lib
 
 from flatbread.aggregate import totals as aggtotals
-from flatbread.aggregate import percentages as percs
+from flatbread.aggregate import percentages
 from flatbread.build import columns as cols
 from flatbread import axes
 from flatbread.style import FlatbreadStyler
@@ -39,7 +39,7 @@ class PivotTable:
         label_abs      = None,
         label_rel      = None,
         ndigits        = None,
-        percs_method   = None,
+        pct_how        = None,
         aggfunc        = None,
         **kwargs
     ):
@@ -57,7 +57,7 @@ class PivotTable:
         self.label_abs      = label_abs
         self.label_rel      = label_rel
         self.ndigits        = ndigits
-        self.percs_method   = percs_method
+        self.pct_how        = pct_how
         self.aggfunc        = aggfunc
         self.title          = None
         self.caption        = None
@@ -270,7 +270,7 @@ class PivotTable:
         return self
 
     @load_settings(['aggregation', 'na'])
-    def percs(
+    def pct(
         self,
         axis           = 0,
         level          = 0,
@@ -331,10 +331,10 @@ class PivotTable:
         subtotals_name = self.__update_namespace(
             'subtotals_name', subtotals_name)
 
-        self.percs_method = how if how is not None else self.percs_method
-        if self.percs_method == 'add':
+        self.pct_how = how if how is not None else self.pct_how
+        if self.pct_how == 'add':
             self._df = self._df.pipe(
-                percs.add,
+                percentages.add,
                 axis           = axis,
                 level          = level,
                 ndigits        = ndigits,
@@ -345,9 +345,9 @@ class PivotTable:
                 subtotals_name = subtotals_name,
                 drop_totals    = drop_totals,
             )
-        elif self.percs_method == 'transform':
+        elif self.pct_how == 'transform':
             self._df = self._df.pipe(
-                percs.transform,
+                percentages.transform,
                 axis           = axis,
                 level          = level,
                 ndigits        = ndigits,
@@ -451,7 +451,7 @@ class PivotTable:
     def __cast(self):
         def get_dtype(col):
             test = lambda x,lbl: lbl in x if isinstance(x, tuple) else x == lbl
-            if self.percs_method == 'transform' or test(col, self.label_rel):
+            if self.pct_how == 'transform' or test(col, self.label_rel):
                 return float
             else:
                 return self.dtypes.get(self.aggfunc, float)

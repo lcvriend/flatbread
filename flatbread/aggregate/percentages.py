@@ -105,7 +105,7 @@ def add(
     # axis = get_axis(axis)
     axis = axes._get_axis_number(axis)
 
-    percs = df.pipe(
+    pct = df.pipe(
         transform,
         axis           = axis,
         level          = level,
@@ -138,9 +138,9 @@ def add(
             totals_name    = totals_name,
             subtotals_name = subtotals_name,
         )
-    new_tuples = (i for items in zip(df.columns, percs.columns) for i in items)
+    new_tuples = (i for items in zip(df.columns, pct.columns) for i in items)
     columns = pd.MultiIndex.from_tuples(new_tuples)
-    return df.join(percs)[columns]
+    return df.join(pct)[columns]
 
 
 @log.entry
