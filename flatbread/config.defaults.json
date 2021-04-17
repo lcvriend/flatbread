@@ -15,10 +15,11 @@
     "aggregation": {
         "totals_name": "Total",
         "subtotals_name": "Subtotal",
-        "percs_method": "add",
+        "pct_how": "add",
         "ndigits": 1,
         "label_abs": "abs",
-        "label_rel": "%"
+        "label_rel": "%",
+        "add_labels_to": "bottom"
     },
     "na": {
         "na": "drop",
