@@ -10,7 +10,9 @@ Flatbread's documentation
    :maxdepth: 2
    :caption: Contents:
 
-   readme
+   overview
+   tables
+   styling
    config
    modules
 

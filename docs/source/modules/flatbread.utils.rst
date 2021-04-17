@@ -1,5 +1,10 @@
-flatbread.utils package
+Flatbread.utils package
 =======================
+
+.. automodule:: flatbread.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------
@@ -24,14 +29,6 @@ flatbread.utils.sanity module
 -----------------------------
 
 .. automodule:: flatbread.utils.sanity
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: flatbread.utils
    :members:
    :undoc-members:
    :show-inheritance:

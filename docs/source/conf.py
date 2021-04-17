@@ -33,6 +33,7 @@ release = '0.0.8'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.autosectionlabel',
     'sphinx.ext.napoleon',
 ]
 
@@ -41,6 +42,9 @@ autodoc_member_order = 'bysource'
 
 # intersphinx settings
 intersphinx_mapping = {'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None)}
+
+# autosectionlabel settings
+autosectionlabel_prefix_document = True
 
 # napoleon settings
 napoleon_google_docstring = False

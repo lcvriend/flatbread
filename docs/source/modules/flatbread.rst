@@ -1,5 +1,10 @@
-flatbread package
+Flatbread package
 =================
+
+.. automodule:: flatbread
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Subpackages
 -----------
@@ -44,14 +49,6 @@ flatbread.pivot module
 ----------------------
 
 .. automodule:: flatbread.pivot
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: flatbread
    :members:
    :undoc-members:
    :show-inheritance:

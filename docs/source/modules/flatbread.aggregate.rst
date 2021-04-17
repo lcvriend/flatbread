@@ -1,8 +1,21 @@
-flatbread.aggregate package
+Flatbread.aggregate package
 ===========================
+
+.. automodule:: flatbread.aggregate
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------
+
+flatbread.aggregate.aggfunc module
+----------------------------------
+
+.. automodule:: flatbread.aggregate.aggfunc
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 flatbread.aggregate.percentages module
 --------------------------------------
@@ -16,14 +29,6 @@ flatbread.aggregate.totals module
 ---------------------------------
 
 .. automodule:: flatbread.aggregate.totals
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: flatbread.aggregate
    :members:
    :undoc-members:
    :show-inheritance:
