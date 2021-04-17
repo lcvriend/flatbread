@@ -46,7 +46,7 @@ def totals(
     return totals.add(df, level=level, **kwargs)
 
 
-def percs(
+def pct(
     df:    pd.DataFrame,
     level: Any = 0,
     add = False,
