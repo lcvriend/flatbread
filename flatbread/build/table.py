@@ -38,8 +38,9 @@ def combine_dfs(
     do_zip = lambda l,r: (i for items in zip(l,r) for i in items)
     do_append = lambda l,r: list(l) + list(r)
     method = do_zip if bottom else do_append
+    names = list(df1.columns.names)
     new_tuples = [i for i in method(df1.columns, df2.columns)]
-    columns = pd.MultiIndex.from_tuples(new_tuples)
+    columns = pd.MultiIndex.from_tuples(new_tuples, names=names)
     return df1.join(df2).reindex(columns, axis=1)
 
 
