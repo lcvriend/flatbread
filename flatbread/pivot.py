@@ -6,7 +6,6 @@ also remaining as close as possible to pandas native objects.
 """
 
 import pandas as pd
-from pandas._libs import lib
 
 from flatbread.aggregate import totals as aggtotals
 from flatbread.aggregate import percentages
@@ -408,8 +407,7 @@ class PivotTable:
         self.__cast()
 
     def __drop_na(self, df):
-        fillna = lambda s: cols.add_category(s, self.na_cat).fillna(self.na_cat)
-        to_list = lambda x: [x] if lib.is_scalar(x) else x
+        to_list = lambda x: [x] if pd.api.types.is_scalar(x) else x
 
         df = df.copy()
         if self.na == 'drop':
