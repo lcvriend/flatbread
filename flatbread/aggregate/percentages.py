@@ -7,7 +7,6 @@ from functools import wraps, partial
 from typing import Any
 
 import pandas as pd # type: ignore
-from pandas._libs import lib
 
 import flatbread.config as config
 import flatbread.utils as utils
@@ -100,8 +99,7 @@ def add(
     pd.DataFrame
         DataFrame with added percentages.
     """
-
-    # get_axis = lambda x: axes._get_axis_number(x) if lib.is_scalar(x) else x
+    # get_axis = lambda x: axes._get_axis_number(x) if pd.api.types.is_scalar(x) else x
     # axis = get_axis(axis)
     axis = axes._get_axis_number(axis)
 
@@ -203,8 +201,9 @@ def transform(
         DataFrame with added percentages.
     """
     f = partial(levels._get_level_number, df)
-    get_axis = lambda x: axes._get_axis_number(x) if lib.is_scalar(x) else x
-    get_level = lambda x, y: f(x, y) if lib.is_scalar(x) else x
+    is_scalar = pd.api.types.is_scalar
+    get_axis = lambda x: axes._get_axis_number(x) if is_scalar(x) else x
+    get_level = lambda x, y: f(x, y) if is_scalar(x) else x
 
     axis = get_axis(axis)
     get_level = get_level(axis, level)
@@ -295,7 +294,6 @@ def _table_wise_multilevel(
     unit:           int,
     **kwargs
 ) -> pd.DataFrame:
-
     axlevels = [min(level) for level in axlevels]
 
     row_totals = totals_name if axlevels[0] == 0 else subtotals_name

@@ -5,7 +5,6 @@ Toolbox for operating on columns of table.
 from typing import Any, Sequence
 
 import pandas as pd # type: ignore
-from pandas._libs import lib
 
 import flatbread.utils as utils
 import flatbread.axes as axes
