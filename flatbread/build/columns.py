@@ -22,6 +22,12 @@ def order(
     return df
 
 
+@utils.copy
+def drop(df: pd.DataFrame, columns: Sequence) -> pd.DataFrame:
+    "Drop ``columns`` from ``df``."
+    return df.drop(columns, axis=1)
+
+
 def add_level(
     df:         pd.DataFrame,
     item:       Any,
@@ -61,33 +67,3 @@ def pct(
     if add:
         return percs.add(df, axis=1, level=level, **kwargs)
     return percs.transform(df, axis=1, level=level, **kwargs)
-
-
-def add_category(
-    s:    pd.Series,
-    category: Any,
-) -> pd.Index:
-    "Add ``category`` to categorical series ``s``."
-
-    def add_cat(s, cats):
-        if isinstance(s.dtype, pd.CategoricalDtype):
-            cats = [item for item in cats if item not in s.cat.categories]
-            s = s.cat.add_categories(cats)
-        return s
-
-    if lib.is_scalar(category):
-        category = [category]
-
-    # if isinstance(index, pd.MultiIndex):
-    #     index = index.set_levels(
-    #         add_cat(index.levels[level], category),
-    #         level=level)
-    # else:
-    #     index = add_cat(index, category)
-    return add_cat(s, category)
-
-
-@utils.copy
-def drop(df: pd.DataFrame, columns: Sequence) -> pd.DataFrame:
-    "Drop ``columns`` from ``df``."
-    return df.drop(columns, axis=1)

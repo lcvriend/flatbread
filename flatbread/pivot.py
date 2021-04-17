@@ -9,7 +9,7 @@ import pandas as pd
 
 from flatbread.aggregate import totals as aggtotals
 from flatbread.aggregate import percentages
-from flatbread.build import columns as cols
+from flatbread.build import series
 from flatbread import axes
 from flatbread.style import FlatbreadStyler
 from flatbread.config import HERE, load_settings
@@ -407,6 +407,8 @@ class PivotTable:
         self.__cast()
 
     def __drop_na(self, df):
+        add_cat = series.add_category
+        fillna = lambda s: add_cat(s, self.na_cat).fillna(self.na_cat)
         to_list = lambda x: [x] if pd.api.types.is_scalar(x) else x
 
         df = df.copy()
