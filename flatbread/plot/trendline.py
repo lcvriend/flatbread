@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Tuple
 import matplotlib.pyplot as plt # type: ignore
 import pandas as pd # type: ignore
 from flatbread.config import CONFIG
-from flatbread.build.rows import timeseries_offset
+from flatbread.build.table import timeseries_offset
 
 today_as_string = str(datetime.now().date())
 
