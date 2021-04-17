@@ -14,6 +14,7 @@ import flatbread.utils.log as log
 import flatbread.axes as axes
 import flatbread.levels as levels
 import flatbread.aggregate.totals as totals
+import flatbread.build.table as table
 from flatbread.aggregate import AGG_SETTINGS
 
 
@@ -45,6 +46,7 @@ def add(
     unit:           int  = 100,
     label_abs:      str  = None,
     label_rel:      str  = None,
+    add_labels_to:  str  = None,
     totals_name:    str  = None,
     subtotals_name: str  = None,
     drop_totals:    bool = False,
@@ -87,6 +89,7 @@ def add(
         Value used for labelling the absolute columns.
     label_rel : str, default 'rel'
         Value used for labelling the relative columns.
+    add_label_to : str, default 'bottom'
     totals_name : str, default 'Total'
         Name identifying the row/column totals.
     subtotals_name : str, default 'Subtotal'
@@ -112,21 +115,11 @@ def add(
         totals_name    = totals_name,
         subtotals_name = subtotals_name,
         drop_totals    = drop_totals,
-    ).pipe(
-        axes.add_axis_level,
-        item  = label_rel,
-        axis  = 1,
-        level = -1,
     )
     df = df.pipe(
         totals._add_totals,
         axis  = axis,
         level = level,
-    ).pipe(
-        axes.add_axis_level,
-        item  = label_abs,
-        axis  = 1,
-        level = -1,
     )
     if drop_totals:
         df = df.pipe(
@@ -136,9 +129,14 @@ def add(
             totals_name    = totals_name,
             subtotals_name = subtotals_name,
         )
-    new_tuples = (i for items in zip(df.columns, pct.columns) for i in items)
-    columns = pd.MultiIndex.from_tuples(new_tuples)
-    return df.join(pct)[columns]
+    df = table.combine_dfs(
+        df,
+        pct,
+        label_abs,
+        label_rel,
+        add_labels_to=add_labels_to,
+    )
+    return df
 
 
 @log.entry
