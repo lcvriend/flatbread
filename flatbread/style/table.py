@@ -21,6 +21,7 @@ def add_table_style(
     table_style = None,
     caption_style = None,
     columns_header_cell_style = None,
+    index_name_cell_style = None,
     index_header_cell_style = None,
     data_cell_style = None,
     body_row_style = None,
@@ -51,6 +52,8 @@ def add_table_style(
         Style applied to the caption element.
     columns_header_cell_style : dict or list of tuples, optional
         Style applied to the column header.
+    index_name_cell_style : dict or list of tuples, optional
+        Style applied to names of index and columns.
     index_header_cell_style : dict or list of tuples, optional
         Style applied to the row header.
     data_style : dict or list of tuples, optional
@@ -80,6 +83,7 @@ def add_table_style(
 
         # columns
         {"selector": "thead th", "props": columns_header_cell_style},
+        {"selector": "th.index_name", "props": index_name_cell_style},
 
         # index
         {"selector": "tbody th", "props": index_header_cell_style},

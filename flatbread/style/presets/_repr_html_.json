@@ -21,6 +21,10 @@
         "font-weight": "bold",
         "padding": "0.5em"
     },
+    "index_name_cell_style": {
+        "text-align": "right",
+        "font-weight": "normal"
+    },
     "index_data_border": {
         "border-right": "1px solid #BDBDBD"
     },
