@@ -21,8 +21,12 @@
         "font-weight": "bold",
         "padding": "0.5em"
     },
-    "index_name_cell_style": {
+    "column_names_cell_style": {
         "text-align": "right",
+        "font-weight": "normal"
+    },
+    "index_names_cell_style": {
+        "text-align": "left",
         "font-weight": "normal"
     },
     "index_data_border": {
