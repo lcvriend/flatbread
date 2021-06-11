@@ -1,3 +1,6 @@
+from flatbread.utils import get_label_indeces
+
+
 def _aggfunc_rows(
     df,
     style_data_aggfunc,
@@ -5,11 +8,11 @@ def _aggfunc_rows(
     row_border_aggfunc,
     aggfunc,
     uuid,
+    level = None,
 ):
     add_uuid = lambda x,uuid: uuid + x
     uuid = f"#T_{uuid} "
-    test = lambda x,lbl: lbl in x if isinstance(x, tuple) else lbl == x
-    rows = [i for i, key in enumerate(df.index) if test(key, aggfunc)]
+    rows = get_label_indeces(df.index, aggfunc, level)
 
     def create_rules_for_data(rows):
         style_elements = style_data_aggfunc + row_border_aggfunc
@@ -48,9 +51,9 @@ def _aggfunc_rows_with_is(
     row_border_aggfunc,
     aggfunc,
     *args, # added in order to be able to ignore uuid
+    level = None,
 ):
-    test = lambda x,lbl: lbl in x if isinstance(x, tuple) else lbl == x
-    rows = [i for i, key in enumerate(df.index) if test(key, aggfunc)]
+    rows = get_label_indeces(df.index, aggfunc, level)
 
     def create_rules_for_data(rows):
         style_elements = style_data_aggfunc + row_border_aggfunc
@@ -91,11 +94,11 @@ def _aggfunc_cols(
     col_border_aggfunc,
     aggfunc,
     uuid,
+    level = None,
 ):
-    add_uuid = lambda x,uuid: uuid + x
+    add_uuid = lambda x, uuid: uuid + x
     uuid = f"#T_{uuid} "
-    test = lambda x,lbl: lbl in x if isinstance(x, tuple) else lbl == x
-    cols = [i for i, key in enumerate(df.columns) if test(key, aggfunc)]
+    cols = get_label_indeces(df.columns, aggfunc, level)
 
     def create_rules_for_data(cols):
         style_elements = style_data_aggfunc + col_border_aggfunc
@@ -140,9 +143,9 @@ def _aggfunc_cols_with_is(
     col_border_aggfunc,
     aggfunc,
     *args, # added in order to be able to ignore uuid
+    level = None,
 ):
-    test = lambda x,lbl: lbl in x if isinstance(x, tuple) else lbl == x
-    cols = [i for i, key in enumerate(df.columns) if test(key, aggfunc)]
+    cols = get_label_indeces(df.columns, aggfunc, level)
 
     def create_rules_for_data(cols):
         style_elements = style_data_aggfunc + col_border_aggfunc

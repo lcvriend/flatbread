@@ -33,6 +33,7 @@ def add_totals_style(
         total_row_border,
         totals_name,
         uuid,
+        level=0,
     )
     cols = make_cols(
         df,
@@ -41,6 +42,7 @@ def add_totals_style(
         total_col_border,
         totals_name,
         uuid,
+        level=0,
     )
     return rows + cols
 
