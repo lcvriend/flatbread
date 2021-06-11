@@ -8,12 +8,12 @@ also remaining as close as possible to pandas native objects.
 import pandas as pd
 from pandas.api.types import is_scalar
 
+from flatbread.config import HERE, load_settings
 from flatbread.aggregate import totals as aggtotals
 from flatbread.aggregate import percentages
 from flatbread.build import series
 from flatbread import axes
 from flatbread.style import FlatbreadStyler
-from flatbread.config import HERE, load_settings
 
 
 @pd.api.extensions.register_dataframe_accessor("pita")
