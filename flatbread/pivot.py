@@ -6,6 +6,7 @@ also remaining as close as possible to pandas native objects.
 """
 
 import pandas as pd
+from pandas.api.types import is_scalar
 
 from flatbread.aggregate import totals as aggtotals
 from flatbread.aggregate import percentages
@@ -45,8 +46,6 @@ class PivotTable:
         self._obj           = pandas_obj
         self._df            = pandas_obj
         self.pipeline       = list()
-        self.index          = None
-        self.columns        = None
         self.na             = na
         self.na_cat         = na_cat
         self.na_position    = na_position
@@ -190,9 +189,6 @@ class PivotTable:
                 self.__dict__[k] = v
 
         # PIVOT
-        self.values  = values
-        self.index   = index
-        self.columns = columns
         self.aggfunc = aggfunc
 
         if index or columns:
@@ -265,7 +261,7 @@ class PivotTable:
             totals_name    = totals_name,
             subtotals_name = subtotals_name,
         )
-        self.__cast()
+        # self.__cast()
         return self
 
     @load_settings(['aggregation', 'na'])
@@ -357,7 +353,7 @@ class PivotTable:
                 subtotals_name = subtotals_name,
                 drop_totals    = drop_totals,
             )
-        self.__cast()
+        # self.__cast()
         return self
 
     def to_html(self, path=None):
@@ -395,8 +391,9 @@ class PivotTable:
     ):
         if aggfunc is None:
             aggfunc = 'size' if values is None else 'count'
+        aggfunc = [aggfunc] if is_scalar(aggfunc) else aggfunc
 
-        self.df = self.__drop_na(self._obj).pivot_table(
+        self.df = self.__drop_na(self._obj, index, columns).pivot_table(
             aggfunc    = aggfunc,
             values     = values,
             index      = index,
@@ -404,18 +401,19 @@ class PivotTable:
             fill_value = fill_value,
             observed   = observed,
         ).pipe(self.__reindex_na)
-        self.__cast()
 
-    def __drop_na(self, df):
+        # self.__cast()
+
+    def __drop_na(self, df, index, columns):
         add_cat = series.add_category
         fillna = lambda s: add_cat(s, self.na_cat).fillna(self.na_cat)
-        to_list = lambda x: [x] if pd.api.types.is_scalar(x) else x
+        to_list = lambda x: [] if x is None else [x] if is_scalar(x) else x
 
         df = df.copy()
         if self.na == 'drop':
-            return df.dropna(subset=to_list(self.columns))
+            return df.dropna(subset=to_list(columns))
         else:
-            all_items     = to_list(self.columns) + to_list(self.index)
+            all_items     = to_list(columns) + to_list(index)
             selection     = [item for item in all_items if item is not None]
             df[selection] = df[selection].apply(fillna)
             return df
@@ -448,16 +446,16 @@ class PivotTable:
             )
         return df
 
-    def __cast(self):
-        def get_dtype(col):
-            test = lambda x,lbl: lbl in x if isinstance(x, tuple) else x == lbl
-            if self.pct_how == 'transform' or test(col, self.label_rel):
-                return float
-            else:
-                return self.dtypes.get(self.aggfunc, float)
+    # def __cast(self):
+    #     def get_dtype(col):
+    #         test = lambda x,lbl: lbl in x if isinstance(x, tuple) else x == lbl
+    #         if self.pct_how == 'transform' or test(col, self.label_rel):
+    #             return float
+    #         else:
+    #             return self.dtypes.get(self.aggfunc, float)
 
-        dtypes_to_set = {col:get_dtype(col) for col in self._df.columns if get_dtype(col)}
-        self._df = self._df.astype(dtypes_to_set)
+    #     dtypes_to_set = {col:get_dtype(col) for col in self._df.columns if get_dtype(col)}
+    #     self._df = self._df.astype(dtypes_to_set)
 
     def __update_namespace(self, var_name, val):
         val = getattr(self, var_name, None) if val is None else val
