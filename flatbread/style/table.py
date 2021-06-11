@@ -14,8 +14,6 @@ import flatbread.style._helpers as helpers
 @helpers.dicts_to_tuples
 def add_table_style(
     *,
-    table_border_top = None,
-    table_border_bottom = None,
     columns_data_border = None,
     index_data_border = None,
     table_style = None,
@@ -39,10 +37,6 @@ def add_table_style(
 
     Arguments
     ---------
-    table_border_top : dict or list of tuples, optional
-        Style for the top border of the table.
-    table_border_bottom : dict or list of tuples, optional
-        Style for the bottom border of the table.
     columns_data_border : dict or list of tuples, optional
         Style for the bottom border of the header.
     index_data_border : dict or list of tuples, optional
