@@ -127,9 +127,14 @@ def _col_level_div(df, style, uuid):
         return [{"selector": ', '.join(selectors)[len(uuid):], "props": style}]
 
     nlevels = df.columns.nlevels
+    # check if first level contains only one element
+    # if so then left border should not be targeted
+    skip_first = len(df.columns.levels[0]) == 1
     ndivs = list()
     sticky = None
     for i in range(nlevels):
+        if i == 0 and skip_first:
+            continue
         if i < nlevels - 1:
             ndivs.append((i, i))
             sticky = i
@@ -181,9 +186,14 @@ def _col_level_div_with_is(df, style, *args):
         return [{"selector": f":is({', '.join(selectors)})", "props": style}]
 
     nlevels = df.columns.nlevels
+    # check if first level contains only one element
+    # if so then left border should not be targeted
+    skip_first = len(df.columns.levels[0]) == 1
     ndivs = list()
     sticky = None
     for i in range(nlevels):
+        if i == 0 and skip_first:
+            continue
         if i < nlevels - 1:
             ndivs.append((i, i))
             sticky = i
