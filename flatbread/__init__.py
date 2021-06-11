@@ -16,7 +16,7 @@ from flatbread.config import CONFIG
 from flatbread.plot.trendline import TrendLine
 from flatbread.utils import sanity, readout, log
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 __license__ = 'GPLv3+'
 __author__  = 'L.C. Vriend'
 __email__   = 'vanboefer@gmail.com'
