@@ -6,7 +6,6 @@
         "font-family": "Georgia, serif",
         "color": "#100c08",
         "border": "1px solid #100c08",
-        "border_top": null,
         "border-bottom": "4px double #100c08"
     },
     "title_style": {
