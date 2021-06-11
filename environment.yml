@@ -16,3 +16,5 @@ dependencies:
   - openpyxl
   # visualization
   - matplotlib
+  # documentation
+  - sphinx
