@@ -1,12 +1,8 @@
 {
-    "table_border_top": {
-        "border-top": "1px solid #BDBDBD"
-    },
-    "table_border_bottom": {
-        "border-bottom": "2px double #BDBDBD"
-    },
     "table_style": {
-        "border-collapse": "collapse"
+        "border-collapse": "collapse",
+        "border-top": "1px solid #BDBDBD",
+        "border-bottom": "2px double #BDBDBD"
     },
     "title_style": null,
     "caption_style": {

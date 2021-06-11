@@ -1,14 +1,10 @@
 {
-    "table_border_top": {
-        "border-top": "1px solid #BDBDBD"
-    },
-    "table_border_bottom": {
-        "border-bottom": "2px double #BDBDBD"
-    },
     "table_style": {
         "font-family": "'Fira Mono', monospace",
         "border": "3px solid #edb183ff",
-        "border-collapse": "collapse"
+        "border-collapse": "collapse",
+        "border-top": "4px solid #BDBDBD",
+        "border-bottom": "2px double #BDBDBD"
     },
     "title_style": null,
     "caption_style": {

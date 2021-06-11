@@ -75,8 +75,6 @@ def add_table_style(
     styles = [
         # table
         {"selector": "", "props": table_style},
-        {"selector": "thead tr:first-child", "props": table_border_top},
-        {"selector": "tbody tr:last-child", "props": table_border_bottom},
 
         #caption
         {"selector": "caption", "props": caption_style},
