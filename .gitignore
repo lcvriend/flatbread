@@ -5,7 +5,3 @@ build
 !flatbread/build
 dist
 notebooks
-output
-*.bat
-*.sh
-docs
