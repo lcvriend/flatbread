@@ -1,12 +1,12 @@
 # Flatbread
 
 ## About
-Flatbread is a small library which adds some pivot-table-like functionality to pandas. Flatbread is accessible through the `DataFrame` and `Series` using the `pita` accessor.
+Flatbread is a small library which adds some pivot-table-like functionality to pandas. Flatbread can be accessed in `DataFrames` and `Series` using the `pita` accessor.
 
 ## Pivot tables
 Let's create a df for testing:
 
-```Python
+```python
 from random import randint
 import pandas as pd
 import flatbread as fb
@@ -25,7 +25,7 @@ df = pd._testing.makeCustomDataframe(
 ### Totals and subtotals
 Flatbread let's you easily add totals and subtotals to your pivot tables:
 
-```
+```python
 df.pita.add_totals().pita.add_subtotals(axis=2, levels=0)
 ```
 
