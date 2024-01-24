@@ -1,5 +1,4 @@
-from functools import singledispatch
-from typing import Callable, Literal, TypeAlias
+from typing import Literal, TypeAlias
 
 import pandas as pd
 
@@ -28,7 +27,7 @@ def offset_date_field(
     )
 
 
-def _custom_sort_index(
+def _sort_index_from_list(
     df: pd.DataFrame,
     order: list|pd.CategoricalDtype,
     axis: Axis = 0,
@@ -41,11 +40,11 @@ def _custom_sort_index(
     return df.reindex(order, axis=axis, level=level)
 
 
-def custom_sort_index(
-    df: pd.DataFrame,
-    order: list|pd.CategoricalDtype,
+def sort_index_from_list(
+    data: pd.DataFrame|pd.Series,
+    order: list,
     axis: Axis = 0,
     level: int|str|None = None,
-):
-    sorter = lambda idx: idx.map({n:m for m,n in pd.Series(order).items()})
-    return df.sort_index(axis=axis, level=level, key=sorter)
+) -> pd.DataFrame|pd.Series:
+    sorter = lambda idx: idx.map({n:m for m,n in enumerate(order)})
+    return data.sort_index(axis=axis, level=level, key=sorter)

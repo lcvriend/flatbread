@@ -3,6 +3,7 @@ from functools import singledispatch
 import pandas as pd
 
 import flatbread.agg.aggregation as agg
+from flatbread import chaining, config, DEFAULTS
 
 
 # TOTALS
@@ -18,6 +19,8 @@ def add_totals(
 
 
 @add_totals.register
+@config.inject_defaults(DEFAULTS['totals'])
+@chaining.persist_ignored('totals', 'label')
 def _(
     data: pd.Series,
     label: str = 'Totals',
@@ -35,9 +38,11 @@ def _(
 
 
 @add_totals.register
+@config.inject_defaults(DEFAULTS['totals'])
+@chaining.persist_ignored('totals', 'label')
 def _(
     data: pd.DataFrame,
-    axis: int = 0,
+    axis: int = 2,
     label: str = 'Totals',
     ignore_keys: str|list[str]|None = 'Subtotals',
     _fill: str|None = '',
@@ -85,6 +90,29 @@ def add_subtotals(
 
 
 @add_subtotals.register
+@config.inject_defaults(DEFAULTS['subtotals'])
+@chaining.persist_ignored('totals', 'label')
+def _(
+    data: pd.Series,
+    levels: int|str|list[int|str] = 0,
+    label: str = 'Subtotals',
+    ignore_keys: str|list[str]|None = 'Totals',
+    _fill: str|None = '',
+) -> pd.Series:
+    output = agg.add_subagg(
+        data,
+        'sum',
+        levels = levels,
+        label = label,
+        ignore_keys = ignore_keys,
+        _fill = _fill,
+    )
+    return output
+
+
+@add_subtotals.register
+@config.inject_defaults(DEFAULTS['subtotals'])
+@chaining.persist_ignored('totals', 'label')
 def _(
     data: pd.DataFrame,
     axis: int = 0,

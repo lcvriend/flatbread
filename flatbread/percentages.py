@@ -1,7 +1,10 @@
 from functools import singledispatch
-from typing import Callable, Literal, TypeAlias
+from typing import Literal, TypeAlias
+import warnings
 
 import pandas as pd
+
+from flatbread import DEFAULTS, chaining, config
 
 
 Axis: TypeAlias = Literal[0, 1, 2, 'index', 'columns', 'both']
@@ -26,6 +29,66 @@ def get_totals(data, axis, label_totals):
 
 
 @singledispatch
+def as_percentages(
+    data,
+    *args,
+    label_pct: str = 'pct',
+    ndigits: int = -1,
+    **kwargs,
+):
+    raise NotImplementedError('No implementation for this type')
+
+
+@as_percentages.register
+@config.inject_defaults(DEFAULTS['percentages'])
+def _(
+    data: pd.Series,
+    *,
+    label_pct: str = 'pct',
+    label_totals: str|None = None,
+    ndigits: int = -1,
+    **kwargs,
+) -> pd.Series:
+    total = data.iloc[-1] if label_totals is None else data.loc[label_totals]
+    return (
+        data
+        .div(total)
+        .mul(100)
+        .pipe(round, ndigits=ndigits)
+        .rename(label_pct)
+    )
+
+
+@as_percentages.register
+@config.inject_defaults(DEFAULTS['percentages'])
+@chaining.persist_ignored('percentages', 'label_pct')
+def _(
+    df: pd.DataFrame,
+    axis: int = 2,
+    *,
+    label_totals: str|None = None,
+    ignore_keys: str|list[str]|None = 'pct',
+    ndigits: int = -1,
+    **kwargs,
+) -> pd.DataFrame:
+    # reverse axis for consistency
+    axis = 0 if axis == 1 else 1 if axis == 0 else None
+
+    cols = chaining.get_data_mask(df.columns, ignore_keys)
+    data = df.loc[:, cols]
+
+    totals = get_totals(data, axis, label_totals)
+
+    pcts = (
+        data
+        .div(totals, axis=axis)
+        .mul(100)
+        .pipe(round_apportioned, ndigits=ndigits)
+    )
+    return pcts
+
+
+@singledispatch
 def add_percentages(
     data,
     *args,
@@ -37,53 +100,85 @@ def add_percentages(
 
 
 @add_percentages.register
+@config.inject_defaults(DEFAULTS['percentages'])
 def _(
     data: pd.Series,
+    *,
     label_n: str = 'n',
     label_pct: str = 'pct',
     label_totals: str|None = None,
     ndigits: int = -1,
+    **kwargs,
 ) -> pd.DataFrame:
-    total = data.iloc[-1] if label_totals is None else data.loc[label_totals]
-    pcts = (
-        data
-        .div(total)
-        .mul(100)
-        .pipe(round_percentages, ndigits=ndigits)
+    pcts = data.pipe(
+        as_percentages,
+        label_pct = label_pct,
+        label_totals = label_totals,
+        ndigits = ndigits
     )
-    return pd.concat([data, pcts], keys=[label_n, label_pct], axis=1)
+    output = pd.concat([data, pcts], keys=[label_n, label_pct], axis=1)
+    return output
 
 
 @add_percentages.register
+@config.inject_defaults(DEFAULTS['percentages'])
+@chaining.persist_ignored('percentages', 'label_pct')
 def _(
-    data: pd.DataFrame,
+    df: pd.DataFrame,
     axis: int = 2,
+    *,
     label_n: str = 'n',
     label_pct: str = 'pct',
     label_totals: str|None = None,
+    ignore_keys: str|list[str]|None = 'pct',
     ndigits: int = -1,
     interleaf: bool = False,
+    **kwargs,
 ) -> pd.DataFrame:
-    totals = get_totals(data, axis, label_totals)
-    axis = axis if axis < 2 else None
-    pcts = (
-        data
-        .div(totals, axis=axis)
-        .mul(100)
-        .pipe(round_percentages, ndigits=ndigits)
+
+    cols = chaining.get_data_mask(df.columns, ignore_keys)
+    data = df.loc[:, cols]
+
+    # totals = get_totals(data, axis, label_totals)
+    # axis = axis if axis < 2 else None
+    # pcts = (
+    #     data
+    #     .div(totals, axis=axis)
+    #     .mul(100)
+    #     .pipe(round_apportioned, ndigits=ndigits)
+    # )
+    pcts = data.pipe(
+        as_percentages,
+        axis = axis,
+        label_totals = label_totals,
+        ignore_keys = ignore_keys,
+        ndigits = ndigits,
     )
-    output = pd.concat([data, pcts], keys=[label_n, label_pct], axis=1)
+
+    # check if there are already percentages in the table
+    if cols.all():
+        # if not then add them, original table gets `label_n`
+        # percentages get `label_pct` as key
+        keys = [label_n, label_pct]
+        output = pd.concat([df, pcts], keys=keys, axis=1)
+    else:
+        # if there are then transform percentages first
+        # keys are already present in the original df
+        # so we do not add new keys
+        pcts = pcts.rename(columns={label_n: label_pct})
+        output = pd.concat([df, pcts], axis=1)
     if interleaf:
         return output.stack(0).unstack(-1)
     return output
 
 
-def round_percentages(
+def round_apportioned(
     s: pd.Series,
+    *,
     ndigits: int = -1
 ) -> pd.Series:
     """
-    Round percentages in a way that they always add up to 100%.
+    Round percentages in a way that they always add up to total.
     Taken from this SO answer:
 
     <https://stackoverflow.com/a/13483486/10403856>
@@ -91,7 +186,7 @@ def round_percentages(
     Parameters
     ----------
     s (pd.Series):
-        A series of unrounded percentages adding up to 100%.
+        A series of unrounded percentages adding up to total.
     ndigits (int):
         Number of digits to round percentages to. Default is -1 (no rounding).
 

@@ -3,6 +3,8 @@ from typing import Callable, Literal, TypeAlias
 
 import pandas as pd
 
+from flatbread import chaining
+
 
 Axis: TypeAlias = Literal[0, 1, 2, 'index', 'columns', 'both']
 
@@ -17,27 +19,11 @@ def get_label(label, aggfunc):
     return 'aggregation'
 
 
-def get_ignored_keys(ignore_keys, label):
-    if ignore_keys is None:
-        return [label]
-    elif isinstance(ignore_keys, str):
-        return [label, ignore_keys]
-    return [label, *ignore_keys]
-
-
 def get_levels(levels, names):
     find_level = lambda lvl: lvl if isinstance(lvl, int) else names.index(lvl)
     if isinstance(levels, (int, str)):
         return [find_level(levels)]
     return [find_level(level) for level in levels]
-
-
-def get_data_rows(index, ignore_keys):
-    if isinstance(index, pd.MultiIndex):
-        ignored = index.map(lambda i: all(key not in i for key in ignore_keys))
-    else:
-        ignored = index.map(lambda i: all(key != i for key in ignore_keys))
-    return ignored
 
 
 # AGGREGATION
@@ -55,6 +41,7 @@ def add_agg(
     raise NotImplementedError('No implementation for this type')
 
 
+## SERIES
 @add_agg.register
 def _(
     s: pd.Series,
@@ -68,8 +55,7 @@ def _(
     data = s.copy()
 
     label = get_label(label, aggfunc)
-    ignored = get_ignored_keys(ignore_keys, label)
-    rows = get_data_rows(data.index, ignored)
+    rows = chaining.get_data_mask(data.index, ignore_keys)
 
     padding = [_fill] * (data.index.nlevels - 1)
     key = tuple([label, *padding]) if padding else label
@@ -77,6 +63,7 @@ def _(
     return data
 
 
+## DATAFRAME
 @add_agg.register
 def _(
     df: pd.DataFrame,
@@ -91,8 +78,7 @@ def _(
     data = df.copy() if axis == 0 else df.copy().T
 
     label = get_label(label, aggfunc)
-    ignored = get_ignored_keys(ignore_keys, label)
-    rows = get_data_rows(data.index, ignored)
+    rows = chaining.get_data_mask(data.index, ignore_keys)
 
     # create key
     padding = [_fill] * (data.index.nlevels - 1)
@@ -120,6 +106,33 @@ def add_subagg(
     raise NotImplementedError('No implementation for this type')
 
 
+## SERIES
+@add_subagg.register
+def _(
+    s: pd.Series,
+    aggfunc: str|Callable,
+    *args,
+    levels: int|str|list[int|str] = 0,
+    label: str|None = None,
+    ignore_keys: str|list[str]|None = None,
+    _fill = '',
+    **kwargs,
+):
+    data = s.copy()
+    output = _subagg_implementation(
+        data,
+        aggfunc,
+        *args,
+        levels = levels,
+        label = label,
+        ignore_keys = ignore_keys,
+        _fill = _fill,
+        **kwargs,
+    )
+    return output
+
+
+## DATAFRAME
 @add_subagg.register
 def _(
     df: pd.DataFrame,
@@ -133,14 +146,39 @@ def _(
     **kwargs,
 ):
     data = df.copy() if axis == 0 else df.copy().T
-    nlevels = data.index.nlevels
-    names = data.index.names
+    output = _subagg_implementation(
+        data,
+        aggfunc,
+        *args,
+        levels = levels,
+        label = label,
+        ignore_keys = ignore_keys,
+        _fill = _fill,
+        **kwargs,
+    )
+    if axis == 1:
+        output = output.T
+    return output
 
+
+def _subagg_implementation(
+    data: pd.Series|pd.DataFrame,
+    aggfunc: str|Callable,
+    *args,
+    levels: int|str|list[int|str] = 0,
+    label: str|None = None,
+    ignore_keys: str|list[str]|None = None,
+    _fill = '',
+    **kwargs,
+):
+    names = data.index.names
     label = get_label(label, aggfunc)
-    ignored = get_ignored_keys(ignore_keys, label)
     levels = get_levels(levels, names)
 
-    assert isinstance(df.index, pd.MultiIndex), 'Axis is not a MultiIndex'
+    # checks
+    msg = 'Flatbread cannot perform subaggregation if axis is not MultiIndex'
+    assert isinstance(data.index, pd.MultiIndex), msg
+    nlevels = data.index.nlevels
     for level in levels:
         assert level < nlevels - 1, f'Level must be smaller than {nlevels - 1}'
 
@@ -153,13 +191,13 @@ def _(
             key = list(levels) + [label] + padding
 
             # ignore totals and subtotal rows when aggregating
-            rows = get_data_rows(group.index, ignored)
+            rows = chaining.get_data_mask(group.index, ignore_keys)
 
             # if no data rows were selected, then do not add subagg
             # this makes sure that for example a subtotal is added
             # to a totals row
             if rows.any():
-                group.loc[tuple(key), :] = (
+                group.loc[tuple(key)] = (
                     group
                     .loc[rows]
                     .agg(aggfunc, *args, **kwargs)
@@ -170,10 +208,7 @@ def _(
     output = data
     for level in sorted(levels, reverse=True):
         # once list of length 1 gets handled as tuple in pandas
-        # this code may be simplified
+        # then this check is redundant (just pass `list(range(level+1))`)
         grouper = 0 if level == 0 else list(range(level + 1))
         output = output.groupby(level=grouper).pipe(process_groups)
-
-    if axis == 1:
-        output = output.T
     return output
