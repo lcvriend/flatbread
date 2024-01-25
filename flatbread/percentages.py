@@ -12,20 +12,20 @@ Axis: TypeAlias = Literal[0, 1, 2, 'index', 'columns', 'both']
 
 def get_totals(data, axis, label_totals):
     if label_totals is None:
-        if axis == 2:
-            return data.iloc[-1, -1]
+        if axis == 0:
+            return data.iloc[:, -1]
         elif axis == 1:
             return data.iloc[-1, :]
         else:
-            return data.iloc[:, -1]
+            return data.iloc[-1, -1]
 
     # if label_totals is given:
-    if axis == 2:
-        return data.loc[label_totals, label_totals]
+    if axis == 0:
+        return data.loc[:, label_totals]
     elif axis == 1:
         return data.loc[label_totals, :]
     else:
-        return data.loc[:, label_totals]
+        return data.loc[label_totals, label_totals]
 
 
 @singledispatch
