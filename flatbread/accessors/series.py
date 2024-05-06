@@ -99,6 +99,7 @@ class PitaSeries:
         add_pct: bool = False,
         label_pct: str = 'pct',
         ndigits: int = -1,
+        base: int = 100,
     )-> pd.Series|pd.DataFrame:
         """
         Similar to pandas `value_counts` except *null* values are by default also counted and a total is added. Optionally, percentages may also be added to the output.
@@ -115,6 +116,8 @@ class PitaSeries:
             Name for the percentage column. Default is 'pct'.
         ndigits (int):
             Number of decimal places to round the percentages. Default is -1 (no rounding).
+        base (int):
+            The whole quantity against which to calculate the fraction.
 
         Returns
         -------
@@ -129,6 +132,7 @@ class PitaSeries:
                 label_n = label_n,
                 label_pct = label_pct,
                 ndigits = ndigits,
+                base = base,
             )
         return result
 
@@ -137,6 +141,7 @@ class PitaSeries:
         label_pct: str = None,
         label_totals: str|None = None,
         ndigits: int = None,
+        base: int = 100,
     ) -> pd.Series:
         """
         Transform data into percentages.
@@ -151,6 +156,8 @@ class PitaSeries:
             Label of the totals row. If no label is supplied then totals will be assumed to be the last row. Default is None.
         ndigits (int):
             Number of decimal places to round the percentages. Default is -1 (no rounding).
+        base (int):
+            The whole quantity against which to calculate the fraction.
 
         Returns
         -------
@@ -162,6 +169,7 @@ class PitaSeries:
             label_pct = label_pct,
             label_totals = label_totals,
             ndigits = ndigits,
+            base = base,
         )
 
     def add_percentages(
@@ -170,6 +178,7 @@ class PitaSeries:
         label_pct: str|None = None,
         label_totals: str|None = None,
         ndigits: int|None = None,
+        base: int = 100,
     ) -> pd.DataFrame:
         """
         Add percentage column to a Series.
@@ -186,6 +195,8 @@ class PitaSeries:
             Label of the totals row. If no label is supplied then totals will be assumed to be the last row. Default is None.
         ndigits (int):
             Number of decimal places to round the percentages. Default is -1 (no rounding).
+        base (int):
+            The whole quantity against which to calculate the fraction.
 
         Returns
         -------
@@ -198,6 +209,7 @@ class PitaSeries:
             label_pct = label_pct,
             label_totals = label_totals,
             ndigits = ndigits,
+            base = base,
         )
 
     def add_totals(

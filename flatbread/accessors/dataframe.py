@@ -106,6 +106,7 @@ class PitaFrame:
         label_totals: str|None = None,
         ignore_keys: str|list[str]|None = None,
         ndigits: int|None = None,
+        base: int = 100,
     ) -> pd.DataFrame:
         """
         Transform data to percentages based on specified axis.
@@ -126,6 +127,8 @@ class PitaFrame:
             Keys of rows/columns to ignore when calculating percentages.
         ndigits (int):
             Number of decimal places to round the percentages. Default is -1 (no rounding).
+        base (int):
+            The whole quantity against which to calculate the fraction.
 
         Returns
         -------
@@ -138,6 +141,7 @@ class PitaFrame:
             label_totals = label_totals,
             ignore_keys = ignore_keys,
             ndigits = ndigits,
+            base = base,
         )
 
     def add_percentages(
@@ -148,6 +152,7 @@ class PitaFrame:
         label_totals: str|None = None,
         ignore_keys: str|list[str]|None = None,
         ndigits: int|None = None,
+        base: int = 100,
         interleaf: bool = False,
     ) -> pd.DataFrame:
         """
@@ -173,6 +178,8 @@ class PitaFrame:
             Keys of rows/columns to ignore when calculating percentages.
         ndigits (int):
             Number of decimal places to round the percentages. Default is -1 (no rounding).
+        base (int):
+            The whole quantity against which to calculate the fraction.
         interleaf (bool):
             If `interleaf` is True then percentages columns will be placed next to count columns. If set to False the percentages columns will have their own separate block in the table. Default is False.
 
@@ -189,6 +196,7 @@ class PitaFrame:
             label_totals = label_totals,
             ignore_keys = ignore_keys,
             ndigits = ndigits,
+            base = base,
             interleaf = interleaf,
         )
 

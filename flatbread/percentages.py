@@ -34,6 +34,7 @@ def as_percentages(
     *args,
     label_pct: str = 'pct',
     ndigits: int = -1,
+    base: int = 100,
     **kwargs,
 ):
     raise NotImplementedError('No implementation for this type')
@@ -47,6 +48,7 @@ def _(
     label_pct: str = 'pct',
     label_totals: str|None = None,
     ndigits: int = -1,
+    base: int = 100,
     **kwargs,
 ) -> pd.Series:
     total = data.iloc[-1] if label_totals is None else data.loc[label_totals]
@@ -69,6 +71,7 @@ def _(
     label_totals: str|None = None,
     ignore_keys: str|list[str]|None = 'pct',
     ndigits: int = -1,
+    base: int = 100,
     **kwargs,
 ) -> pd.DataFrame:
     # reverse axis for consistency
@@ -82,7 +85,7 @@ def _(
     pcts = (
         data
         .div(totals, axis=axis)
-        .mul(100)
+        .mul(base)
         .pipe(round_apportioned, ndigits=ndigits)
     )
     return pcts
@@ -94,6 +97,7 @@ def add_percentages(
     *args,
     label_pct: str = 'pct',
     ndigits: int = -1,
+    base: int = 100,
     **kwargs,
 ):
     raise NotImplementedError('No implementation for this type')
@@ -108,13 +112,15 @@ def _(
     label_pct: str = 'pct',
     label_totals: str|None = None,
     ndigits: int = -1,
+    base: int = 100,
     **kwargs,
 ) -> pd.DataFrame:
     pcts = data.pipe(
         as_percentages,
         label_pct = label_pct,
         label_totals = label_totals,
-        ndigits = ndigits
+        ndigits = ndigits,
+        base = base,
     )
     output = pd.concat([data, pcts], keys=[label_n, label_pct], axis=1)
     return output
@@ -132,6 +138,7 @@ def _(
     label_totals: str|None = None,
     ignore_keys: str|list[str]|None = 'pct',
     ndigits: int = -1,
+    base: int = 100,
     interleaf: bool = False,
     **kwargs,
 ) -> pd.DataFrame:
@@ -153,6 +160,7 @@ def _(
         label_totals = label_totals,
         ignore_keys = ignore_keys,
         ndigits = ndigits,
+        base = base,
     )
 
     # check if there are already percentages in the table
