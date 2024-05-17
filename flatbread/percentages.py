@@ -55,8 +55,8 @@ def _(
     return (
         data
         .div(total)
-        .mul(100)
-        .pipe(round, ndigits=ndigits)
+        .mul(base)
+        .pipe(round_apportioned, ndigits=ndigits)
         .rename(label_pct)
     )
 
