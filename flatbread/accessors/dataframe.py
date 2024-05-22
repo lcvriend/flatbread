@@ -107,6 +107,7 @@ class PitaFrame:
         ignore_keys: str|list[str]|None = None,
         ndigits: int|None = None,
         base: int = 100,
+        apportioned_rounding: bool = True,
     ) -> pd.DataFrame:
         """
         Transform data to percentages based on specified axis.
@@ -142,6 +143,7 @@ class PitaFrame:
             ignore_keys = ignore_keys,
             ndigits = ndigits,
             base = base,
+            apportioned_rounding = apportioned_rounding,
         )
 
     def add_percentages(
@@ -153,6 +155,7 @@ class PitaFrame:
         ignore_keys: str|list[str]|None = None,
         ndigits: int|None = None,
         base: int = 100,
+        apportioned_rounding: bool = True,
         interleaf: bool = False,
     ) -> pd.DataFrame:
         """
@@ -197,6 +200,7 @@ class PitaFrame:
             ignore_keys = ignore_keys,
             ndigits = ndigits,
             base = base,
+            apportioned_rounding = apportioned_rounding,
             interleaf = interleaf,
         )
 

@@ -35,6 +35,7 @@ def as_percentages(
     label_pct: str = 'pct',
     ndigits: int = -1,
     base: int = 100,
+    apportioned_rounding: bool = True,
     **kwargs,
 ):
     raise NotImplementedError('No implementation for this type')
@@ -49,14 +50,16 @@ def _(
     label_totals: str|None = None,
     ndigits: int = -1,
     base: int = 100,
+    apportioned_rounding: bool = True,
     **kwargs,
 ) -> pd.Series:
+    rounding = round_apportioned if apportioned_rounding else round
     total = data.iloc[-1] if label_totals is None else data.loc[label_totals]
     return (
         data
         .div(total)
         .mul(base)
-        .pipe(round_apportioned, ndigits=ndigits)
+        .pipe(rounding, ndigits=ndigits)
         .rename(label_pct)
     )
 
@@ -72,9 +75,11 @@ def _(
     ignore_keys: str|list[str]|None = 'pct',
     ndigits: int = -1,
     base: int = 100,
+    apportioned_rounding: bool = True,
     **kwargs,
 ) -> pd.DataFrame:
     # reverse axis for consistency
+    rounding = round_apportioned if apportioned_rounding else round
     axis = 0 if axis == 1 else 1 if axis == 0 else None
 
     cols = chaining.get_data_mask(df.columns, ignore_keys)
@@ -86,7 +91,7 @@ def _(
         data
         .div(totals, axis=axis)
         .mul(base)
-        .pipe(round_apportioned, ndigits=ndigits)
+        .pipe(rounding, ndigits=ndigits)
     )
     return pcts
 
@@ -98,6 +103,7 @@ def add_percentages(
     label_pct: str = 'pct',
     ndigits: int = -1,
     base: int = 100,
+    apportioned_rounding: bool = True,
     **kwargs,
 ):
     raise NotImplementedError('No implementation for this type')
@@ -113,6 +119,7 @@ def _(
     label_totals: str|None = None,
     ndigits: int = -1,
     base: int = 100,
+    apportioned_rounding: bool = True,
     **kwargs,
 ) -> pd.DataFrame:
     pcts = data.pipe(
@@ -121,6 +128,7 @@ def _(
         label_totals = label_totals,
         ndigits = ndigits,
         base = base,
+        apportioned_rounding = apportioned_rounding,
     )
     output = pd.concat([data, pcts], keys=[label_n, label_pct], axis=1)
     return output
@@ -139,6 +147,7 @@ def _(
     ignore_keys: str|list[str]|None = 'pct',
     ndigits: int = -1,
     base: int = 100,
+    apportioned_rounding: bool = True,
     interleaf: bool = False,
     **kwargs,
 ) -> pd.DataFrame:
@@ -161,6 +170,7 @@ def _(
         ignore_keys = ignore_keys,
         ndigits = ndigits,
         base = base,
+        apportioned_rounding = apportioned_rounding,
     )
 
     # check if there are already percentages in the table
