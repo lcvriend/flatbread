@@ -186,7 +186,7 @@ def _subagg_implementation(
         processed = []
         for levels, group in groups:
             # create key
-            levels = (levels,) if isinstance(levels, str) else levels
+            levels = (levels,) if pd.api.types.is_scalar(levels) else levels
             padding = [_fill] * (len(names) - len(levels) - 1)
             key = list(levels) + [label] + padding
 
