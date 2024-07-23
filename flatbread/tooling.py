@@ -1,6 +1,8 @@
-from typing import Literal, TypeAlias
+from typing import Any, Literal, TypeAlias
 
 import pandas as pd
+
+from flatbread import DEFAULTS
 
 
 Axis: TypeAlias = Literal[0, 1, 2, 'index', 'columns', 'both']
@@ -48,3 +50,33 @@ def sort_index_from_list(
 ) -> pd.DataFrame|pd.Series:
     sorter = lambda idx: idx.map({n:m for m,n in enumerate(order)})
     return data.sort_index(axis=axis, level=level, key=sorter)
+
+
+def sort_totals(
+    data: pd.DataFrame|pd.Series,
+    axis: Axis = 0,
+    level: int = 0,
+    **kwargs,
+):
+    """
+    Sort an index alphabetically except for special labels which should come last.
+    """
+    def safe_index(lst: list, value: str, default: int = -1) -> int:
+        index_map = {v:i for i,v in enumerate(lst)}
+        return index_map.get(value, default)
+
+    def assign_order(i) -> tuple[int, Any]:
+        return safe_index(labels, i), i
+
+    labels = [
+        DEFAULTS['subtotals']['label'],
+        DEFAULTS['totals']['label'],
+    ]
+
+    output = data.sort_index(
+        axis = axis,
+        level = level,
+        key = lambda idx: idx.map(assign_order),
+        **kwargs,
+    )
+    return output

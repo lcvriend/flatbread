@@ -5,6 +5,7 @@ import pandas as pd
 import flatbread.percentages as pct
 import flatbread.agg.aggregation as agg
 import flatbread.agg.totals as tot
+import flatbread.tooling as tool
 
 
 @pd.api.extensions.register_series_accessor("pita")
@@ -12,6 +13,7 @@ class PitaSeries:
     def __init__(self, pandas_obj):
         self._obj = pandas_obj
 
+    #region aggregation
     def add_agg(
         self,
         aggfunc: str|Callable,
@@ -92,6 +94,7 @@ class PitaSeries:
             _fill = _fill,
         )
 
+    #region value counts
     def value_counts(
         self,
         fillna: str = '<NA>',
@@ -136,6 +139,7 @@ class PitaSeries:
             )
         return result
 
+    #region percentages
     def as_percentages(
         self,
         label_pct: str = None,
@@ -171,6 +175,9 @@ class PitaSeries:
             ndigits = ndigits,
             base = base,
         )
+
+    def as_pct(self, *args, **kwargs):
+        return self.as_percentages(*args, **kwargs)
 
     def add_percentages(
         self,
@@ -212,6 +219,10 @@ class PitaSeries:
             base = base,
         )
 
+    def add_pct(self, *args, **kwargs):
+        return self.add_percentages(*args, **kwargs)
+
+    #region totals
     def add_totals(
         self,
         label: str|None = None,
@@ -270,4 +281,17 @@ class PitaSeries:
             label = label,
             ignore_keys = ignore_keys,
             _fill = _fill,
+        )
+
+    def sort_totals(
+        self,
+        axis: int = 0,
+        level: int = 0,
+        **kwargs
+    ):
+        return tool.sort_totals(
+            self._obj,
+            axis = axis,
+            level = level,
+            **kwargs,
         )
