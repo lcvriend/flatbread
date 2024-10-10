@@ -180,13 +180,15 @@ def _(
         keys = [label_n, label_pct]
         output = pd.concat([df, pcts], keys=keys, axis=1)
     else:
-        # if there are then transform percentages first
+        # if percentages are present then transform them first
         # keys are already present in the original df
         # so we do not add new keys
         pcts = pcts.rename(columns={label_n: label_pct})
         output = pd.concat([df, pcts], axis=1)
     if interleaf:
-        return output.stack(0).unstack(-1)
+        # return output.stack(0).unstack(-1)
+        keys = [label_n, label_pct]
+        return output.swaplevel(axis=1).sort_index(axis=1, level=0)
     return output
 
 
