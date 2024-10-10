@@ -217,4 +217,6 @@ def round_apportioned(
         return s
     cumsum = s.fillna(0).cumsum().round(ndigits)
     prev_baseline = cumsum.shift(1).fillna(0)
-    return cumsum - prev_baseline
+    rounded = cumsum - prev_baseline
+    keep_na = rounded.mask(s.isna())
+    return keep_na
