@@ -6,10 +6,11 @@ import flatbread.percentages as pct
 import flatbread.agg.aggregation as agg
 import flatbread.agg.totals as tot
 import flatbread.tooling as tool
+from flatbread.render.display import PitaDisplayMixin
 
 
 @pd.api.extensions.register_series_accessor("pita")
-class PitaSeries:
+class PitaSeries(PitaDisplayMixin):
     def __init__(self, pandas_obj):
         self._obj = pandas_obj
 
