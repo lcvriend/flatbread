@@ -6,7 +6,7 @@ import pandas as pd
 
 def get_data_mask(index, ignore_keys):
     """
-    Create a mask used for separating data from results of flatbread operations. The keys in `ignore_keys` determine which rows/columns need to be ingored. This can be used when chaining multiple flatbread operations.
+    Create a mask used for separating data from results of flatbread operations. The keys in `ignore_keys` determine which rows/columns need to be ignored. This can be used when chaining multiple flatbread operations.
 
     Parameters
     ----------
