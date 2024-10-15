@@ -1,6 +1,14 @@
-<script type="module" src="https://lcvriend.github.io/wc-simple-table/src/viewer.js"></script>
-<data-viewer id="{{ id }}" style="--hover-color: none;"></data-viewer>
+<div id="{{ id }}"></div>
 <script type="module">
-const data = {{ data }}
-document.getElementById("{{ id }}").data = data
+  import { DataViewer } from "https://lcvriend.github.io/wc-simple-table/src/viewer.js";
+
+  customElements.whenDefined("data-viewer").then(() => {
+    const data = {{ data }}
+    const viewer = document.createElement("data-viewer")
+    viewer.style.setProperty("--hover-color", "none")
+    viewer.data = data
+
+    const placeholder = document.getElementById("{{ id }}")
+    placeholder.parentNode.replaceChild(viewer, placeholder)
+  })
 </script>
