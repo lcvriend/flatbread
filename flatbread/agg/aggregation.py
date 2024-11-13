@@ -26,7 +26,7 @@ def get_levels(levels, names):
     return [find_level(level) for level in levels]
 
 
-# AGGREGATION
+# region AGGREGATION
 
 @singledispatch
 def add_agg(
@@ -41,7 +41,7 @@ def add_agg(
     raise NotImplementedError('No implementation for this type')
 
 
-## SERIES
+# region #series
 @add_agg.register
 def _(
     s: pd.Series,
@@ -63,7 +63,7 @@ def _(
     return data
 
 
-## DATAFRAME
+# region #dataframe
 @add_agg.register
 def _(
     df: pd.DataFrame,
@@ -91,14 +91,14 @@ def _(
     return data
 
 
-# SUBAGGREGATION
+# region SUBAGG
 
 @singledispatch
 def add_subagg(
     data,
     aggfunc: str|Callable,
     *args,
-    levels: int|str|list[int|str] = 0,
+    level: int|str|list[int|str] = 0,
     label: str|None = None,
     ignore_keys: str|list[str]|None = None,
     **kwargs,
@@ -106,13 +106,13 @@ def add_subagg(
     raise NotImplementedError('No implementation for this type')
 
 
-## SERIES
+# region #series
 @add_subagg.register
 def _(
     s: pd.Series,
     aggfunc: str|Callable,
     *args,
-    levels: int|str|list[int|str] = 0,
+    level: int|str|list[int|str] = 0,
     label: str|None = None,
     ignore_keys: str|list[str]|None = None,
     _fill = '',
@@ -123,7 +123,7 @@ def _(
         data,
         aggfunc,
         *args,
-        levels = levels,
+        level = level,
         label = label,
         ignore_keys = ignore_keys,
         _fill = _fill,
@@ -132,14 +132,14 @@ def _(
     return output
 
 
-## DATAFRAME
+# region #dataframe
 @add_subagg.register
 def _(
     df: pd.DataFrame,
     aggfunc: str|Callable,
     *args,
     axis: int = 0,
-    levels: int|str|list[int|str] = 0,
+    level: int|str|list[int|str] = 0,
     label: str|None = None,
     ignore_keys: str|list[str]|None = None,
     _fill = '',
@@ -150,7 +150,7 @@ def _(
         data,
         aggfunc,
         *args,
-        levels = levels,
+        level = level,
         label = label,
         ignore_keys = ignore_keys,
         _fill = _fill,
@@ -165,7 +165,7 @@ def _subagg_implementation(
     data: pd.Series|pd.DataFrame,
     aggfunc: str|Callable,
     *args,
-    levels: int|str|list[int|str] = 0,
+    level: int|str|list[int|str] = 0,
     label: str|None = None,
     ignore_keys: str|list[str]|None = None,
     _fill = '',
@@ -173,7 +173,7 @@ def _subagg_implementation(
 ):
     names = data.index.names
     label = get_label(label, aggfunc)
-    levels = get_levels(levels, names)
+    levels = get_levels(level, names)
 
     # checks
     msg = 'Flatbread cannot perform subaggregation if axis is not MultiIndex'

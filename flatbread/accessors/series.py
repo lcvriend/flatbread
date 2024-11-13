@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Any, Callable
 
 import pandas as pd
 
@@ -58,7 +58,7 @@ class PitaSeries(PitaDisplayMixin):
     def add_subagg(
         self,
         aggfunc: str|Callable,
-        levels: int|str|list[int|str] = 0,
+        level: int|str|list[int|str] = 0,
         label: str = None,
         ignore_keys: str|list[str]|None = None,
         _fill: str = '',
@@ -89,7 +89,7 @@ class PitaSeries(PitaDisplayMixin):
         return agg.add_agg(
             self._obj,
             aggfunc,
-            levels = levels,
+            level = level,
             label = label,
             ignore_keys = ignore_keys,
             _fill = _fill,
@@ -254,7 +254,7 @@ class PitaSeries(PitaDisplayMixin):
 
     def add_subtotals(
         self,
-        levels: int|str|list[int|str] = 0,
+        level: int|str|list[int|str] = 0,
         label: str|None = None,
         ignore_keys: str|list[str]|None = None,
         _fill: str = '',
@@ -278,7 +278,7 @@ class PitaSeries(PitaDisplayMixin):
         """
         return tot.add_subtotals(
             self._obj,
-            levels = levels,
+            level = level,
             label = label,
             ignore_keys = ignore_keys,
             _fill = _fill,

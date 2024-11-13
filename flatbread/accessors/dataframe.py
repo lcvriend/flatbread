@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Any, Callable
 
 import pandas as pd
 
@@ -63,7 +63,7 @@ class PitaFrame(PitaDisplayMixin):
         self,
         aggfunc: str|Callable,
         axis: int = 0,
-        levels: int|str|list[int|str] = 0,
+        level: int|str|list[int|str] = 0,
         label: str = None,
         ignore_keys: str|list[str]|None = None,
         _fill: str = '',
@@ -97,7 +97,7 @@ class PitaFrame(PitaDisplayMixin):
             self._obj,
             aggfunc,
             axis = axis,
-            levels = levels,
+            level = level,
             label = label,
             ignore_keys = ignore_keys,
             _fill = _fill,
@@ -250,7 +250,7 @@ class PitaFrame(PitaDisplayMixin):
     def add_subtotals(
         self,
         axis: int = 2,
-        levels: int|str|list[int|str] = 0,
+        level: int|str|list[int|str] = 0,
         label: str|None = None,
         ignore_keys: str|list[str]|None = None,
         _fill: str = '',
@@ -277,7 +277,7 @@ class PitaFrame(PitaDisplayMixin):
         return tot.add_subtotals(
             self._obj,
             axis = axis,
-            levels = levels,
+            level = level,
             label = label,
             ignore_keys = ignore_keys,
             _fill = _fill,

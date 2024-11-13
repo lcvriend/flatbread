@@ -6,7 +6,7 @@ import flatbread.agg.aggregation as agg
 from flatbread import chaining, config, DEFAULTS
 
 
-# TOTALS
+# region TOTALS
 
 @singledispatch
 def add_totals(
@@ -77,13 +77,13 @@ def _(
     return output
 
 
-# SUBTOTALS
+# region SUBTOTALS
 
 @singledispatch
 def add_subtotals(
     data,
     label: str = 'Subtotals',
-    levels: int|str|list[int|str] = 0,
+    level: int|str|list[int|str] = 0,
     ignore_keys: str|list[str]|None = 'Totals',
 ):
     raise NotImplementedError('No implementation for this type')
@@ -94,7 +94,7 @@ def add_subtotals(
 @chaining.persist_ignored('totals', 'label')
 def _(
     data: pd.Series,
-    levels: int|str|list[int|str] = 0,
+    level: int|str|list[int|str] = 0,
     label: str = 'Subtotals',
     ignore_keys: str|list[str]|None = 'Totals',
     _fill: str|None = '',
@@ -102,7 +102,7 @@ def _(
     output = agg.add_subagg(
         data,
         'sum',
-        levels = levels,
+        level = level,
         label = label,
         ignore_keys = ignore_keys,
         _fill = _fill,
@@ -116,7 +116,7 @@ def _(
 def _(
     data: pd.DataFrame,
     axis: int = 0,
-    levels: int|str|list[int|str] = 0,
+    level: int|str|list[int|str] = 0,
     label: str = 'Subtotals',
     ignore_keys: str|list[str]|None = 'Totals',
     _fill: str = '',
@@ -126,7 +126,7 @@ def _(
             data,
             'sum',
             axis = axis,
-            levels = levels,
+            level = level,
             label = label,
             ignore_keys = ignore_keys,
             _fill = _fill,
@@ -137,7 +137,7 @@ def _(
             .pipe(
                 add_subtotals,
                 axis = 0,
-                levels = levels,
+                level = level,
                 label = label,
                 ignore_keys = ignore_keys,
                 _fill = _fill,
@@ -145,7 +145,7 @@ def _(
             .pipe(
                 add_subtotals,
                 axis = 1,
-                levels = levels,
+                level = level,
                 label = label,
                 ignore_keys = ignore_keys,
                 _fill = _fill,
