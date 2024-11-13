@@ -295,3 +295,40 @@ class PitaFrame(PitaDisplayMixin):
             level = level,
             **kwargs,
         )
+
+    # region tooling
+    def add_level(
+        self,
+        value: Any,
+        level: int = 0,
+        level_name: Any = None,
+        axis: int = 0,
+    ):
+        """
+        Add a level containing the specified value to a DataFrame axis.
+
+        Parameters
+        ----------
+        data (pd.DataFrame):
+            Input DataFrame.
+        value (Any):
+            Value to fill the new level with.
+        level (int, optional):
+            Position to insert the new level. Defaults to 0 (start).
+        level_name (Any, optional):
+            Name for the new level. Defaults to None.
+        axis (Axis):
+            Axis to modify (0 for index, 1 for columns). Defaults to 0.
+
+        Returns
+        -------
+        pd.DataFrame:
+            DataFrame with the new level added to the specified axis.
+        """
+        return tool.add_level(
+            self._obj,
+            value = value,
+            level = level,
+            level_name = level_name,
+            axis = axis,
+        )
