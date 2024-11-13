@@ -197,7 +197,7 @@ def _subagg_implementation(
             # this makes sure that for example a subtotal is added
             # to a totals row
             if rows.any():
-                group.loc[tuple(key)] = (
+                group.loc[tuple(key),] = (
                     group
                     .loc[rows]
                     .agg(aggfunc, *args, **kwargs)
