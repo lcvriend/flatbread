@@ -4,6 +4,7 @@ from decimal import Decimal
 from pathlib import Path
 
 import pandas as pd
+from flatbread import DEFAULTS
 
 
 DEFAULT_DTYPES: dict[str, str] = {
@@ -23,6 +24,24 @@ DEFAULT_DTYPES: dict[str, str] = {
     'Int16':          'int',
     'Int32':          'int',
     'Int64':          'int',
+}
+
+FORMAT_OPTIONS: dict[str, dict] = {
+    'percentages': {
+        'labels': [DEFAULTS['percentages']['label_pct']],
+        'options': {
+            'style': 'percent',
+            'minimumFractionDigits': 0,
+            'maximumFractionDigits':
+                DEFAULTS['percentages']['ndigits'] if DEFAULTS['percentages']['ndigits'] >= 0 else 21,
+        }
+    },
+    'difference': {
+        'labels': ['diff'],
+        'options': {
+            'signDisplay': 'always',
+        }
+    }
 }
 
 
@@ -45,6 +64,7 @@ class DataFrameToTableSpec:
     def __init__(self, pandas_obj) -> None:
         self._obj = pandas_obj
         self._dtypes = DEFAULT_DTYPES.copy()
+        self._format_options = {}
 
     def __call__(
         self, path: Path|str|None,
@@ -112,12 +132,20 @@ class DataFrameToTableSpec:
             The table specification as a dictionary.
         """
         spec = self._obj.to_dict(orient='split')
-        spec['values'] = spec.pop('data')
+        # handle NA (set to None)
+        spec['values'] = [
+            [None if pd.isna(i) else i for i in row]
+            for row in spec.pop('data')
+        ]
         spec['indexNames'] = self._obj.index.names
         spec['columnNames'] = self._obj.columns.names
         spec['dtypes'] = self._obj.dtypes.pipe(self.get_dtypes_as_list)
-        if format_options is not None:
-            spec['formatOptions'] = format_options
+
+        spec['formatOptions'] = (
+            format_options
+            if format_options is not None
+            else self.get_format_options()
+        )
         return spec
 
     def _serialize_spec_to_json(self, spec) -> str:
@@ -175,3 +203,29 @@ class DataFrameToTableSpec:
         """
         get_dtype = lambda item: self._dtypes.get(str(item), 'str')
         return s.map(get_dtype).to_list()
+
+    def set_format_options(self, format_options: dict):
+        self._format_options = format_options
+
+    def get_format_options(self):
+        return [self.get_format_options_for_column(col) for col in self._obj]
+
+    def get_format_options_for_column(self, column) -> list[dict|None]:
+        def check_labels(col, labels):
+            if pd.api.types.is_scalar(col):
+                return col if col in labels else False
+            if col in labels:
+                return col
+            for label in labels:
+                if label in col:
+                    return label
+            else:
+                return False
+
+        if label := check_labels(column, self._format_options.keys()):
+            return self._format_options[label]
+
+        for format_type in FORMAT_OPTIONS.values():
+            if check_labels(column, format_type['labels']):
+                return format_type['options']
+        return None

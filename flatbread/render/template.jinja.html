@@ -7,6 +7,10 @@
     const viewer = document.createElement("data-viewer")
     viewer.style.setProperty("--hover-color", "none")
     viewer.data = data
+    {% if defaults.locale %}
+    viewer.setAttribute("locale", "{{ defaults.locale }}")
+    viewer.setAttribute("margin-labels", "{{[defaults.totals.label,defaults.subtotals.label]|join(';')}}")
+    {% endif %}
 
     const placeholder = document.getElementById("{{ id }}")
     placeholder.parentNode.replaceChild(viewer, placeholder)

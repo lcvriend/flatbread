@@ -10,6 +10,8 @@
     "percentages": {
         "label_pct": "pct",
         "label_n": "n",
-        "ndigits": -1
-    }
+        "ndigits": -1,
+        "base": 1
+    },
+    "locale": null
 }
