@@ -103,7 +103,7 @@ class PitaSeries(PitaDisplayMixin):
         add_pct: bool = False,
         label_pct: str = 'pct',
         ndigits: int = -1,
-        base: int = 100,
+        base: int = 1,
     )-> pd.Series|pd.DataFrame:
         """
         Similar to pandas `value_counts` except *null* values are by default also counted and a total is added. Optionally, percentages may also be added to the output.
@@ -146,7 +146,7 @@ class PitaSeries(PitaDisplayMixin):
         label_pct: str = None,
         label_totals: str|None = None,
         ndigits: int = None,
-        base: int = 100,
+        base: int = 1,
     ) -> pd.Series:
         """
         Transform data into percentages.
@@ -186,7 +186,7 @@ class PitaSeries(PitaDisplayMixin):
         label_pct: str|None = None,
         label_totals: str|None = None,
         ndigits: int|None = None,
-        base: int = 100,
+        base: int = 1,
     ) -> pd.DataFrame:
         """
         Add percentage column to a Series.

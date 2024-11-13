@@ -110,7 +110,7 @@ class PitaFrame(PitaDisplayMixin):
         label_totals: str|None = None,
         ignore_keys: str|list[str]|None = None,
         ndigits: int|None = None,
-        base: int = 100,
+        base: int = 1,
         apportioned_rounding: bool = True,
     ) -> pd.DataFrame:
         """
@@ -161,7 +161,7 @@ class PitaFrame(PitaDisplayMixin):
         label_totals: str|None = None,
         ignore_keys: str|list[str]|None = None,
         ndigits: int|None = None,
-        base: int = 100,
+        base: int = 1,
         apportioned_rounding: bool = True,
         interleaf: bool = False,
     ) -> pd.DataFrame:

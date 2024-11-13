@@ -34,7 +34,7 @@ def as_percentages(
     *args,
     label_pct: str = 'pct',
     ndigits: int = -1,
-    base: int = 100,
+    base: int = 1,
     apportioned_rounding: bool = True,
     **kwargs,
 ):
@@ -49,7 +49,7 @@ def _(
     label_pct: str = 'pct',
     label_totals: str|None = None,
     ndigits: int = -1,
-    base: int = 100,
+    base: int = 1,
     apportioned_rounding: bool = True,
     **kwargs,
 ) -> pd.Series:
@@ -74,7 +74,7 @@ def _(
     label_totals: str|None = None,
     ignore_keys: str|list[str]|None = 'pct',
     ndigits: int = -1,
-    base: int = 100,
+    base: int = 1,
     apportioned_rounding: bool = True,
     **kwargs,
 ) -> pd.DataFrame:
@@ -102,7 +102,7 @@ def add_percentages(
     *args,
     label_pct: str = 'pct',
     ndigits: int = -1,
-    base: int = 100,
+    base: int = 1,
     apportioned_rounding: bool = True,
     **kwargs,
 ):
@@ -118,7 +118,7 @@ def _(
     label_pct: str = 'pct',
     label_totals: str|None = None,
     ndigits: int = -1,
-    base: int = 100,
+    base: int = 1,
     apportioned_rounding: bool = True,
     **kwargs,
 ) -> pd.DataFrame:
@@ -146,7 +146,7 @@ def _(
     label_totals: str|None = None,
     ignore_keys: str|list[str]|None = 'pct',
     ndigits: int = -1,
-    base: int = 100,
+    base: int = 1,
     apportioned_rounding: bool = True,
     interleaf: bool = False,
     **kwargs,
