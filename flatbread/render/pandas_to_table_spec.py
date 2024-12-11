@@ -208,7 +208,8 @@ class DataFrameToTableSpec:
         self._format_options = format_options
 
     def get_format_options(self):
-        return [self.get_format_options_for_column(col) for col in self._obj]
+        options = [self.get_format_options_for_column(col) for col in self._obj]
+        return options
 
     def get_format_options_for_column(self, column) -> list[dict|None]:
         def check_labels(col, labels):
