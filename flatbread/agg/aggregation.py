@@ -193,10 +193,10 @@ def _subagg_implementation(
             # ignore totals and subtotal rows when aggregating
             rows = chaining.get_data_mask(group.index, ignore_keys)
 
-            # if no data rows were selected, then do not add subagg
-            # this makes sure that for example a subtotal is added
-            # to a totals row
-            if rows.any():
+            # only add subagg if there are two or more data rows selected
+            # - skip total rows, etc.
+            # - skip if there is only one row selected
+            if sum(rows) > 1:
                 subagged = group.loc[rows].agg(aggfunc, *args, **kwargs)
                 group.loc[tuple(key),:] = subagged
             processed.append(group)
