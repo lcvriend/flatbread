@@ -207,5 +207,5 @@ def _subagg_implementation(
         # once list of length 1 gets handled as tuple in pandas
         # then this check is redundant (just pass `list(range(level+1))`)
         grouper = 0 if level == 0 else list(range(level + 1))
-        output = output.groupby(level=grouper).pipe(process_groups)
+        output = output.groupby(level=grouper, sort=False).pipe(process_groups)
     return output
