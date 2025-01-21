@@ -1,57 +1,141 @@
-import uuid
-import pandas as pd
+from typing import Any
+
 from jinja2 import Environment, PackageLoader
 
 from flatbread import DEFAULTS
-import flatbread.render.pandas_to_table_spec
+from flatbread.render.config import DisplayConfig
+from flatbread.render.template import TemplateManager
+from flatbread.render.tablespec import TableSpecBuilder
 
 
 class PitaDisplayMixin:
+    """Mixin for displaying pandas objects using data-viewer"""
     _env = Environment(loader=PackageLoader('flatbread', 'render'))
     _template_name = 'template.jinja.html'
-    _as_frame = None
-
-    def _repr_html_(self):
-        template = self._env.get_template(self._template_name)
-        data = self._get_table_spec()
-        return template.render(
-            data = data,
-            defaults = DEFAULTS,
-            id = f"id-{uuid.uuid4()}",
-        )
 
     @property
-    def as_frame(self):
-        if self._as_frame is None:
-            is_series = isinstance(self._obj, pd.Series)
-            self._as_frame = self._obj.to_frame() if is_series else self._obj
-        return self._as_frame
+    def _config(self) -> DisplayConfig:
+        """Lazy initialization of display config"""
+        if not hasattr(self, '_display_config'):
+            self._display_config = DisplayConfig.from_defaults(DEFAULTS.get("display", {}))
+        return self._display_config
 
-    def _get_table_spec(self):
-        return self.as_frame.to_table_spec.as_json()
+    @property
+    def _table_spec_builder(self) -> TableSpecBuilder:
+        """Lazy initialization of spec builder"""
+        if not hasattr(self, '_spec_builder'):
+            self._spec_builder = TableSpecBuilder(self._obj)
+        return self._spec_builder
 
-    def set_format_options(self, options):
-        """
-        Set custom format options for the display.
+    @property
+    def _template_manager(self) -> TemplateManager:
+        """Lazy initialization of template manager"""
+        if not hasattr(self, '_template_mgr'):
+            self._template_mgr = TemplateManager()
+        return self._template_mgr
+
+    def configure_display(self, **kwargs) -> "PitaDisplayMixin":
+        """Configure display options"""
+        self._config.update(**kwargs)
+        return self
+
+    def set_locale(self, locale: str) -> "PitaDisplayMixin":
+        """Set the locale for number/date formatting"""
+        self._config.locale = locale
+        return self
+
+    def set_na_rep(self, na_rep: str) -> "PitaDisplayMixin":
+        """Set null value representation"""
+        self._config.na_rep = na_rep
+        return self
+
+    def set_max_rows(self, max_rows: int) -> "PitaDisplayMixin":
+        """Set maximum rows before truncating"""
+        self._config.max_rows = max_rows
+        return self
+
+    def set_max_columns(self, max_columns: int) -> "PitaDisplayMixin":
+        """Set maximum columns before truncating"""
+        self._config.max_columns = max_columns
+        return self
+
+    def set_trim_size(self, n: int) -> "PitaDisplayMixin":
+        """Set number of items to show when truncated"""
+        self._config.trim_size = n
+        return self
+
+    def set_separator(self, sep: str) -> "PitaDisplayMixin":
+        """Set truncation indicator"""
+        self._config.separator = sep
+        return self
+
+    def hide_borders(self, hide: bool = True) -> "PitaDisplayMixin":
+        """Hide all borders"""
+        self._config.hide_column_borders = hide
+        self._config.hide_row_borders = hide
+        self._config.hide_thead_border = hide
+        self._config.hide_index_border = hide
+        return self
+
+    def show_column_borders(self, show: bool = True) -> "PitaDisplayMixin":
+        """Show/hide vertical column borders"""
+        self._config.hide_column_borders = not show
+        return self
+
+    def show_row_borders(self, show: bool = True) -> "PitaDisplayMixin":
+        """Show/hide horizontal row borders"""
+        self._config.hide_row_borders = not show
+        return self
+
+    def show_header_border(self, show: bool = True) -> "PitaDisplayMixin":
+        """Show/hide header bottom border"""
+        self._config.hide_thead_border = not show
+        return self
+
+    def show_index_border(self, show: bool = True) -> "PitaDisplayMixin":
+        """Show/hide index right border"""
+        self._config.hide_index_border = not show
+        return self
+
+    def show_hover(self, show: bool = True) -> "PitaDisplayMixin":
+        """Enable row hover effect"""
+        self._config.show_hover = show
+        return self
+
+    def collapse_columns(self, collapse: bool = True) -> "PitaDisplayMixin":
+        """Collapse column headers"""
+        self._config.collapse_columns = collapse
+        return self
+
+    def set_section_levels(self, levels: int) -> "PitaDisplayMixin":
+        """Set index levels to show as sections"""
+        self._config.section_levels = levels
+        return self
+
+    def set_margin_labels(self, *labels: str) -> "PitaDisplayMixin":
+        """Set labels to be treated as margins"""
+        self._config.margin_labels = list(labels)
+        return self
+
+    def format(self, column: str, format_spec: str | dict[str, Any]) -> "PitaDisplayMixin":
+        """Set format options for a column
 
         Parameters
         ----------
-        options : dict, callable
-            A dictionary where keys are column names and values are format option dictionaries or a callable that takes a DataFrame and returns a dictionary.
+        column : str
+            Column to format
+        format_spec : str | dict
+            Either a preset name (e.g. 'currency') or format options dict
 
         Returns
         -------
-        self
-            Returns the object itself for method chaining.
-
-        Examples
-        --------
-        >>> df.pita.set_format_options({
-        ...     'price': {'style': 'currency', 'currency': 'USD'},
-        ...     'percentage': {'style': 'percent', 'maximumFractionDigits': 2}
-        ... })
+        PitaDisplayMixin
+            Self for method chaining
         """
-        if callable(options):
-            options = options(self.as_frame)
-        self.as_frame.to_table_spec.set_format_options(options)
+        self._table_spec_builder.set_format(column, format_spec)
         return self
+
+    def _repr_html_(self) -> str:
+        """Generate HTML representation for Jupyter display"""
+        spec = self._table_spec_builder.build_spec()
+        return self._template_manager.render(spec, self._config)

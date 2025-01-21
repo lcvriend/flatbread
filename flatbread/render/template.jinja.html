@@ -3,16 +3,47 @@
   import { DataViewer } from "https://lcvriend.github.io/wc-simple-table/src/viewer.js";
 
   customElements.whenDefined("data-viewer").then(() => {
-    const data = {{ data }}
-    const viewer = document.createElement("data-viewer")
-    viewer.style.setProperty("--hover-color", "none")
+    const data = {{ data | safe }}
+    const viewer = new DataViewer()
     viewer.data = data
-    {% if defaults.locale %}
-    viewer.setAttribute("locale", "{{ defaults.locale }}")
-    viewer.setAttribute("margin-labels", "{{[defaults.totals.label,defaults.subtotals.label]|join(';')}}")
+    viewer.setAttribute("hide-settings-menu", "")
+
+    {% if config.locale %}
+    viewer.setAttribute("locale", "{{ config.locale }}")
+    {% endif %}
+
+    viewer.setAttribute("na-rep", "{{ config.na_rep }}")
+    viewer.setAttribute("margin-labels", "{{ config.margin_labels|join(';') }}")
+
+    viewer.setAttribute("section-levels", "{{ config.section_levels }}")
+    viewer.setAttribute("max-rows", "{{ config.max_rows }}")
+    viewer.setAttribute("max-columns", "{{ config.max_columns }}")
+    viewer.setAttribute("trim-size", "{{ config.trim_size }}")
+    viewer.setAttribute("separator", "{{ config.separator }}")
+
+    {% if config.collapse_columns is not none %}
+    viewer.setAttribute("collapse-columns", "{{ config.collapse_columns|lower }}")
+    {% endif %}
+
+    {% if config.hide_column_borders %}
+    viewer.setAttribute("hide-column-borders", "")
+    {% endif %}
+    {% if config.hide_row_borders %}
+    viewer.setAttribute("hide-row-borders", "")
+    {% endif %}
+    {% if config.hide_thead_border %}
+    viewer.setAttribute("hide-thead-border", "")
+    {% endif %}
+    {% if config.hide_index_border %}
+    viewer.setAttribute("hide-index-border", "")
+    {% endif %}
+
+    {% if config.show_hover %}
+    viewer.setAttribute("show-hover", "")
     {% endif %}
 
     const placeholder = document.getElementById("{{ id }}")
     placeholder.parentNode.replaceChild(viewer, placeholder)
+    console.log(viewer)
   })
 </script>
