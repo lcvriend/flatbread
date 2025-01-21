@@ -152,3 +152,14 @@ def _(
             )
         )
     return output
+
+
+#region DROP TOTALS
+def drop_totals(
+    data: pd.DataFrame|pd.Series,
+    ignore_keys: str|list[str]|None = None,
+) -> pd.DataFrame|pd.Series:
+    if ignore_keys is None:
+        ignore_keys = data.attrs['flatbread']['totals']['ignore_keys']
+    mask = chaining.get_data_mask(data.index, ignore_keys)
+    return data.loc[mask].copy()

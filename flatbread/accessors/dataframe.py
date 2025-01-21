@@ -296,6 +296,11 @@ class PitaFrame(PitaDisplayMixin):
             **kwargs,
         )
 
+    def drop_totals(
+        self
+    ):
+        return tot.drop_totals(self._obj)
+
     # region tooling
     def add_level(
         self,
