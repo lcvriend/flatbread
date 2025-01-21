@@ -1,9 +1,18 @@
 from functools import singledispatch
 from typing import Callable, Literal, TypeAlias
+import warnings
 
 import pandas as pd
 
 from flatbread import chaining
+
+# Ignore lexsort warning as agg is meant to keep the original order of the df in tact
+warnings.filterwarnings(
+    'ignore',
+    category=pd.errors.PerformanceWarning,
+    message='indexing past lexsort depth may impact performance.',
+    module='flatbread.agg.aggregation',
+)
 
 
 Axis: TypeAlias = Literal[0, 1, 2, 'index', 'columns', 'both']
