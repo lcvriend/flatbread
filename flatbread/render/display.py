@@ -1,11 +1,12 @@
-from typing import Any
+from typing import Any, Callable
 
+import pandas as pd
 from jinja2 import Environment, PackageLoader
 
 from flatbread import DEFAULTS
 from flatbread.render.config import DisplayConfig
 from flatbread.render.template import TemplateManager
-from flatbread.render.tablespec import TableSpecBuilder
+from flatbread.render.tablespec import TableSpecBuilder, FormatSpec
 
 
 class PitaDisplayMixin:
@@ -139,6 +140,11 @@ class PitaDisplayMixin:
             Self for method chaining
         """
         self._table_spec_builder.set_format(column, format_spec)
+        return self
+
+    def format_columns(self, formats: FormatSpec) -> "PitaDisplayMixin":
+        """Set multiple column formats at once"""
+        self._table_spec_builder.set_formats(formats)
         return self
 
     def _repr_html_(self) -> str:
