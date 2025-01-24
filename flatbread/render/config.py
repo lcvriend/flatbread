@@ -6,10 +6,9 @@ class DisplayConfig:
     # Data handling
     locale: str | None = None
     na_rep: str = "-"
-    margin_labels: list[str] = field(default_factory=lambda: ["Totals", "Subtotals"])
+    margin_labels: list[str] = field(default_factory=list)
 
     # Layout control
-    section_levels: int = 0
     collapse_columns: bool = None
     max_rows: int = 30
     max_columns: int = 30
@@ -26,17 +25,37 @@ class DisplayConfig:
     show_hover: bool = False
 
     @classmethod
-    def from_defaults(cls, defaults: dict[str, Any]) -> "DisplayConfig":
+    def from_defaults(
+        cls,
+        defaults: dict[str, Any],
+        data_attrs: dict|None = None,
+    ) -> "DisplayConfig":
         """Create config instance from defaults dict"""
-        if not defaults:  # If no defaults provided, use dataclass defaults
+        if not defaults:
             return cls()
+
+        margin_labels = []
+        if totals := defaults.get('totals', {}):
+            margin_labels.append(totals.get('label', 'Totals'))
+        if subtotals := defaults.get('subtotals', {}):
+            margin_labels.append(subtotals.get('label', 'Subtotals'))
+        if percentages := defaults.get('percentages', {}):
+            margin_labels.append(percentages.get('label_pct', 'pct'))
+
+        # Add ignored keys from attrs
+        if data_attrs and (fb_attrs := data_attrs.get('flatbread')):
+            if totals_attrs := fb_attrs.get('totals'):
+                if ignore_keys := totals_attrs.get('ignore_keys'):
+                    margin_labels.extend(ignore_keys)
+            if percentages_attrs := fb_attrs.get('percentages'):
+                if ignore_keys := percentages_attrs.get('ignore_keys'):
+                    margin_labels.extend(ignore_keys)
 
         # Extract values from defaults, using dataclass defaults if not present
         return cls(
-            locale=defaults.get("locale", cls.locale),
-            na_rep=defaults.get("na_rep", cls.na_rep),
-            margin_labels=defaults.get("margin_labels", cls.margin_labels),
-            section_levels=defaults.get("section_levels", cls.section_levels),
+            locale = defaults.get("locale", cls.locale),
+            na_rep = defaults.get("na_rep", cls.na_rep),
+            margin_labels = list(set(margin_labels)),
             collapse_columns=defaults.get("collapse_columns", cls.collapse_columns),
             max_rows=defaults.get("max_rows", cls.max_rows),
             max_columns=defaults.get("max_columns", cls.max_columns),

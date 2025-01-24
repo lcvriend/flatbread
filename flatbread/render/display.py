@@ -15,9 +15,11 @@ class PitaDisplayMixin:
 
     @property
     def _config(self) -> DisplayConfig:
-        """Lazy initialization of display config"""
         if not hasattr(self, '_display_config'):
-            self._display_config = DisplayConfig.from_defaults(DEFAULTS.get("display", {}))
+            self._display_config = DisplayConfig.from_defaults(
+                DEFAULTS,
+                self._obj.attrs if hasattr(self._obj, 'attrs') else None
+            )
         return self._display_config
 
     @property
@@ -117,7 +119,11 @@ class PitaDisplayMixin:
         self._config.margin_labels = list(labels)
         return self
 
-    def format(self, column: str, format_spec: str | dict[str, Any]) -> "PitaDisplayMixin":
+    def format(
+        self,
+        column: str,
+        format_spec: str | dict[str, Any],
+    ) -> "PitaDisplayMixin":
         """Set format options for a column
 
         Parameters
@@ -139,3 +145,36 @@ class PitaDisplayMixin:
         """Generate HTML representation for Jupyter display"""
         spec = self._table_spec_builder.build_spec()
         return self._template_manager.render(spec, self._config)
+
+    def get_table_spec(self) -> dict:
+        """
+        Get the raw table specification as a dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the complete table specification including:
+            - values: 2D array of cell values
+            - columns: Column labels
+            - index: Row labels
+            - columnNames: Names for column levels
+            - indexNames: Names for index levels
+            - dtypes: Data types per column
+            - formatOptions: Format configuration per column
+        """
+        return self._table_spec_builder.build_spec()
+
+    def get_table_spec_json(self) -> str:
+        """
+        Get the table specification as a JSON string.
+
+        Returns
+        -------
+        str
+            JSON string containing the complete table specification.
+            The JSON is serialized using the same custom serialization logic
+            used for display, handling pandas-specific types like Timestamps
+            and Intervals.
+        """
+        spec = self.get_table_spec()
+        return self._template_manager._serialize_to_json(spec)
