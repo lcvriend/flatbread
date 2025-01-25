@@ -96,7 +96,7 @@ class TableSpecBuilder:
                 )
         self._format_options[column] = format_spec
 
-    def set_formats(self, formats: FormatSpec]) -> None:
+    def set_formats(self, formats: FormatSpec) -> None:
         """Set multiple column formats at once.
 
         Parameters
