@@ -149,7 +149,7 @@ class PitaDisplayMixin:
 
     def _repr_html_(self) -> str:
         """Generate HTML representation for Jupyter display"""
-        spec = self._table_spec_builder.build_spec()
+        spec = self._table_spec_builder.get_spec_as_json()
         return self._template_manager.render(spec, self._config)
 
     def get_table_spec(self) -> dict:
@@ -182,5 +182,4 @@ class PitaDisplayMixin:
             used for display, handling pandas-specific types like Timestamps
             and Intervals.
         """
-        spec = self.get_table_spec()
-        return self._template_manager._serialize_to_json(spec)
+        return self._table_spec_builder.get_spec_as_json()

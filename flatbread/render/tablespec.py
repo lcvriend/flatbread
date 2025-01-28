@@ -1,3 +1,5 @@
+import json
+import decimal
 from typing import Any, Callable
 
 import pandas as pd
@@ -27,9 +29,18 @@ class TableSpecBuilder:
             "formatOptions": self._prepare_format_options()
         }
 
+    def get_spec_as_json(self) -> str:
+        spec = self.build_spec()
+        as_json = self._serialize_to_json(spec)
+        return as_json
+
     def _prepare_values(self) -> list[list]:
         """Convert DataFrame values to nested list format"""
-        return self._data.values.tolist()
+        values = [
+            [None if pd.isna(i) else i for i in row]
+            for row in self._data.values.tolist()
+        ]
+        return values
 
     def _prepare_columns(self) -> list:
         """Prepare column labels"""
@@ -116,3 +127,27 @@ class TableSpecBuilder:
 
         for column, format_spec in formats.items():
             self.set_format(column, format_spec)
+
+    def _serialize_to_json(self, data: dict) -> str:
+        """Safely serialize data to JSON for JS consumption"""
+        return json.dumps(data, separators=(',', ':'), default=self._json_serialize)
+
+    @staticmethod
+    def _json_serialize(obj):
+        """Handle special types for JSON serialization"""
+        if isinstance(obj, pd.Timestamp):
+            timestamp = obj.isoformat()
+            if timestamp.endswith('T00:00:00'):
+                return timestamp[:-9]
+            return timestamp
+        if isinstance(obj, decimal.Decimal):
+            return float(obj)
+        if isinstance(obj, (pd.Index, pd.arrays.IntervalArray)):
+            return list(obj)
+        if pd.isna(obj):
+            return None
+        if isinstance(obj, pd._libs.interval.Interval):
+            return str(obj)
+        if hasattr(obj, 'dtype'):
+            return obj.item()
+        return str(obj)
