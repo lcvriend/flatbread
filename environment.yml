@@ -1,20 +1,11 @@
 name: flatbread
+channels:
+  - conda-forge
+  - defaults
 dependencies:
-  - python >= 3.7
-  # build
-  - mypy
-  - flake8
-  - setuptools
-  - wheel
+  - python>=3.10
+  - pandas>=2.0.0
+  - jinja2>=3.0.0
+  - pip
+  - build
   - twine
-  # jupyter
-  - jupyter
-  - jupyterlab
-  - ipykernel
-  # data
-  - pandas
-  - openpyxl
-  # visualization
-  - matplotlib
-  # documentation
-  - sphinx
