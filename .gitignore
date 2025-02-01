@@ -1,7 +1,5 @@
 __pycache__
+*.egg-info/
+dist/
 .vscode
-flatbread.egg-info
-build
-!flatbread/build
-dist
 notebooks
