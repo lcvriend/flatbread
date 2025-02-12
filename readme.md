@@ -4,6 +4,8 @@ Flatbread is a Python library that extends pandas with tabulation features. It m
 
 Flatbread can be accessed in `DataFrames` and `Series` using the `pita` accessor.
 
+It uses the [wc-simple-table](https://github.com/lcvriend/wc-simple-table) dataviewer web component to display tables in a notebook: [check out some examples](https://lcvriend.github.io/wc-simple-table/).
+
 ## Key Features
 
 - Add row and column totals/subtotals to DataFrames and Series
