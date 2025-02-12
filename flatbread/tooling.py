@@ -86,7 +86,7 @@ def sort_totals(
 @singledispatch
 def add_level(
     data,
-    item: Any,
+    values: Any|list[Any],
     level: int = 0,
     level_name: Any = None,
     axis: Axis = 0,
@@ -97,7 +97,7 @@ def add_level(
 @add_level.register
 def _(
     data: pd.DataFrame,
-    value: Any,
+    value: Any|list[Any],
     level: int = 0,
     level_name: Any = None,
     axis: Axis = 0,
@@ -109,8 +109,8 @@ def _(
     ----------
     data (pd.DataFrame):
         Input DataFrame.
-    value (Any):
-        Value to fill the new level with.
+    value Any|list[Any]
+        Either a single value to fill the entire level with, or a list of values with length matching the axis size. Values will be mapped in order.
     level (int, optional):
         Position to insert the new level. Defaults to 0 (start).
     level_name (Any, optional):
@@ -126,11 +126,25 @@ def _(
     data = data.copy()
     target = data.index if axis in [0, 'index'] else data.columns
 
+    if isinstance(value, list):
+        if len(value) != len(target):
+            raise ValueError(
+                f"Length of values list ({len(value)}) must match "
+                f"length of {'index' if axis in [0, 'index'] else 'columns'} ({len(target)})"
+            )
+
     if not isinstance(target, pd.MultiIndex):
         original_name = target.name
         target = pd.MultiIndex.from_arrays([target], names=[original_name])
 
-    new_keys = [add_value_to_key(key, value, level) for key in target]
+    new_keys = [
+        add_value_to_key(
+            key,
+            value[i] if isinstance(value, list) else value,
+            level
+        )
+        for i, key in enumerate(target)
+    ]
     new_names = add_value_to_key(target.names, level_name, level)
     new_index = pd.MultiIndex.from_tuples(new_keys, names=new_names)
 
@@ -156,8 +170,8 @@ def _(
     ----------
     data (pd.Series):
         Input Series.
-    value (Any):
-        Value to fill the new level with.
+    value Any|list[Any]
+        Either a single value to fill the entire level with, or a list of values with length matching the axis size. Values will be mapped in order.
     level (int, optional):
         Position to insert the new level. Defaults to 0 (start).
     level_name (Any, optional):
@@ -173,11 +187,25 @@ def _(
     data = data.copy()
     target = data.index
 
+    if isinstance(value, list):
+        if len(value) != len(target):
+            raise ValueError(
+                f"Length of values list ({len(value)}) must match "
+                f"length of index ({len(target)})"
+            )
+
     if not isinstance(target, pd.MultiIndex):
         original_name = target.name
         target = pd.MultiIndex.from_arrays([target], names=[original_name])
 
-    new_keys = [add_value_to_key(key, value, level) for key in target]
+    new_keys = [
+        add_value_to_key(
+            key,
+            value[i] if isinstance(value, list) else value,
+            level
+        )
+        for i, key in enumerate(target)
+    ]
     new_names = add_value_to_key(target.names, level_name, level)
     new_index = pd.MultiIndex.from_tuples(new_keys, names=new_names)
     data.index = new_index
