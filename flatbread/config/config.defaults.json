@@ -13,5 +13,14 @@
         "ndigits": -1,
         "base": 1
     },
-    "locale": null
+    "locale": null,
+    "format_presets": {
+        "currency_eur": {
+            "dtypes": ["float", "int"],
+            "options": {
+                "style": "currency",
+                "currency": "EUR"
+            }
+        }
+    }
 }

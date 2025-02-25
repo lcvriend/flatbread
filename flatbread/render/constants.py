@@ -2,6 +2,19 @@
 from flatbread import DEFAULTS
 
 
+USER_PRESETS = DEFAULTS.get("format_presets", {})
+USER_PRESETS_BY_DTYPE = {
+    dtype: set()
+    for dtype in ["float", "int", "datetime", "str", "category"]
+}
+
+for preset_name, preset_config in USER_PRESETS.items():
+    preset_dtypes = preset_config.get("dtypes", ["float", "int"])  # Default to numeric
+    for dtype in preset_dtypes:
+        if dtype in USER_PRESETS_BY_DTYPE:
+            USER_PRESETS_BY_DTYPE[dtype].add(preset_name)
+
+
 SMART_FORMATS = {
     'percentages': {
         'labels': [DEFAULTS['percentages']['label_pct']],
@@ -43,7 +56,7 @@ NUMBER_PRESETS = {"default", "currency", "percentage", "compact", "diffs"}
 DATE_PRESETS = {"default", "date", "datetime"}
 
 DTYPE_TO_PRESETS = {
-    "float": NUMBER_PRESETS,
-    "int": NUMBER_PRESETS,
-    "datetime": DATE_PRESETS
+    "float": NUMBER_PRESETS.union(USER_PRESETS_BY_DTYPE["float"]),
+    "int": NUMBER_PRESETS.union(USER_PRESETS_BY_DTYPE["int"]),
+    "datetime": DATE_PRESETS.union(USER_PRESETS_BY_DTYPE["datetime"]),
 }

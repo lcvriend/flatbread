@@ -94,17 +94,51 @@ class TableSpecBuilder:
                     return format_type['options']
         return None
 
-    def set_format(self, column: str, format_spec: ColumnFormat) -> None:
+    def set_format(self, column: str, format_spec: str | dict[str, Any]) -> None:
+        """Set format options for a column
+
+        Parameters
+        ----------
+        column : str
+            Column to format
+        format_spec : str | dict
+            Either a preset name (e.g. 'currency') or format options dict
+        """
+        from flatbread.render.constants import USER_PRESETS, DTYPE_TO_PRESETS, DEFAULT_DTYPES
+
         if isinstance(format_spec, str):
+            # Check if it's a user-defined preset
+            if format_spec in USER_PRESETS:
+                pandas_dtype = str(self._data[column].dtype)
+                simple_dtype = DEFAULT_DTYPES.get(pandas_dtype, 'str')
+
+                # Get allowed dtypes for this preset
+                preset_config = USER_PRESETS[format_spec]
+                allowed_dtypes = preset_config.get("dtypes", ["float", "int"])
+
+                if simple_dtype in allowed_dtypes:
+                    self._format_options[column] = preset_config.get("options", {})
+                    return
+                else:
+                    raise ValueError(
+                        f"Preset '{format_spec}' is not compatible with column '{column}' "
+                        f"of dtype {pandas_dtype} (mapped to {simple_dtype}). "
+                        f"This preset supports: {', '.join(allowed_dtypes)}"
+                    )
+
+            # Handle built-in presets
             pandas_dtype = str(self._data[column].dtype)
             simple_dtype = DEFAULT_DTYPES.get(pandas_dtype, 'str')
             valid_presets = DTYPE_TO_PRESETS.get(simple_dtype, set())
+
             if format_spec not in valid_presets:
                 valid = ", ".join(sorted(valid_presets))
                 raise ValueError(
                     f"Invalid preset '{format_spec}' for dtype {pandas_dtype} "
                     f"(mapped to {simple_dtype}). Valid presets are: {valid}"
                 )
+
+        # If we reached here, either format_spec is a dict or a valid built-in preset
         self._format_options[column] = format_spec
 
     def set_formats(self, formats: FormatSpec) -> None:
@@ -112,11 +146,15 @@ class TableSpecBuilder:
 
         Parameters
         ----------
-        formats : dict, list or callable
-            Either dict mapping column names to format specs,
-            a list of length columns,
-            or function that takes DataFrame and returns such dict
+        formats : str, dict, list or callable
+            - If string: apply the same format preset to all columns
+            - If dict: mapping column names to format specs
+            - If list: format specs in same order as columns
+            - If callable: function that takes DataFrame and returns a dict
         """
+        if isinstance(formats, str):
+            formats = {column: formats for column in self._data.columns}
+
         if callable(formats):
             formats = formats(self._data)
 

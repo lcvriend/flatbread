@@ -147,6 +147,52 @@ class PitaDisplayMixin:
         self._table_spec_builder.set_formats(formats)
         return self
 
+    def list_format_presets(self, dtype: str = None) -> dict[str, dict]:
+        """List available format presets, optionally filtered by data type
+
+        Parameters
+        ----------
+        dtype : str, optional
+            Filter presets by data type compatibility. Options: 'float', 'int',
+            'datetime', 'str', 'category'.
+
+        Returns
+        -------
+        dict
+            Dictionary of preset names and their configurations
+        """
+        from flatbread.render.constants import USER_PRESETS, DTYPE_TO_PRESETS
+
+        # Define built-in presets with their configurations
+        built_in = {
+            "default": {"notation": "standard"},
+            "currency": {"style": "currency", "currency": "USD"},
+            "percentage": {"style": "percent"},
+            "compact": {"notation": "compact"},
+            "date": {"dateStyle": "short"},
+            "datetime": {"dateStyle": "short", "timeStyle": "short"}
+        }
+
+        # Extract user preset options
+        user_options = {
+            name: config.get("options", {})
+            for name, config in USER_PRESETS.items()
+        }
+
+        # Combine built-in and user presets
+        all_presets = {**built_in, **user_options}
+
+        # Filter by dtype if specified
+        if dtype:
+            if dtype not in DTYPE_TO_PRESETS:
+                valid_dtypes = ", ".join(sorted(DTYPE_TO_PRESETS.keys()))
+                raise ValueError(f"Invalid dtype '{dtype}'. Valid options are: {valid_dtypes}")
+
+            valid_presets = DTYPE_TO_PRESETS.get(dtype, set())
+            return {k: v for k, v in all_presets.items() if k in valid_presets}
+
+        return all_presets
+
     def _repr_html_(self) -> str:
         """Generate HTML representation for Jupyter display"""
         spec = self._table_spec_builder.get_spec_as_json()
