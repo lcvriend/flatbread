@@ -13,18 +13,38 @@ def get_data_mask(index, ignore_keys):
     index (pd.Index):
         The index used for determining if a row/column contains data or not.
     ignore_keys (list[str]):
-        List of index keys indicating that a row/column is *not* a data column. If the index is a MultiIndex then a row/column will be ignored if the key is in the keys of the index, else a row/column will be ignored if it is equal to the key in the index.
+        List of index keys indicating that a row/column is *not* a data column. If the index is a MultiIndex then a row/column will be ignored if the key is in the keys of the index, else a row/column will be ignored if it is equal to or a prefix of the key in the index.
 
     Returns
     -------
     pd.Index:
         Boolean index indicating which rows/columns refer to data.
     """
+    if ignore_keys is None:
+        return pd.Series(True, index=index)
+
+    # Convert single string to list
+    if isinstance(ignore_keys, str):
+        ignore_keys = [ignore_keys]
+
+    def should_keep(value):
+        # direct match
+        if value in ignore_keys:
+            return False
+
+        # check for prefix
+        if isinstance(value, str):
+            for key in ignore_keys:
+                if isinstance(key, str) and value.startswith(key):
+                    return False
+        return True
+
     if isinstance(index, pd.MultiIndex):
-        ignored = index.map(lambda i: all(key not in i for key in ignore_keys))
+        result = [all(should_keep(el) for el in idx) for idx in index]
     else:
-        ignored = index.map(lambda i: all(key != i for key in ignore_keys))
-    return ignored
+        result = [should_keep(idx) for idx in index]
+
+    return pd.Series(result, index=index)
 
 
 def persist_ignored(component: str, label: str) -> Callable:

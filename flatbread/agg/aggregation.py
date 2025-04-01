@@ -109,6 +109,7 @@ def add_subagg(
     *args,
     level: int|str|list[int|str] = 0,
     label: str|None = None,
+    include_level_name: bool = False,
     ignore_keys: str|list[str]|None = None,
     **kwargs,
 ):
@@ -123,6 +124,7 @@ def _(
     *args,
     level: int|str|list[int|str] = 0,
     label: str|None = None,
+    include_level_name: bool = False,
     ignore_keys: str|list[str]|None = None,
     _fill = '',
     **kwargs,
@@ -134,6 +136,7 @@ def _(
         *args,
         level = level,
         label = label,
+        include_level_name = include_level_name,
         ignore_keys = ignore_keys,
         _fill = _fill,
         **kwargs,
@@ -150,6 +153,7 @@ def _(
     axis: int = 0,
     level: int|str|list[int|str] = 0,
     label: str|None = None,
+    include_level_name: bool = False,
     ignore_keys: str|list[str]|None = None,
     _fill = '',
     **kwargs,
@@ -161,6 +165,7 @@ def _(
         *args,
         level = level,
         label = label,
+        include_level_name = include_level_name,
         ignore_keys = ignore_keys,
         _fill = _fill,
         **kwargs,
@@ -176,6 +181,7 @@ def _subagg_implementation(
     *args,
     level: int|str|list[int|str] = 0,
     label: str|None = None,
+    include_level_name: bool = False,
     ignore_keys: str|list[str]|None = None,
     _fill = '',
     **kwargs,
@@ -196,8 +202,19 @@ def _subagg_implementation(
         for levels, group in groups:
             # create key
             levels = (levels,) if pd.api.types.is_scalar(levels) else levels
+
+            # format label with level name if requested
+            current_label = label
+            if include_level_name:
+                # get level name
+                if isinstance(level, (int, str)):
+                    level_name = names[level] if isinstance(level, int) else level
+                    current_label = f"{label} {level_name}"
+                elif isinstance(levels[-1], str):
+                    current_label = f"{label} {levels[-1]}"
+
             padding = [_fill] * (len(names) - len(levels) - 1)
-            key = list(levels) + [label] + padding
+            key = list(levels) + [current_label] + padding
 
             # ignore totals and subtotal rows when aggregating
             rows = chaining.get_data_mask(group.index, ignore_keys)

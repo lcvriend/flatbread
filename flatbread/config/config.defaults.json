@@ -5,6 +5,7 @@
     },
     "subtotals": {
         "label": "Subtotals",
+        "include_level_name": false,
         "ignore_keys": ["Totals"]
     },
     "percentages": {

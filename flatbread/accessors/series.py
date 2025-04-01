@@ -60,6 +60,7 @@ class PitaSeries(PitaDisplayMixin):
         aggfunc: str|Callable,
         level: int|str|list[int|str] = 0,
         label: str = None,
+        include_level_name: bool = False,
         ignore_keys: str|list[str]|None = None,
         _fill: str = '',
     ) -> pd.Series:
@@ -91,6 +92,7 @@ class PitaSeries(PitaDisplayMixin):
             aggfunc,
             level = level,
             label = label,
+            include_level_name = include_level_name,
             ignore_keys = ignore_keys,
             _fill = _fill,
         )
@@ -256,6 +258,7 @@ class PitaSeries(PitaDisplayMixin):
         self,
         level: int|str|list[int|str] = 0,
         label: str|None = None,
+        include_level_name: bool = False,
         ignore_keys: str|list[str]|None = None,
         _fill: str = '',
     ) -> pd.Series:
@@ -280,6 +283,7 @@ class PitaSeries(PitaDisplayMixin):
             self._obj,
             level = level,
             label = label,
+            include_level_name = include_level_name,
             ignore_keys = ignore_keys,
             _fill = _fill,
         )

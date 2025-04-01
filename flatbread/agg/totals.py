@@ -95,6 +95,7 @@ def add_subtotals(
 def _(
     data: pd.Series,
     level: int|str|list[int|str] = 0,
+    include_level_name: bool = False,
     label: str = 'Subtotals',
     ignore_keys: str|list[str]|None = 'Totals',
     _fill: str|None = '',
@@ -104,6 +105,7 @@ def _(
         'sum',
         level = level,
         label = label,
+        include_level_name = include_level_name,
         ignore_keys = ignore_keys,
         _fill = _fill,
     )
@@ -118,6 +120,7 @@ def _(
     axis: int = 0,
     level: int|str|list[int|str] = 0,
     label: str = 'Subtotals',
+    include_level_name: bool = False,
     ignore_keys: str|list[str]|None = 'Totals',
     _fill: str = '',
 ) -> pd.DataFrame:
@@ -128,6 +131,7 @@ def _(
             axis = axis,
             level = level,
             label = label,
+            include_level_name = include_level_name,
             ignore_keys = ignore_keys,
             _fill = _fill,
         )
@@ -139,6 +143,7 @@ def _(
                 axis = 0,
                 level = level,
                 label = label,
+                include_level_name = include_level_name,
                 ignore_keys = ignore_keys,
                 _fill = _fill,
             )
@@ -147,6 +152,7 @@ def _(
                 axis = 1,
                 level = level,
                 label = label,
+                include_level_name = include_level_name,
                 ignore_keys = ignore_keys,
                 _fill = _fill,
             )
