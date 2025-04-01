@@ -203,18 +203,16 @@ def _subagg_implementation(
             # create key
             levels = (levels,) if pd.api.types.is_scalar(levels) else levels
 
-            # format label with level name if requested
-            current_label = label
+            # Get the actual level value to include in the label
+            level_value = levels[-1] if isinstance(levels, tuple) else levels
+
+            # Create the subtotal label with the level value if requested
+            subtotal_label = label
             if include_level_name:
-                # get level name
-                if isinstance(level, (int, str)):
-                    level_name = names[level] if isinstance(level, int) else level
-                    current_label = f"{label} {level_name}"
-                elif isinstance(levels[-1], str):
-                    current_label = f"{label} {levels[-1]}"
+                subtotal_label = f"{label} {level_value}"
 
             padding = [_fill] * (len(names) - len(levels) - 1)
-            key = list(levels) + [current_label] + padding
+            key = list(levels) + [subtotal_label] + padding
 
             # ignore totals and subtotal rows when aggregating
             rows = chaining.get_data_mask(group.index, ignore_keys)
