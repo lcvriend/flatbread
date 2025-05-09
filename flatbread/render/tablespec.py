@@ -160,11 +160,63 @@ class TableSpecBuilder:
 
         if isinstance(formats, list):
             if len(formats) != len(self._data.columns):
-                raise ValueError(f"Expected {len(self._data.columns)} formats, got {len (formats)}")
+                raise ValueError(f"Expected {len(self._data.columns)} formats, got {len(formats)}")
             formats = dict(zip(self._data.columns, formats))
 
-        for column, format_spec in formats.items():
-            self.set_format(column, format_spec)
+        # Handle pattern matching for dictionary keys
+        if isinstance(formats, dict):
+            # Use an ordered dictionary to maintain the order of pattern matches
+            pattern_matches = {}
+
+            # Apply patterns in the order they were provided
+            for pattern, format_spec in formats.items():
+                for column in self._data.columns:
+                    if self._is_pattern_match(column, pattern):
+                        # This will overwrite any previous match for this column
+                        pattern_matches[column] = format_spec
+
+            # Apply all the formats
+            for column, format_spec in pattern_matches.items():
+                self.set_format(column, format_spec)
+        else:
+            for column, format_spec in formats.items():
+                self.set_format(column, format_spec)
+
+    def _is_pattern_match(self, column: Any, pattern: Any) -> bool:
+        """
+        Check if a column matches a pattern.
+
+        Parameters
+        ----------
+        column : Any
+            The column name to check (could be tuple for MultiIndex)
+        pattern : Any
+            The pattern to match against
+
+        Returns
+        -------
+        bool
+            True if the column matches the pattern
+        """
+        # Direct equality check
+        if column == pattern:
+            return True
+
+        # For MultiIndex columns (tuples)
+        if isinstance(column, tuple):
+            # Case 1: If pattern is also a tuple, check if it's a prefix
+            if isinstance(pattern, tuple) and len(pattern) <= len(column):
+                return column[:len(pattern)] == pattern
+
+            # Case 2: If pattern is a scalar, check if it's in any level
+            else:
+                return any(part == pattern for part in column)
+
+        # For string columns, check if pattern is substring
+        elif isinstance(column, str) and isinstance(pattern, str):
+            return pattern in column
+
+        return False
 
     def _serialize_to_json(self, data: dict) -> str:
         """Safely serialize data to JSON for JS consumption"""
