@@ -1,4 +1,5 @@
 from typing import Any, Callable
+from pathlib import Path
 
 import pandas as pd
 
@@ -299,6 +300,41 @@ class PitaSeries(PitaDisplayMixin):
             axis = axis,
             level = level,
             **kwargs,
+        )
+
+    # region io
+    def export_excel(
+        self,
+        filepath: str | Path,
+        title: str | None = None,
+        number_formats: dict | None = None,
+        border_specs: dict | None = None,
+        **kwargs
+    ) -> None:
+        """
+        Export Series to Excel with automatic formatting based on flatbread configuration.
+
+        Parameters
+        ----------
+        filepath : str | Path
+            Path to save the Excel file
+        title : str, optional
+            Title for the worksheet
+        number_formats : dict, optional
+            Custom number formats (overrides auto-detected ones)
+        border_specs : dict, optional
+            Custom border specifications (merged with margin borders)
+        **kwargs
+            Additional arguments passed to pandasxl WorksheetManager
+        """
+        import flatbread.io.excel as excel
+        return excel.export_excel(
+            self._obj,
+            filepath,
+            title=title,
+            number_formats=number_formats,
+            border_specs=border_specs,
+            **kwargs
         )
 
     # region tooling

@@ -23,13 +23,15 @@ SMART_FORMATS = {
             'minimumFractionDigits': 0,
             'maximumFractionDigits':
                 DEFAULTS['percentages']['ndigits'] if DEFAULTS['percentages']['ndigits'] >= 0 else 21,
-        }
+        },
+        'excel_format': '0.0%'
     },
     'difference': {
         'labels': ['diff'],
         'options': {
             'signDisplay': 'always',
-        }
+        },
+        'excel_format': '+#,##0;-#,##0',
     }
 }
 

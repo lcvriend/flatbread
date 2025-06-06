@@ -21,7 +21,8 @@
             "options": {
                 "style": "currency",
                 "currency": "EUR"
-            }
+            },
+            "excel_format": "#,##0.00 €"
         }
     }
 }
