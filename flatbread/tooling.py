@@ -1,12 +1,31 @@
 from functools import singledispatch
-from typing import Any, Literal, TypeAlias
+from typing import Any, Hashable, Literal, TypeAlias
 
 import pandas as pd
 
 from flatbread import DEFAULTS
 
 
-Axis: TypeAlias = Literal[0, 1, 2, 'index', 'columns', 'both']
+Axis: TypeAlias = int | Literal["index", "columns", "rows"]
+Level: TypeAlias = Hashable
+
+
+def _resolve_level(
+    index: pd.Index,
+    level: Level,
+) -> int:
+    """Resolve level specification to list of integer levels."""
+    if isinstance(level, str):
+        try:
+            resolved = index.names.index(level)
+        except ValueError:
+            raise ValueError(f"Level name '{level}' not found in index names")
+    else:
+        if level >= index.nlevels or level < -index.nlevels:
+            raise IndexError(f"Level {level} out of range for index with {index.nlevels} levels")
+        resolved = level if level >= 0 else index.nlevels + level
+
+    return resolved
 
 
 def offset_date_field(
@@ -30,6 +49,7 @@ def offset_date_field(
     )
 
 
+# region sort agg
 def _sort_index_from_list(
     df: pd.DataFrame,
     order: list|pd.CategoricalDtype,
@@ -53,36 +73,153 @@ def sort_index_from_list(
     return data.sort_index(axis=axis, level=level, key=sorter)
 
 
+def sort_aggregates(
+    data: pd.DataFrame|pd.Series,
+    axis: Axis = 0,
+    level: Level|list[Level]|None = None,
+    labels: list[str]|None = None,
+    aggregates_last: bool = True,
+    sort_remaining: bool = True,
+) -> pd.DataFrame|pd.Series:
+    """
+    Sort index/columns to position aggregate labels at start or end within groups.
+
+    Reorders index or column labels so that specified aggregate labels (like 'Totals',
+    'Subtotals') appear either first or last within their respective groups, while
+    preserving the existing order of non-aggregate items.
+
+    Parameters
+    ----------
+    data : pd.DataFrame | pd.Series
+        Data to sort.
+    axis : Axis, default 0
+        Axis to sort along:
+        - 0 or 'index': sort the index (rows)
+        - 1 or 'columns': sort the columns
+        - 'rows': alias for 0
+    level : Level | list[Level] | None, default None
+        Index level(s) to sort. Can be level number(s), level name(s), or None for all levels.
+        When sorting a specific level in a MultiIndex, only reorders within each group
+        at that level.
+    labels : list[str] | None, default None
+        List of labels to treat as aggregates. If None, no special positioning is applied.
+        Labels are matched as substrings for MultiIndex levels.
+    aggregates_last : bool, default True
+        Whether to place aggregate labels at the end (True) or beginning (False) of each group.
+    sort_remaining : bool, default True
+        Whether to sort non-target levels alphabetically. When False, preserves existing
+        order of other levels.
+
+    Returns
+    -------
+    pd.DataFrame | pd.Series
+        Data with aggregate labels repositioned according to the specified parameters.
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({'A': [1, 2, 3]}, index=['Item1', 'Totals', 'Item2'])
+    >>> sort_aggregates(df, labels=['Totals'])
+                A
+    Item1       1
+    Item2       3
+    Totals      2
+
+    >>> # MultiIndex example - sort level 1 within each level 0 group
+    >>> sort_aggregates(df, level=1, labels=['Subtotals'], aggregates_last=False)
+    """
+    def create_sort_index(idx: pd.Index) -> pd.Index:
+        label_score = len(idx) if aggregates_last else -1
+        mapping = {
+            key:label_score if key in labels else i
+            for i,key
+            in enumerate(idx.unique())
+        }
+        return idx.map(mapping)
+
+    return data.sort_index(
+        axis = axis,
+        level = level,
+        sort_remaining = sort_remaining,
+        key = create_sort_index,
+    )
+
+
 def sort_totals(
     data: pd.DataFrame|pd.Series,
     axis: Axis = 0,
-    level: int = 0,
-    **kwargs,
+    level: Level|list[Level]|None = None,
+    labels: list|None = None,
+    totals_last: bool = True,
+    sort_remaining: bool = True,
 ):
     """
-    Sort an index alphabetically except for special labels which should come last.
+    Sort index/columns to position totals and subtotals at start or end within groups.
+
+    Convenience function that sorts common aggregate labels (totals, subtotals) to
+    their appropriate positions, while leaving other items in their existing order.
+    Uses default labels from flatbread configuration unless custom labels are provided.
+
+    Parameters
+    ----------
+    data : pd.DataFrame | pd.Series
+        Data to sort.
+    axis : Axis, default 0
+        Axis to sort along:
+        - 0 or 'index': sort the index (rows)
+        - 1 or 'columns': sort the columns
+        - 'rows': alias for 0
+    level : Level | list[Level] | None, default None
+        Index level(s) to sort. Can be level number(s), level name(s), or None for all levels.
+    labels : list[str] | None, default None
+        Custom labels to treat as totals/subtotals. If None, uses default labels from
+        flatbread configuration ('Totals', 'Subtotals').
+    totals_last : bool, default True
+        Whether to place totals/subtotals at the end (True) or beginning (False) of each group.
+    sort_remaining : bool, default True
+        Whether to sort non-target levels alphabetically.
+
+    Returns
+    -------
+    pd.DataFrame | pd.Series
+        Data with totals/subtotals repositioned according to the specified parameters.
+
+    Notes
+    -----
+    This function uses the default aggregate labels from `DEFAULTS['totals']['label']`
+    and `DEFAULTS['subtotals']['label']` unless custom labels are specified.
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({'A': [1, 2, 3]}, index=['Item1', 'Totals', 'Item2'])
+    >>> sort_totals(df)
+                A
+    Item1       1
+    Item2       3
+    Totals      2
+
+    >>> # Place totals first instead of last
+    >>> sort_totals(df, totals_last=False)
+                A
+    Totals      2
+    Item1       1
+    Item2       3
     """
-    def safe_index(lst: list, value: str, default: int = -1) -> int:
-        index_map = {v:i for i,v in enumerate(lst)}
-        return index_map.get(value, default)
-
-    def assign_order(i) -> tuple[int, Any]:
-        return safe_index(labels, i), i
-
     labels = [
         DEFAULTS['subtotals']['label'],
         DEFAULTS['totals']['label'],
-    ]
+    ] if labels is None else labels
 
-    output = data.sort_index(
+    return sort_aggregates(
+        data = data,
         axis = axis,
         level = level,
-        key = lambda idx: idx.map(assign_order),
-        **kwargs,
+        labels = labels,
+        aggregates_last = totals_last,
+        sort_remaining = sort_remaining,
     )
-    return output
 
 
+# region add level
 @singledispatch
 def add_level(
     data,

@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, Hashable, Literal, TypeAlias
 from pathlib import Path
 
 import pandas as pd
@@ -8,6 +8,10 @@ import flatbread.agg.aggregation as agg
 import flatbread.agg.totals as tot
 import flatbread.tooling as tool
 from flatbread.render.display import PitaDisplayMixin
+
+
+Axis: TypeAlias = int | Literal["index", "columns", "rows"]
+Level: TypeAlias = Hashable
 
 
 @pd.api.extensions.register_series_accessor("pita")
@@ -291,15 +295,19 @@ class PitaSeries(PitaDisplayMixin):
 
     def sort_totals(
         self,
-        axis: int = 0,
-        level: int = 0,
-        **kwargs
+        axis: Axis = 0,
+        level: Level|list[Level]|None = None,
+        labels: list[str]|None = None,
+        totals_last: bool = True,
+        sort_remaining: bool = True,
     ):
         return tool.sort_totals(
             self._obj,
             axis = axis,
             level = level,
-            **kwargs,
+            labels = labels,
+            totals_last = totals_last,
+            sort_remaining = sort_remaining,
         )
 
     # region io
