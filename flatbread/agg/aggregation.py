@@ -85,15 +85,20 @@ def _(
     **kwargs,
 ) -> pd.DataFrame:
     data = df.copy() if axis == 0 else df.copy().T
-
     label = get_label(label, aggfunc)
     rows = chaining.get_data_mask(data.index, ignore_keys)
 
     # create key
-    padding = [_fill] * (data.index.nlevels - 1)
-    key = tuple([label, *padding]) if padding else label
+    padding = (_fill,) * (data.index.nlevels - 1)
+    key = (label,) + padding if padding else label
 
-    data.loc[key, :] = data.loc[rows].agg(aggfunc, *args, **kwargs)
+    agged = data.loc[rows].agg(aggfunc, *args, **kwargs)
+    for col_name, col in data.items():
+        if col.dtype != agged.dtype:
+            data = data.astype({col_name:agged.dtype})
+
+    new_row = pd.Series(agged, name=key)
+    data = pd.concat([data, new_row.to_frame().T])
 
     if axis == 1:
         data = data.T
@@ -203,16 +208,16 @@ def _subagg_implementation(
             # create key
             levels = (levels,) if pd.api.types.is_scalar(levels) else levels
 
-            # Get the actual level value to include in the label
+            # get the actual level value to include in the label
             level_value = levels[-1] if isinstance(levels, tuple) else levels
 
-            # Create the subtotal label with the level value if requested
+            # create the subtotal label with the level value if requested
             subtotal_label = label
             if include_level_name:
                 subtotal_label = f"{label} {level_value}"
 
-            padding = [_fill] * (len(names) - len(levels) - 1)
-            key = list(levels) + [subtotal_label] + padding
+            padding = (_fill,) * (len(names) - len(levels) - 1)
+            key = levels + (subtotal_label,) + padding
 
             # ignore totals and subtotal rows when aggregating
             rows = chaining.get_data_mask(group.index, ignore_keys)
@@ -222,7 +227,9 @@ def _subagg_implementation(
             # - skip if there is only one row selected
             if sum(rows) > 1:
                 subagged = group.loc[rows].agg(aggfunc, *args, **kwargs)
-                group.loc[tuple(key),:] = subagged
+                new_row = pd.Series(subagged, name=key)
+                group = pd.concat([group, new_row.to_frame().T])
+                # group.loc[tuple(key),:] = subagged
             processed.append(group)
         return pd.concat(processed)
 
