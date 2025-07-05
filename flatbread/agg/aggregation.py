@@ -116,6 +116,7 @@ def add_subagg(
     label: str|None = None,
     include_level_name: bool = False,
     ignore_keys: str|list[str]|None = None,
+    skip_single_rows: bool = True,
     **kwargs,
 ):
     raise NotImplementedError('No implementation for this type')
@@ -131,6 +132,7 @@ def _(
     label: str|None = None,
     include_level_name: bool = False,
     ignore_keys: str|list[str]|None = None,
+    skip_single_rows: bool = True,
     _fill = '',
     **kwargs,
 ):
@@ -143,6 +145,7 @@ def _(
         label = label,
         include_level_name = include_level_name,
         ignore_keys = ignore_keys,
+        skip_single_rows = skip_single_rows,
         _fill = _fill,
         **kwargs,
     )
@@ -160,6 +163,7 @@ def _(
     label: str|None = None,
     include_level_name: bool = False,
     ignore_keys: str|list[str]|None = None,
+    skip_single_rows: bool = True,
     _fill = '',
     **kwargs,
 ):
@@ -172,6 +176,7 @@ def _(
         label = label,
         include_level_name = include_level_name,
         ignore_keys = ignore_keys,
+        skip_single_rows = skip_single_rows,
         _fill = _fill,
         **kwargs,
     )
@@ -188,6 +193,7 @@ def _subagg_implementation(
     label: str|None = None,
     include_level_name: bool = False,
     ignore_keys: str|list[str]|None = None,
+    skip_single_rows: bool = True,
     _fill = '',
     **kwargs,
 ):
@@ -222,10 +228,11 @@ def _subagg_implementation(
             # ignore totals and subtotal rows when aggregating
             rows = chaining.get_data_mask(group.index, ignore_keys)
 
+            # when `skip_single_rows` is True:
             # only add subagg if there are two or more data rows selected
             # - skip total rows, etc.
             # - skip if there is only one row selected
-            if sum(rows) > 1:
+            if sum(rows) > (1 if skip_single_rows else 0):
                 subagged = group.loc[rows].agg(aggfunc, *args, **kwargs)
                 new_row = pd.Series(subagged, name=key)
                 group = pd.concat([group, new_row.to_frame().T])

@@ -85,6 +85,7 @@ def add_subtotals(
     label: str = 'Subtotals',
     level: int|str|list[int|str] = 0,
     ignore_keys: str|list[str]|None = 'Totals',
+    skip_single_rows: bool = True,
 ):
     raise NotImplementedError('No implementation for this type')
 
@@ -98,6 +99,7 @@ def _(
     include_level_name: bool = False,
     label: str = 'Subtotals',
     ignore_keys: str|list[str]|None = 'Totals',
+    skip_single_rows: bool = True,
     _fill: str|None = '',
 ) -> pd.Series:
     output = agg.add_subagg(
@@ -107,6 +109,7 @@ def _(
         label = label,
         include_level_name = include_level_name,
         ignore_keys = ignore_keys,
+        skip_single_rows = skip_single_rows,
         _fill = _fill,
     )
     return output
@@ -122,6 +125,7 @@ def _(
     label: str = 'Subtotals',
     include_level_name: bool = False,
     ignore_keys: str|list[str]|None = 'Totals',
+    skip_single_rows: bool = True,
     _fill: str = '',
 ) -> pd.DataFrame:
     if axis < 2:
@@ -133,6 +137,7 @@ def _(
             label = label,
             include_level_name = include_level_name,
             ignore_keys = ignore_keys,
+            skip_single_rows = skip_single_rows,
             _fill = _fill,
         )
     else:
@@ -145,6 +150,7 @@ def _(
                 label = label,
                 include_level_name = include_level_name,
                 ignore_keys = ignore_keys,
+                skip_single_rows = skip_single_rows,
                 _fill = _fill,
             )
             .pipe(
@@ -154,6 +160,7 @@ def _(
                 label = label,
                 include_level_name = include_level_name,
                 ignore_keys = ignore_keys,
+                skip_single_rows = skip_single_rows,
                 _fill = _fill,
             )
         )

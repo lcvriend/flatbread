@@ -69,9 +69,10 @@ class PitaFrame(PitaDisplayMixin):
         aggfunc: str|Callable,
         axis: int = 0,
         level: int|str|list[int|str] = 0,
-        label: str = None,
+        label: str|None = None,
         include_level_name: bool = False,
         ignore_keys: str|list[str]|None = None,
+        skip_single_rows: bool = True,
         _fill: str = '',
     ) -> pd.DataFrame:
         """
@@ -87,8 +88,12 @@ class PitaFrame(PitaDisplayMixin):
             Levels to aggregate. Default 0.
         label (str|None):
             Label for the aggregation row/column. Default None.
+        include_level_name (bool):
+            Whether to add level name to subtotal label.
         ignore_keys (str|list[str]|None):
-            Keys of rows to ignore when aggregating.
+            Keys of rows to ignore when aggregating. Default 'Totals'
+        skip_single_rows (bool):
+            Whether to skip single rows when aggregating. Default True.
         *args:
             Positional arguments to pass to func.
         **kwargs:
@@ -107,6 +112,7 @@ class PitaFrame(PitaDisplayMixin):
             label = label,
             include_level_name = include_level_name,
             ignore_keys = ignore_keys,
+            skip_single_rows = skip_single_rows,
             _fill = _fill,
         )
 
@@ -261,6 +267,7 @@ class PitaFrame(PitaDisplayMixin):
         label: str|None = None,
         include_level_name: bool = False,
         ignore_keys: str|list[str]|None = None,
+        skip_single_rows: bool = True,
         _fill: str = '',
     ) -> pd.DataFrame:
         """
@@ -274,8 +281,12 @@ class PitaFrame(PitaDisplayMixin):
             Levels to sum with func. Default 0.
         label (str|None):
             Label for the subtotals row/column. Default 'Subtotals'.
+        include_level_name (bool):
+            Whether to add level name to subtotal label.
         ignore_keys (str|list[str]|None):
             Keys of rows to ignore when aggregating. Default 'Totals'
+        skip_single_rows (bool):
+            Whether to skip single rows when aggregating. Default True.
 
         Returns
         -------
@@ -289,6 +300,7 @@ class PitaFrame(PitaDisplayMixin):
             label = label,
             include_level_name = include_level_name,
             ignore_keys = ignore_keys,
+            skip_single_rows = skip_single_rows,
             _fill = _fill,
         )
 
