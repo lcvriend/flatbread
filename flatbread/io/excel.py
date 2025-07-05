@@ -105,13 +105,13 @@ def export_excel(
     number_formats: dict | None = None,
     border_specs: dict | None = None,
     **kwargs
-):
+) -> None:
     raise NotImplementedError('No implementation for this type')
 
 
 @export_excel.register
 def _(
-    df: pd.DataFrame,
+    data: pd.DataFrame,
     filepath: str | Path,
     title: str | None = None,
     number_formats: dict | None = None,
@@ -137,16 +137,16 @@ def _(
         Additional arguments passed to pandasxl WorksheetManager
     """
     try:
-        from pandasxl.worksheet import WorksheetManager
+        from flatbreadxl.worksheet import WorksheetManager
     except ImportError:
         raise ImportError(
-            "pandasxl is required for Excel export. "
-            "Install it with: pip install pandasxl"
+            "flatbreadxl is required for Excel export. "
+            "Install it with: pip install flatbreadxl"
         )
 
     # Extract flatbread settings and translate to pandasxl format
-    auto_number_formats = _get_auto_number_formats(df)
-    auto_border_specs = _get_auto_border_specs(df)
+    auto_number_formats = _get_auto_number_formats(data)
+    auto_border_specs = _get_auto_border_specs(data)
 
     # Merge user overrides
     final_number_formats = {**auto_number_formats, **(number_formats or {})}
@@ -158,7 +158,7 @@ def _(
     # Create worksheet and export
     manager = WorksheetManager.from_filepath(filepath)
     manager.add_table(
-        df,
+        data,
         title=title,
         number_formats=final_number_formats,
         border_specs=final_border_specs,
@@ -174,7 +174,7 @@ def _(
 
 @export_excel.register
 def _(
-    s: pd.Series,
+    data: pd.Series,
     filepath: str | Path,
     title: str | None = None,
     number_formats: dict | None = None,
@@ -200,10 +200,10 @@ def _(
         Additional arguments passed to pandasxl WorksheetManager
     """
     return export_excel(
-        s.to_frame(),
+        data.to_frame(),
         filepath,
-        title=title,
-        number_formats=number_formats,
-        border_specs=border_specs,
+        title = title,
+        number_formats = number_formats,
+        border_specs = border_specs,
         **kwargs
     )
