@@ -1,52 +1,24 @@
-from functools import singledispatch
-
 import pandas as pd
 
+from flatbread import DEFAULTS
+from flatbread.types import Axis, Level
 import flatbread.agg.aggregation as agg
-from flatbread import chaining, config, DEFAULTS
+import flatbread.tooling as tooling
+import flatbread.axes as axes
+import flatbread.chaining as chaining
 
 
-# region TOTALS
-
-@singledispatch
+# region totals
+@tooling.inject_defaults(DEFAULTS['totals'])
+@chaining.persist_ignored('totals', 'label')
 def add_totals(
-    data,
-    label: str = 'Totals',
-    ignore_keys: str|list[str]|None = 'Subtotals',
-    _fill: str|None = '',
-):
-    raise NotImplementedError('No implementation for this type')
-
-
-@add_totals.register
-@config.inject_defaults(DEFAULTS['totals'])
-@chaining.persist_ignored('totals', 'label')
-def _(
-    data: pd.Series,
-    label: str = 'Totals',
-    ignore_keys: str|list[str]|None = 'Subtotals',
-    _fill: str|None = '',
-) -> pd.Series:
-    output = agg.add_agg(
-        data,
-        'sum',
-        label = label,
-        ignore_keys = ignore_keys,
-        _fill = _fill,
-    )
-    return output
-
-
-@add_totals.register
-@config.inject_defaults(DEFAULTS['totals'])
-@chaining.persist_ignored('totals', 'label')
-def _(
     data: pd.DataFrame,
-    axis: int = 2,
+    axis: Axis = 2,
     label: str = 'Totals',
     ignore_keys: str|list[str]|None = 'Subtotals',
     _fill: str|None = '',
 ) -> pd.DataFrame:
+    axis = axes.resolve_axis(axis)
     if axis < 2:
         output = agg.add_agg(
             data,
@@ -77,57 +49,20 @@ def _(
     return output
 
 
-# region SUBTOTALS
-
-@singledispatch
+# region subtotals
+@tooling.inject_defaults(DEFAULTS['subtotals'])
+@chaining.persist_ignored('totals', 'label')
 def add_subtotals(
-    data,
-    label: str = 'Subtotals',
-    level: int|str|list[int|str] = 0,
-    ignore_keys: str|list[str]|None = 'Totals',
-    skip_single_rows: bool = True,
-):
-    raise NotImplementedError('No implementation for this type')
-
-
-@add_subtotals.register
-@config.inject_defaults(DEFAULTS['subtotals'])
-@chaining.persist_ignored('totals', 'label')
-def _(
-    data: pd.Series,
-    level: int|str|list[int|str] = 0,
-    include_level_name: bool = False,
-    label: str = 'Subtotals',
-    ignore_keys: str|list[str]|None = 'Totals',
-    skip_single_rows: bool = True,
-    _fill: str|None = '',
-) -> pd.Series:
-    output = agg.add_subagg(
-        data,
-        'sum',
-        level = level,
-        label = label,
-        include_level_name = include_level_name,
-        ignore_keys = ignore_keys,
-        skip_single_rows = skip_single_rows,
-        _fill = _fill,
-    )
-    return output
-
-
-@add_subtotals.register
-@config.inject_defaults(DEFAULTS['subtotals'])
-@chaining.persist_ignored('totals', 'label')
-def _(
     data: pd.DataFrame,
-    axis: int = 0,
-    level: int|str|list[int|str] = 0,
+    axis: Axis = 0,
+    level: Level = 0,
     label: str = 'Subtotals',
     include_level_name: bool = False,
     ignore_keys: str|list[str]|None = 'Totals',
     skip_single_rows: bool = True,
     _fill: str = '',
 ) -> pd.DataFrame:
+    axis = axes.resolve_axis(axis)
     if axis < 2:
         output = agg.add_subagg(
             data,
@@ -167,7 +102,7 @@ def _(
     return output
 
 
-#region DROP TOTALS
+# region drop
 def drop_totals(
     data: pd.DataFrame|pd.Series,
     ignore_keys: str|list[str]|None = None,

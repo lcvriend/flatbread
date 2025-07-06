@@ -1,16 +1,18 @@
 from functools import singledispatch
-from typing import Literal, TypeAlias
+from typing import Any
 import warnings
 
 import pandas as pd
 
-from flatbread import DEFAULTS, chaining, config
+from flatbread import DEFAULTS
+from flatbread.types import Axis, Level
+import flatbread.chaining as chaining
+import flatbread.tooling as tooling
+import flatbread.axes as axes
 
 
-Axis: TypeAlias = Literal[0, 1, 2, 'index', 'columns', 'both']
-
-
-def get_totals(data, axis, label_totals):
+def get_totals(data, axis: Axis, label_totals: str|None):
+    axis = axes.resolve_axis(axis)
     if label_totals is None:
         if axis == 0:
             return data.iloc[:, -1]
@@ -37,12 +39,12 @@ def as_percentages(
     base: int = 1,
     apportioned_rounding: bool = True,
     **kwargs,
-):
+) -> Any:
     raise NotImplementedError('No implementation for this type')
 
 
 @as_percentages.register
-@config.inject_defaults(DEFAULTS['percentages'])
+@tooling.inject_defaults(DEFAULTS['percentages'])
 def _(
     data: pd.Series,
     *,
@@ -65,11 +67,11 @@ def _(
 
 
 @as_percentages.register
-@config.inject_defaults(DEFAULTS['percentages'])
+@tooling.inject_defaults(DEFAULTS['percentages'])
 @chaining.persist_ignored('percentages', 'label_pct')
 def _(
     df: pd.DataFrame,
-    axis: int = 2,
+    axis: Axis = 2,
     *,
     label_totals: str|None = None,
     ignore_keys: str|list[str]|None = 'pct',
@@ -80,13 +82,12 @@ def _(
 ) -> pd.DataFrame:
     # reverse axis for consistency
     rounding = round_apportioned if apportioned_rounding else round
-    axis = 0 if axis == 1 else 1 if axis == 0 else None
 
     cols = chaining.get_data_mask(df.columns, ignore_keys)
     data = df.loc[:, cols]
 
     totals = get_totals(data, axis, label_totals)
-
+    axis = 0 if axis == 1 else 1 if axis == 0 else None
     pcts = (
         data
         .div(totals, axis=axis)
@@ -105,12 +106,12 @@ def add_percentages(
     base: int = 1,
     apportioned_rounding: bool = True,
     **kwargs,
-):
+) -> Any:
     raise NotImplementedError('No implementation for this type')
 
 
 @add_percentages.register
-@config.inject_defaults(DEFAULTS['percentages'])
+@tooling.inject_defaults(DEFAULTS['percentages'])
 def _(
     data: pd.Series,
     *,
@@ -135,7 +136,7 @@ def _(
 
 
 @add_percentages.register
-@config.inject_defaults(DEFAULTS['percentages'])
+@tooling.inject_defaults(DEFAULTS['percentages'])
 @chaining.persist_ignored('percentages', 'label_pct')
 def _(
     df: pd.DataFrame,

@@ -5,13 +5,10 @@ import pandas as pd
 
 import flatbread.percentages as pct
 import flatbread.agg.aggregation as agg
-import flatbread.agg.totals as tot
-import flatbread.tooling as tool
+import flatbread.agg.totals as totals
+import flatbread.axes as axes
+from flatbread.types import Axis, Level
 from flatbread.render.display import PitaDisplayMixin
-
-
-Axis: TypeAlias = int | Literal["index", "columns", "rows"]
-Level: TypeAlias = Hashable
 
 
 @pd.api.extensions.register_dataframe_accessor("pita")
@@ -24,8 +21,8 @@ class PitaFrame(PitaDisplayMixin):
         self,
         aggfunc: str|Callable,
         *args,
-        axis: int = 0,
-        label: str = None,
+        axis: Axis = 0,
+        label: str|None = None,
         ignore_keys: str|list[str]|None = None,
         _fill: str = '',
         **kwargs,
@@ -37,7 +34,7 @@ class PitaFrame(PitaDisplayMixin):
         ----------
         aggfunc (str|Callable):
             Function to use for aggregating the data.
-        axis (int):
+        axis (int | Literal["index", "columns", "both"]):
             Axis to aggregate. Default 0.
         label (str|None):
             Label for the aggregation row/column. Default None.
@@ -67,7 +64,7 @@ class PitaFrame(PitaDisplayMixin):
     def add_subagg(
         self,
         aggfunc: str|Callable,
-        axis: int = 0,
+        axis: Axis = 0,
         level: int|str|list[int|str] = 0,
         label: str|None = None,
         include_level_name: bool = False,
@@ -82,7 +79,7 @@ class PitaFrame(PitaDisplayMixin):
         ----------
         aggfunc (str|Callable):
             Function to use for aggregating the data.
-        axis (int):
+        axis (int | Literal["index", "columns", "both"]):
             Axis to aggregate. Default 0.
         levels (int|str|list[int|str]):
             Levels to aggregate. Default 0.
@@ -119,7 +116,7 @@ class PitaFrame(PitaDisplayMixin):
     #region percentages
     def as_percentages(
         self,
-        axis: int = 2,
+        axis: Axis = 2,
         label_totals: str|None = None,
         ignore_keys: str|list[str]|None = None,
         ndigits: int|None = None,
@@ -133,7 +130,7 @@ class PitaFrame(PitaDisplayMixin):
         ----------
         data (pd.DataFrame):
             The input DataFrame.
-        axis (int):
+        axis (int | Literal["index", "columns", "both"]):
             The axis along which percentages are calculated. Percentages are based on:
             - when axis is 2 then grand total
             - when axis is 1 then column totals
@@ -168,7 +165,7 @@ class PitaFrame(PitaDisplayMixin):
 
     def add_percentages(
         self,
-        axis: int = 2,
+        axis: Axis = 2,
         label_n: str|None = None,
         label_pct: str|None = None,
         label_totals: str|None = None,
@@ -185,7 +182,7 @@ class PitaFrame(PitaDisplayMixin):
         ----------
         data (pd.DataFrame):
             The input DataFrame.
-        axis (int):
+        axis (int | Literal["index", "columns", "both"]):
             The axis along which percentages are calculated. Percentages are based on:
             - when axis is 2 then grand total
             - when axis is 1 then row totals
@@ -230,7 +227,7 @@ class PitaFrame(PitaDisplayMixin):
     #region totals
     def add_totals(
         self,
-        axis: int = 2,
+        axis: Axis = 2,
         label: str|None = None,
         ignore_keys: str|list[str]|None = None,
         _fill: str = '',
@@ -240,7 +237,7 @@ class PitaFrame(PitaDisplayMixin):
 
         Parameters
         ----------
-        axis (int):
+        axis (int | Literal["index", "columns", "both"]):
             Axis to sum. If axis == 2 then add totals to both rows and columns. Default 2.
         label (str|None):
             Label for the totals row/column. Default 'Totals'.
@@ -252,7 +249,7 @@ class PitaFrame(PitaDisplayMixin):
         pd.DataFrame:
             Table with total rows/columns added.
         """
-        return tot.add_totals(
+        return totals.add_totals(
             self._obj,
             axis = axis,
             label = label,
@@ -262,7 +259,7 @@ class PitaFrame(PitaDisplayMixin):
 
     def add_subtotals(
         self,
-        axis: int = 2,
+        axis: Axis = 2,
         level: int|str|list[int|str] = 0,
         label: str|None = None,
         include_level_name: bool = False,
@@ -275,7 +272,7 @@ class PitaFrame(PitaDisplayMixin):
 
         Parameters
         ----------
-        axis (int):
+        axis (int | Literal["index", "columns", "both"]):
             Axis to sum. If axis == 2 then add totals to both rows and columns. Default 2.
         levels (int|str|list[int|str]):
             Levels to sum with func. Default 0.
@@ -293,7 +290,7 @@ class PitaFrame(PitaDisplayMixin):
         pd.DataFrame:
             Table with total rows/columns added.
         """
-        return tot.add_subtotals(
+        return totals.add_subtotals(
             self._obj,
             axis = axis,
             level = level,
@@ -311,8 +308,36 @@ class PitaFrame(PitaDisplayMixin):
         labels: list[str]|None = None,
         totals_last: bool = True,
         sort_remaining: bool = True,
-    ):
-        return tool.sort_totals(
+    ) -> pd.DataFrame:
+        """
+        Sort index/columns to position totals and subtotals at start or end within groups.
+
+        Convenience function that sorts common aggregate labels (totals, subtotals) to
+        their appropriate positions, while leaving other items in their existing order.
+        Uses default labels from flatbread configuration unless custom labels are provided.
+
+        Parameters
+        ----------
+        axis : Axis, default 0
+            Axis to sort along:
+            - 0 or 'index': sort the index (rows)
+            - 1 or 'columns': sort the columns
+        level : Level | list[Level] | None, default None
+            Index level(s) to sort. Can be level number(s), level name(s), or None for all levels.
+        labels : list[str] | None, default None
+            Custom labels to treat as totals/subtotals. If None, uses default labels from
+            flatbread configuration ('Totals', 'Subtotals').
+        totals_last : bool, default True
+            Whether to place totals/subtotals at the end (True) or beginning (False) of each group.
+        sort_remaining : bool, default True
+            Whether to sort non-target levels alphabetically.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with totals/subtotals repositioned according to the specified parameters.
+        """
+        return axes.sort_totals(
             self._obj,
             axis = axis,
             level = level,
@@ -324,7 +349,7 @@ class PitaFrame(PitaDisplayMixin):
     def drop_totals(
         self
     ):
-        return tot.drop_totals(self._obj)
+        return totals.drop_totals(self._obj)
 
     # region io
     def export_excel(
@@ -390,7 +415,7 @@ class PitaFrame(PitaDisplayMixin):
         pd.DataFrame:
             DataFrame with the new level added to the specified axis.
         """
-        return tool.add_level(
+        return axes.add_level(
             self._obj,
             value = value,
             level = level,

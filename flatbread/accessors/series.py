@@ -5,13 +5,10 @@ import pandas as pd
 
 import flatbread.percentages as pct
 import flatbread.agg.aggregation as agg
-import flatbread.agg.totals as tot
-import flatbread.tooling as tool
+import flatbread.agg.totals as totals
+import flatbread.axes as axes
+from flatbread.types import Axis, Level
 from flatbread.render.display import PitaDisplayMixin
-
-
-Axis: TypeAlias = int | Literal["index", "columns", "rows"]
-Level: TypeAlias = Hashable
 
 
 @pd.api.extensions.register_series_accessor("pita")
@@ -24,7 +21,7 @@ class PitaSeries(PitaDisplayMixin):
         self,
         aggfunc: str|Callable,
         *args,
-        label: str = None,
+        label: str|None = None,
         ignore_keys: str|list[str]|None = None,
         _fill: str = '',
         **kwargs,
@@ -63,7 +60,7 @@ class PitaSeries(PitaDisplayMixin):
     def add_subagg(
         self,
         aggfunc: str|Callable,
-        level: int|str|list[int|str] = 0,
+        level: Level|list[Level] = 0,
         label: str|None = None,
         include_level_name: bool = False,
         ignore_keys: str|list[str]|None = None,
@@ -77,8 +74,8 @@ class PitaSeries(PitaDisplayMixin):
         ----------
         aggfunc (str|Callable):
             Function to use for aggregating the data.
-        levels (int|str|list[int|str]):
-            Levels to aggregate with func. Default 0.
+        level (int|str|list[int|str]):
+            Level(s) to aggregate with func. Default 0.
         label (str|None):
             Label for the aggregated rows. Default None.
         include_level_name (bool):
@@ -142,7 +139,7 @@ class PitaSeries(PitaDisplayMixin):
             Series reporting the count of each value in the original series.
         """
         s = self._obj if fillna is None else self._obj.fillna(fillna)
-        result = s.value_counts().rename(label_n).pipe(tot.add_totals)
+        result = s.value_counts().rename(label_n).pipe(totals.add_totals)
         if add_pct:
             return result.pipe(
                 pct.add_percentages,
@@ -156,9 +153,9 @@ class PitaSeries(PitaDisplayMixin):
     #region percentages
     def as_percentages(
         self,
-        label_pct: str = None,
+        label_pct: str|None = None,
         label_totals: str|None = None,
-        ndigits: int = None,
+        ndigits: int|None = None,
         base: int = 1,
     ) -> pd.Series:
         """
@@ -258,7 +255,7 @@ class PitaSeries(PitaDisplayMixin):
         pd.Series:
             Series with totals row added.
         """
-        return tot.add_totals(
+        return totals.add_totals(
             self._obj,
             label = label,
             ignore_keys = ignore_keys,
@@ -267,7 +264,7 @@ class PitaSeries(PitaDisplayMixin):
 
     def add_subtotals(
         self,
-        level: int|str|list[int|str] = 0,
+        level: Level|list[Level] = 0,
         label: str|None = None,
         include_level_name: bool = False,
         ignore_keys: str|list[str]|None = None,
@@ -279,8 +276,8 @@ class PitaSeries(PitaDisplayMixin):
 
         Parameters
         ----------
-        levels (int|str|list[int|str]):
-            Levels to add subtotals to. Default 0.
+        level (int|str|list[int|str]):
+            Level(s) to add subtotals to. Default 0.
         label (str|None):
             Label for the subtotals rows. Default 'Subtotals'.
         include_level_name (bool):
@@ -295,7 +292,7 @@ class PitaSeries(PitaDisplayMixin):
         pd.Series:
             Series with subtotal rows added.
         """
-        return tot.add_subtotals(
+        return totals.add_subtotals(
             self._obj,
             level = level,
             label = label,
@@ -312,8 +309,36 @@ class PitaSeries(PitaDisplayMixin):
         labels: list[str]|None = None,
         totals_last: bool = True,
         sort_remaining: bool = True,
-    ):
-        return tool.sort_totals(
+    ) -> pd.Series:
+        """
+        Sort index/columns to position totals and subtotals at start or end within groups.
+
+        Convenience function that sorts common aggregate labels (totals, subtotals) to
+        their appropriate positions, while leaving other items in their existing order.
+        Uses default labels from flatbread configuration unless custom labels are provided.
+
+        Parameters
+        ----------
+        axis : Axis, default 0
+            Axis to sort along:
+            - 0 or 'index': sort the index (rows)
+            - 1 or 'columns': sort the columns
+        level : Level | list[Level] | None, default None
+            Index level(s) to sort. Can be level number(s), level name(s), or None for all levels.
+        labels : list[str] | None, default None
+            Custom labels to treat as totals/subtotals. If None, uses default labels from
+            flatbread configuration ('Totals', 'Subtotals').
+        totals_last : bool, default True
+            Whether to place totals/subtotals at the end (True) or beginning (False) of each group.
+        sort_remaining : bool, default True
+            Whether to sort non-target levels alphabetically.
+
+        Returns
+        -------
+        pd.Series
+            Series with totals/subtotals repositioned according to the specified parameters.
+        """
+        return axes.sort_totals(
             self._obj,
             axis = axis,
             level = level,
@@ -363,7 +388,7 @@ class PitaSeries(PitaDisplayMixin):
         value: Any,
         level: int = 0,
         level_name: Any = None,
-        axis: int = 0,
+        axis: Axis = 0,
     ):
         """
         Add a level containing the specified value to a Series index.
@@ -378,7 +403,7 @@ class PitaSeries(PitaDisplayMixin):
             Position to insert the new level. Defaults to 0 (start).
         level_name (Any, optional):
             Name for the new level. Defaults to None.
-        axis (Axis):
+        axis (int | Literal["index", "columns", "both"]):
             Added for symmetry with DataFrame method.
 
         Returns
@@ -386,7 +411,7 @@ class PitaSeries(PitaDisplayMixin):
         pd.Series:
             Series with the new level added to the specified axis.
         """
-        return tool.add_level(
+        return axes.add_level(
             self._obj,
             value = value,
             level = level,
