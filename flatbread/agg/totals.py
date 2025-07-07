@@ -1,3 +1,5 @@
+from typing import Literal
+
 import pandas as pd
 
 from flatbread import DEFAULTS
@@ -12,12 +14,12 @@ import flatbread.chaining as chaining
 @tooling.inject_defaults(DEFAULTS['totals'])
 @chaining.persist_ignored('totals', 'label')
 def add_totals(
-    data: pd.DataFrame,
-    axis: Axis = 2,
-    label: str = 'Totals',
+    data: pd.DataFrame|pd.Series,
+    axis: Axis|Literal[2, 'both'] = 2,
+    label: str|None = 'Totals',
     ignore_keys: str|list[str]|None = 'Subtotals',
     _fill: str|None = '',
-) -> pd.DataFrame:
+) -> pd.DataFrame|pd.Series:
     axis = axes.resolve_axis(axis)
     if axis < 2:
         output = agg.add_agg(
@@ -53,15 +55,15 @@ def add_totals(
 @tooling.inject_defaults(DEFAULTS['subtotals'])
 @chaining.persist_ignored('totals', 'label')
 def add_subtotals(
-    data: pd.DataFrame,
+    data: pd.DataFrame|pd.Series,
     axis: Axis = 0,
     level: Level = 0,
-    label: str = 'Subtotals',
+    label: str|None = 'Subtotals',
     include_level_name: bool = False,
     ignore_keys: str|list[str]|None = 'Totals',
     skip_single_rows: bool = True,
     _fill: str = '',
-) -> pd.DataFrame:
+) -> pd.DataFrame|pd.Series:
     axis = axes.resolve_axis(axis)
     if axis < 2:
         output = agg.add_subagg(

@@ -108,6 +108,13 @@ def sort_aggregates(
     >>> # MultiIndex example - sort level 1 within each level 0 group
     >>> sort_aggregates(df, level=1, labels=['Subtotals'], aggregates_last=False)
     """
+    if level is None:
+        resolved_level = None
+    elif isinstance(level, list):
+        resolved_level = [resolve_level(data.index, lv) for lv in level]
+    else:
+        resolved_level = resolve_level(data.index, level)
+
     def create_sort_index(idx: pd.Index) -> pd.Index:
         label_score = len(idx) if aggregates_last else -1
         mapping = {
@@ -118,8 +125,8 @@ def sort_aggregates(
         return idx.map(mapping)
 
     return data.sort_index(
-        axis = axis,
-        level = level,
+        axis = axis, # type: ignore
+        level = resolved_level,
         sort_remaining = sort_remaining,
         key = create_sort_index,
     )
@@ -207,7 +214,7 @@ def add_level(
     level: int = 0,
     level_name: Any = None,
     axis: Axis = 0,
-) -> pd.DataFrame|pd.Series:
+) -> Any:
     raise NotImplementedError('No implementation for this type')
 
 

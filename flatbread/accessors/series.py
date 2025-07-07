@@ -255,7 +255,7 @@ class PitaSeries(PitaDisplayMixin):
         pd.Series:
             Series with totals row added.
         """
-        return totals.add_totals(
+        return totals.add_totals( # type: ignore
             self._obj,
             label = label,
             ignore_keys = ignore_keys,
@@ -292,7 +292,7 @@ class PitaSeries(PitaDisplayMixin):
         pd.Series:
             Series with subtotal rows added.
         """
-        return totals.add_subtotals(
+        return totals.add_subtotals( # type: ignore
             self._obj,
             level = level,
             label = label,
@@ -338,7 +338,7 @@ class PitaSeries(PitaDisplayMixin):
         pd.Series
             Series with totals/subtotals repositioned according to the specified parameters.
         """
-        return axes.sort_totals(
+        return axes.sort_totals( # type: ignore
             self._obj,
             axis = axis,
             level = level,

@@ -249,7 +249,7 @@ class PitaFrame(PitaDisplayMixin):
         pd.DataFrame:
             Table with total rows/columns added.
         """
-        return totals.add_totals(
+        return totals.add_totals( # type: ignore
             self._obj,
             axis = axis,
             label = label,
@@ -290,7 +290,7 @@ class PitaFrame(PitaDisplayMixin):
         pd.DataFrame:
             Table with total rows/columns added.
         """
-        return totals.add_subtotals(
+        return totals.add_subtotals( # type: ignore
             self._obj,
             axis = axis,
             level = level,
@@ -337,7 +337,7 @@ class PitaFrame(PitaDisplayMixin):
         pd.DataFrame
             DataFrame with totals/subtotals repositioned according to the specified parameters.
         """
-        return axes.sort_totals(
+        return axes.sort_totals( # type: ignore
             self._obj,
             axis = axis,
             level = level,

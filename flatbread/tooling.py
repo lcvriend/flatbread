@@ -1,17 +1,20 @@
 from functools import wraps
-from typing import Callable
+from typing import Any, Callable, TypeVar
 
 import pandas as pd
 
 from flatbread.types import Axis, Level
 
 
-def handle_series_as_dataframe(func) -> Callable:
+T = TypeVar('T', pd.Series, pd.DataFrame)
+
+
+def handle_series_as_dataframe(func: Callable[..., pd.DataFrame]) -> Callable[..., T]:
     """
     Decorator that converts Series to DataFrame, runs the function, then converts back.
     """
     @wraps(func)
-    def wrapper(data, *args, **kwargs):
+    def wrapper(data: pd.DataFrame|pd.Series, *args: Any, **kwargs: Any) -> T:
         is_series = isinstance(data, pd.Series)
         if is_series:
             data = data.to_frame()
@@ -21,7 +24,7 @@ def handle_series_as_dataframe(func) -> Callable:
         if is_series:
             result = result.iloc[:, 0]
 
-        return result
+        return result # type: ignore
     return wrapper
 
 
@@ -96,7 +99,7 @@ def _sort_index_from_list(
     df: pd.DataFrame,
     order: list|pd.CategoricalDtype,
     axis: Axis = 0,
-    level: int|str|None = None,
+    level: Level|None = None,
 ) -> pd.DataFrame:
     index = df.index if axis in [0, 'index'] else df.columns
     if isinstance(index, pd.MultiIndex):
