@@ -18,6 +18,7 @@ warnings.filterwarnings(
 )
 
 
+# region helpers
 def get_label(label, aggfunc):
     if label is not None:
         return label
@@ -33,6 +34,69 @@ def get_levels(levels, names):
     if isinstance(levels, (int, str)):
         return [find_level(levels)]
     return [find_level(level) for level in levels]
+
+
+def create_agg_row(
+    agged_data: pd.Series,
+    label: str,
+    original_index: pd.Index,
+    _fill: str = '',
+    group_levels: tuple|None = None
+) -> pd.DataFrame:
+    """Create a properly indexed row for aggregation results."""
+    if isinstance(original_index, pd.MultiIndex):
+        key = build_multiindex_key(label, original_index, _fill, group_levels)
+        validate_index_key(original_index, key)
+        return create_multiindex_row(agged_data, key, original_index)
+    else:
+        validate_index_key(original_index, label)
+        return create_single_index_row(agged_data, label, original_index)
+
+
+def build_multiindex_key(
+    label: str,
+    original_index: pd.MultiIndex,
+    _fill: str,
+    group_levels: tuple|None
+) -> tuple:
+    """Build the key tuple for MultiIndex aggregation row."""
+    if group_levels is not None:
+        # subagg case: preserve group levels + add subtotal
+        padding = (_fill,) * (original_index.nlevels - len(group_levels) - 1)
+        return group_levels + (label,) + padding
+    else:
+        # regular agg case: label + padding
+        padding = (_fill,) * (original_index.nlevels - 1)
+        return (label,) + padding if padding else label
+
+
+def validate_index_key(
+    original_index: pd.Index|pd.MultiIndex,
+    key: str|tuple,
+) -> None:
+    """Validate that the key doesn't already exist."""
+    if key in original_index:
+        raise ValueError(f"Aggregation row with key {key} already exists")
+
+
+def create_multiindex_row(
+    agged_data: pd.Series,
+    key: tuple,
+    original_index: pd.MultiIndex
+) -> pd.DataFrame:
+    """Create aggregation row for MultiIndex."""
+    idx = pd.MultiIndex.from_tuples([key], names=original_index.names)
+    return pd.DataFrame([agged_data], index=idx)
+
+
+def create_single_index_row(
+    agged_data: pd.Series,
+    label: str,
+    original_index: pd.Index
+) -> pd.DataFrame:
+    """Create aggregation row for single Index."""
+    idx = pd.Index([label], name=original_index.name)
+    return pd.DataFrame([agged_data], index=idx)
 
 
 # region aggregation
@@ -51,12 +115,14 @@ def add_agg(
     label = get_label(label, aggfunc)
     rows = chaining.get_data_mask(data.index, ignore_keys)
 
-    padding = (_fill,) * (data.index.nlevels - 1)
-    key = (label,) + padding if padding else label
-
     agged = data.loc[rows].agg(aggfunc, *args, **kwargs)
-    new_row = pd.DataFrame([agged], index=[key])
-    return pd.concat([data, new_row])
+    new_row = create_agg_row(
+        agged,
+        label = label,
+        original_index = data.index,
+        _fill = _fill,
+    )
+    return pd.concat([data, new_row], names=data.index.names)
 
 
 # region subagg
@@ -121,14 +187,16 @@ def _subagg_implementation(
             if include_level_name:
                 subtotal_label = f"{label} {level_value}"
 
-            padding = (_fill,) * (len(names) - len(levels) - 1)
-            key = levels + (subtotal_label,) + padding
-
             rows = chaining.get_data_mask(group.index, ignore_keys)
-
             if sum(rows) > (1 if skip_single_rows else 0):
                 subagged = group.loc[rows].agg(aggfunc, *args, **kwargs)
-                new_row = pd.DataFrame([subagged], index=[key])
+                new_row = create_agg_row(
+                    subagged,
+                    subtotal_label,
+                    original_index = data.index,
+                    _fill = _fill,
+                    group_levels = levels,
+                )
                 group = pd.concat([group, new_row])
 
             processed.append(group)
