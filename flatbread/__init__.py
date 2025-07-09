@@ -11,10 +11,7 @@ if TYPE_CHECKING:
     class Series(pd.Series):
         pita: PitaSeries
 
-from flatbread.config import read_config
-
-DEFAULTS = read_config()
-
+from flatbread.config import DEFAULTS
 import flatbread.accessors.dataframe
 import flatbread.accessors.series
 import flatbread.accessors.index
